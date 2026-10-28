@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>All Bookings Management · Local Service Connect</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-light: #eef2ff;
+    }
+    body { background-color: #f8fafc; color: #1e293b; }
+    .stat-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.15rem 1.25rem;
+      transition: all 0.2s ease;
+    }
+    .stat-card:hover {
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+      transform: translateY(-1px);
+    }
+    .filter-tab-btn {
+      border: none;
+      background: transparent;
+      padding: 0.65rem 1rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #64748b;
+      border-bottom: 2px solid transparent;
+      transition: all 0.18s ease;
+      cursor: pointer;
+    }
+    .filter-tab-btn:hover { color: var(--primary-color); }
+    .filter-tab-btn.active {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+    }
+    .status-badge-PENDING { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .status-badge-ACCEPTED { background: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
+    .status-badge-ON_THE_WAY { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+    .status-badge-SERVICE_STARTED { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .status-badge-AWAITING_COMPLETION { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
+    .status-badge-COMPLETED { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .status-badge-CANCELLED { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .status-badge-REJECTED { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+
+    .audit-node {
+      position: relative;
+      padding-left: 28px;
+    }
+    .audit-node::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 14px;
+      bottom: -16px;
+      width: 2px;
+      background: #e2e8f0;
+    }
+    .audit-node:last-child::before { display: none; }
+    .audit-dot {
+      position: absolute;
+      left: 0;
+      top: 4px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 3px solid var(--primary-color);
+    }
+    .cursor-pointer { cursor: pointer; }
+    .spin-animation { animation: spin 0.8s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div id="nav"></div>
+
+<div class="container-fluid px-3 px-lg-4 py-4">
+
+  <!-- Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+      <div class="d-flex align-items-center gap-2">
+        <h1 class="h3 fw-bold mb-0">Booking Administration Console</h1>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.75rem;">
+          <i class="bi bi-shield-lock-fill me-1"></i>Admin Verified
+        </span>
+      </div>
+      <p class="text-muted small mb-0 mt-1">
+        Monitor reservations, track on-demand Quick Service dispatch, inspect status audit timelines, and manage booking lifecycles.
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" onclick="loadBookings(true)">
+        <i class="bi bi-arrow-clockwise me-1" id="btnRefreshSpin"></i> Refresh
+      </button>
+      <a href="/admin/dashboard.html" class="btn btn-outline-secondary btn-sm rounded-pill">
+        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- Alert Banner -->
+  <div id="pageAlert" class="alert d-none" role="alert"></div>
+
+  <!-- Top KPI Stat Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-xl">
+      <div class="stat-card cursor-pointer" onclick="switchFilterTab('ALL')">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="small text-muted fw-semibold">Total Bookings</span>
+          <span class="badge bg-secondary-subtle text-secondary rounded-circle p-2"><i class="bi bi-journal-text"></i></span>
+        </div>
+        <div class="h3 fw-bold text-dark mb-0" id="cntTotalBookings">-</div>
+        <div class="text-muted" style="font-size: 0.72rem;">All recorded reservations</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl">
+      <div class="stat-card cursor-pointer" onclick="switchFilterTab('ACTIVE')">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="small text-muted fw-semibold">Active In-Progress</span>
+          <span class="badge bg-primary-subtle text-primary rounded-circle p-2"><i class="bi bi-activity"></i></span>
+        </div>
+        <div class="h3 fw-bold text-primary mb-0" id="cntActiveBookings">-</div>
+        <div class="text-muted" style="font-size: 0.72rem;">Pending + Started + Awaiting Confirmation</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl">
+      <div class="stat-card cursor-pointer" onclick="switchFilterTab('QUICK_SERVICE')">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="small text-muted fw-semibold">Quick Service</span>
+          <span class="badge bg-warning-subtle text-warning rounded-circle p-2"><i class="bi bi-lightning-charge-fill"></i></span>
+        </div>
+        <div class="h3 fw-bold text-warning mb-0" id="cntQuickBookings">-</div>
+        <div class="text-muted" style="font-size: 0.72rem;">On-demand dispatch requests</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl">
+      <div class="stat-card cursor-pointer" onclick="switchFilterTab('COMPLETED')">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="small text-muted fw-semibold">Completed Jobs</span>
+          <span class="badge bg-success-subtle text-success rounded-circle p-2"><i class="bi bi-check2-circle"></i></span>
+        </div>
+        <div class="h3 fw-bold text-success mb-0" id="cntCompletedBookings">-</div>
+        <div class="text-muted" style="font-size: 0.72rem;">Successfully fulfilled jobs</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl">
+      <div class="stat-card cursor-pointer" onclick="switchFilterTab('CANCELLED')">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="small text-muted fw-semibold">Cancelled / Declined</span>
+          <span class="badge bg-danger-subtle text-danger rounded-circle p-2"><i class="bi bi-x-circle"></i></span>
+        </div>
+        <div class="h3 fw-bold text-danger mb-0" id="cntCancelledBookings">-</div>
+        <div class="text-muted" style="font-size: 0.72rem;">Customer cancelled or declined</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Card with Filter Tabs & Table -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    
+    <!-- Filter Tabs Header -->
+    <div class="border-bottom px-3 pt-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <div class="d-flex flex-wrap gap-1" id="filterTabs">
+        <button type="button" class="filter-tab-btn active" data-status="ALL">All Bookings</button>
+        <button type="button" class="filter-tab-btn" data-status="ACTIVE"><i class="bi bi-activity text-primary me-1"></i>Active In-Progress</button>
+        <button type="button" class="filter-tab-btn" data-status="QUICK_SERVICE"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Quick Service</button>
+        <button type="button" class="filter-tab-btn" data-status="PENDING">Pending Acceptance</button>
+        <button type="button" class="filter-tab-btn" data-status="SERVICE_STARTED">In Service</button>
+        <button type="button" class="filter-tab-btn" data-status="COMPLETED">Completed</button>
+        <button type="button" class="filter-tab-btn" data-status="CANCELLED">Cancelled</button>
+        <button type="button" class="filter-tab-btn" data-status="ANALYTICS"><i class="bi bi-bar-chart-fill text-info me-1"></i>Analytics &amp; Trends</button>
+      </div>
+    </div>
+
+    <!-- Search & Multi-Filter Bar -->
+    <div class="p-3 bg-light border-bottom" id="bookingFilterBar">
+      <div class="row g-2 align-items-center mb-2">
+        <div class="col-md-4">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" id="searchQuery" class="form-control border-start-0" placeholder="Search booking #, customer, provider, phone, area...">
+            <button class="btn btn-outline-secondary" type="button" id="btnClearSearch" title="Clear search"><i class="bi bi-x"></i></button>
+          </div>
+        </div>
+        <div class="col-6 col-md-2">
+          <select id="statusFilter" class="form-select form-select-sm">
+            <option value="">All Statuses</option>
+            <option value="ACTIVE">All Active (In Progress)</option>
+            <option value="PENDING">Pending (Request Sent)</option>
+            <option value="ACCEPTED">Accepted by Provider</option>
+            <option value="ON_THE_WAY">Provider On The Way</option>
+            <option value="SERVICE_STARTED">Service in Progress</option>
+            <option value="AWAITING_COMPLETION">Awaiting Confirmation</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="CANCELLED">Cancelled</option>
+            <option value="REJECTED">Declined by Provider</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <select id="typeFilter" class="form-select form-select-sm">
+            <option value="">All Types</option>
+            <option value="NORMAL">Standard (Scheduled)</option>
+            <option value="QUICK_SERVICE">Quick Service (On-Demand)</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <select id="serviceFilter" class="form-select form-select-sm">
+            <option value="">All Services</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <input type="text" id="subServiceFilter" class="form-control form-control-sm" placeholder="Filter subservice...">
+        </div>
+      </div>
+
+      <div class="row g-2 align-items-center">
+        <div class="col-6 col-md-2">
+          <input type="text" id="areaFilter" class="form-control form-control-sm" placeholder="Filter area / locality...">
+        </div>
+        <div class="col-6 col-md-2">
+          <select id="providerFilter" class="form-select form-select-sm">
+            <option value="">All Providers</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <select id="customerFilter" class="form-select form-select-sm">
+            <option value="">All Customers</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white small text-muted">From</span>
+            <input type="date" id="fromDateFilter" class="form-control">
+          </div>
+        </div>
+        <div class="col-6 col-md-2">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white small text-muted">To</span>
+            <input type="date" id="toDateFilter" class="form-control">
+          </div>
+        </div>
+        <div class="col-6 col-md-1">
+          <select id="sortFilter" class="form-select form-select-sm">
+            <option value="id:desc">Newest #</option>
+            <option value="id:asc">Oldest #</option>
+            <option value="scheduled:asc">Scheduled (Earliest)</option>
+            <option value="scheduled:desc">Scheduled (Latest)</option>
+            <option value="status:asc">Status</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-1 text-end">
+          <button type="button" class="btn btn-outline-secondary btn-sm w-100" id="btnResetFilters" title="Reset all filters">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table View Container -->
+    <div class="card-body p-0" id="viewBookingsList">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light text-secondary small text-uppercase fw-bold">
+            <tr>
+              <th class="ps-4" style="width: 100px;">Booking #</th>
+              <th>Service &amp; Subservice</th>
+              <th>Customer</th>
+              <th>Provider</th>
+              <th>Scheduled / Timing</th>
+              <th>Status &amp; Payment</th>
+              <th class="text-end pe-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bookingTableBody">
+            <tr>
+              <td colspan="7" class="text-center py-5 text-muted">
+                <div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading reservations...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Bar -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 p-3 border-top bg-light" id="paginationBar">
+        <div class="small text-muted" id="pageInfoText">Showing 0 bookings</div>
+        <div class="d-flex align-items-center gap-2">
+          <select id="pageSizeSelect" class="form-select form-select-sm w-auto">
+            <option value="10">10 / page</option>
+            <option value="15" selected>15 / page</option>
+            <option value="25">25 / page</option>
+            <option value="50">50 / page</option>
+          </select>
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-secondary px-3" id="btnPrevPage" disabled onclick="changePage(-1)">
+              <i class="bi bi-chevron-left me-1"></i>Previous
+            </button>
+            <button type="button" class="btn btn-outline-secondary px-3" id="btnNextPage" disabled onclick="changePage(1)">
+              Next<i class="bi bi-chevron-right ms-1"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics & Trends Container -->
+    <div class="card-body p-4 d-none" id="viewAnalytics">
+      <div class="row g-4 mb-4">
+        <!-- Status Breakdown Progress Bars -->
+        <div class="col-lg-6">
+          <div class="card border rounded-3 p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="fw-bold text-dark mb-0"><i class="bi bi-pie-chart text-primary me-2"></i>Bookings by Lifecycle Status</h6>
+              <span class="badge bg-light text-secondary border" id="analyticsTotalBadge">0 Total</span>
+            </div>
+            <div id="analyticsStatusBars" class="d-flex flex-column gap-2"></div>
+          </div>
+        </div>
+
+        <!-- Quick Service Dispatch Health -->
+        <div class="col-lg-6">
+          <div class="card border rounded-3 p-3 h-100">
+            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Quick Service Platform Health</h6>
+            <div class="row g-2 mb-3">
+              <div class="col-4">
+                <div class="p-2 bg-light rounded text-center">
+                  <div class="small text-muted">Unassigned</div>
+                  <div class="fs-4 fw-bold text-warning" id="anaUnassigned">0</div>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="p-2 bg-light rounded text-center">
+                  <div class="small text-muted">Delayed (>15m)</div>
+                  <div class="fs-4 fw-bold text-danger" id="anaDelayed">0</div>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="p-2 bg-light rounded text-center">
+                  <div class="small text-muted">Total Quick</div>
+                  <div class="fs-4 fw-bold text-dark" id="anaTotalQuick">0</div>
+                </div>
+              </div>
+            </div>
+            <p class="small text-muted mb-0">
+              <i class="bi bi-info-circle me-1"></i>Quick Service bookings are dispatched immediately without pre-scheduled time slots. Unassigned requests prompt matching verified online providers in the customer's locality.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 14-Day Booking Trends Table -->
+      <div class="card border rounded-3 p-3">
+        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-graph-up text-primary me-2"></i>Daily Reservation &amp; Fulfillment Trends (Last 14 Days)</h6>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle small mb-0">
+            <thead class="bg-light">
+              <tr>
+                <th>Date</th>
+                <th>Total Bookings</th>
+                <th>Quick Service</th>
+                <th>Completed</th>
+                <th>Cancelled</th>
+                <th>Fulfillment Rate</th>
+              </tr>
+            </thead>
+            <tbody id="analyticsTrendRows">
+              <tr><td colspan="6" class="text-center py-3 text-muted">Loading trend analysis...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ================================================================= -->
+<!-- MODAL: COMPREHENSIVE BOOKING DETAILS & AUDIT TIMELINE -->
+<!-- ================================================================= -->
+<div class="modal fade" id="bookingDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <!-- Modal Header -->
+      <div class="modal-header bg-light border-bottom py-3 px-4">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <h2 class="h5 fw-bold text-dark mb-0" id="bdmTitle">Booking Details</h2>
+              <span class="badge bg-white text-dark border font-monospace" id="bdmIdBadge">#0</span>
+              <span id="bdmTypeBadge" class="badge bg-secondary">NORMAL</span>
+              <span id="bdmStatusBadge" class="badge bg-primary">PENDING</span>
+            </div>
+            <div class="small text-muted" id="bdmSubhead">Created: -</div>
+          </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body p-4">
+        <div class="row g-3">
+          
+          <!-- LEFT COLUMN: Customer & Provider Details -->
+          <div class="col-lg-6">
+            <!-- Customer Card -->
+            <div class="card border rounded-3 p-3 mb-3">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold small text-dark"><i class="bi bi-person-circle text-primary me-1"></i>Customer Details</span>
+                <span class="badge bg-light text-secondary border font-monospace" id="bdmCustId">Customer #0</span>
+              </div>
+              <div class="row g-2 small">
+                <div class="col-12"><span class="text-muted">Customer Name:</span> <strong id="bdmCustName" class="text-dark">-</strong></div>
+                <div class="col-sm-6"><span class="text-muted">Phone:</span> <span id="bdmCustPhone" class="fw-semibold">-</span></div>
+                <div class="col-sm-6"><span class="text-muted">Email:</span> <span id="bdmCustEmail">-</span></div>
+                <div class="col-12"><span class="text-muted">Service Address:</span> <span id="bdmCustAddress" class="text-dark fw-medium">-</span></div>
+                <div class="col-12"><span class="text-muted">Area / Locality:</span> <span id="bdmCustArea" class="badge bg-light text-dark border">-</span></div>
+              </div>
+            </div>
+
+            <!-- Provider Card -->
+            <div class="card border rounded-3 p-3 mb-3">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold small text-dark"><i class="bi bi-tools text-primary me-1"></i>Assigned Provider Details</span>
+                <span class="badge bg-light text-secondary border font-monospace" id="bdmProvId">Provider #0</span>
+              </div>
+              <div class="row g-2 small">
+                <div class="col-12"><span class="text-muted">Business Name:</span> <strong id="bdmProvBizName" class="text-dark">-</strong></div>
+                <div class="col-sm-6"><span class="text-muted">Owner Name:</span> <span id="bdmProvOwner">-</span></div>
+                <div class="col-sm-6"><span class="text-muted">Phone:</span> <span id="bdmProvPhone" class="fw-semibold">-</span></div>
+                <div class="col-sm-6"><span class="text-muted">Email:</span> <span id="bdmProvEmail">-</span></div>
+                <div class="col-sm-6"><span class="text-muted">Rating:</span> <span id="bdmProvRating">-</span></div>
+                <div class="col-12"><span class="text-muted">Approx. Base Rate:</span> <span id="bdmProvRate" class="fw-bold text-success">-</span></div>
+              </div>
+            </div>
+
+            <!-- Customer Review (if available) -->
+            <div class="card border rounded-3 p-3" id="bdmReviewCard">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold small text-dark"><i class="bi bi-star-fill text-warning me-1"></i>Customer Review</span>
+                <span id="bdmReviewRating" class="badge bg-warning text-dark">5 ★</span>
+              </div>
+              <p class="small text-muted mb-1" id="bdmReviewComment">"Great service!"</p>
+              <div class="text-muted" style="font-size:0.72rem;" id="bdmReviewDate">-</div>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: Service Details, Pricing, & Audit Timeline -->
+          <div class="col-lg-6">
+            <!-- Reservation & Pricing Card -->
+            <div class="card border rounded-3 p-3 mb-3">
+              <h6 class="fw-bold text-dark mb-2"><i class="bi bi-info-circle text-primary me-1"></i>Reservation &amp; Billing Summary</h6>
+              <div class="row g-2 small mb-2">
+                <div class="col-sm-6"><span class="text-muted">Service Category:</span> <strong id="bdmServiceName">-</strong></div>
+                <div class="col-sm-6"><span class="text-muted">Subservice:</span> <span id="bdmSubServiceName" class="badge bg-light text-dark border">-</span></div>
+                <div class="col-sm-6"><span class="text-muted">Scheduled For:</span> <span id="bdmWhenText" class="fw-semibold text-primary">-</span></div>
+                <div class="col-sm-6"><span class="text-muted">Completion Time:</span> <span id="bdmCompletedAt">-</span></div>
+                <div class="col-sm-6"><span class="text-muted">Approx Price:</span> <strong id="bdmPrice" class="text-success fs-6">-</strong></div>
+                <div class="col-sm-6"><span class="text-muted">Payment Method:</span> <span id="bdmPaymentStatus" class="badge bg-light text-dark border">-</span></div>
+                <div class="col-12"><span class="text-muted">Customer Notes:</span> <p class="mb-0 text-muted fst-italic" id="bdmNotes">None</p></div>
+              </div>
+              <div id="bdmCancelReasonContainer" class="d-none alert alert-danger py-2 px-3 small mb-0">
+                <i class="bi bi-exclamation-octagon-fill me-1"></i>
+                <span class="fw-bold">Cancellation Reason:</span> <span id="bdmCancellationReason">-</span>
+              </div>
+            </div>
+
+            <!-- Status History & Audit Trail -->
+            <div class="card border rounded-3 p-3">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-clock-history text-primary me-1"></i>Lifecycle History &amp; Audit Trail</h6>
+                <span class="badge bg-light text-secondary border" id="bdmHistoryCount">0 events</span>
+              </div>
+              <div id="bdmTimeline" style="max-height: 280px; overflow-y: auto;">
+                <div class="text-muted small">Loading history...</div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer bg-light d-flex justify-content-between align-items-center">
+        <div>
+          <button type="button" class="btn btn-outline-danger btn-sm rounded-pill" id="bdmBtnCancel" onclick="openAdminActionModal('CANCELLED')">
+            <i class="bi bi-x-circle me-1"></i>Cancel Reservation
+          </button>
+          <button type="button" class="btn btn-outline-primary btn-sm rounded-pill ms-1" id="bdmBtnReassign" onclick="openAdminActionModal('REASSIGN')">
+            <i class="bi bi-arrow-repeat me-1"></i>Reassign Provider
+          </button>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" id="bdmBtnChangeStatus" onclick="openAdminActionModal()">
+            <i class="bi bi-sliders me-1"></i>Update Status
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- MODAL: ADMINISTRATIVE ACTION / STATUS UPDATE / REASSIGN -->
+<!-- ================================================================= -->
+<div class="modal fade" id="adminActionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-light border-bottom py-3 px-4">
+        <h5 class="modal-title fw-bold" id="actionModalTitle">Administrative Booking Action</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="small text-muted mb-3" id="actionModalPrompt">
+          Record an administrative status transition or reassign the service provider for this booking. All actions are logged into the audit timeline.
+        </p>
+
+        <!-- Status Selection -->
+        <div class="mb-3" id="groupActionStatus">
+          <label class="form-label small fw-bold text-dark" for="actionTargetStatus">Target Lifecycle Status</label>
+          <select id="actionTargetStatus" class="form-select form-select-sm">
+            <option value="ACCEPTED">ACCEPTED (Confirm &amp; Accept)</option>
+            <option value="ON_THE_WAY">ON_THE_WAY (Dispatched)</option>
+            <option value="SERVICE_STARTED">SERVICE_STARTED (Commence Service)</option>
+            <option value="AWAITING_COMPLETION">AWAITING_COMPLETION (Fulfillment Finished)</option>
+            <option value="COMPLETED">COMPLETED (Complete Service)</option>
+            <option value="CANCELLED">CANCELLED (Administrative Cancellation)</option>
+            <option value="REJECTED">REJECTED (Decline)</option>
+          </select>
+        </div>
+
+        <!-- Reassignment Provider Selection -->
+        <div class="mb-3 d-none" id="groupActionReassign">
+          <label class="form-label small fw-bold text-dark" for="actionReassignSelect">Select Replacement Provider</label>
+          <select id="actionReassignSelect" class="form-select form-select-sm">
+            <option value="">Choose an eligible verified provider...</option>
+          </select>
+          <div class="small text-muted mt-1" style="font-size:0.72rem;">
+            Only verified partners serving this category in the customer's locality are listed.
+          </div>
+        </div>
+
+        <!-- Administrative Reason -->
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-dark" for="actionReason">
+            Administrative Explanation / Reason <span class="text-danger">*</span>
+          </label>
+          <textarea id="actionReason" class="form-control" rows="3" placeholder="Provide recorded explanation for this action (e.g. Customer dispute resolution, provider vehicle breakdown, emergency override)..." required></textarea>
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm rounded-pill px-4 fw-semibold" id="btnConfirmAction" onclick="submitAdminAction()">
+          Confirm Action
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script>
+const me = Auth.require('ADMIN');
+adminNav('bookings');
+
+const $ = id => document.getElementById(id);
+
+// State
+let currentTab = 'ALL';
+let currentSearch = '';
+let currentStatus = '';
+let currentType = '';
+let currentServiceId = '';
+let currentSubService = '';
+let currentProviderId = '';
+let currentCustomerId = '';
+let currentArea = '';
+let fromDate = '';
+let toDate = '';
+let currentSort = 'id:desc';
+let currentPage = 0;
+let pageSize = 15;
+
+let activeBookingDetail = null;
+
+// Modals
+let bookingDetailModalInstance = null;
+let adminActionModalInstance = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  bookingDetailModalInstance = new bootstrap.Modal($('bookingDetailModal'));
+  adminActionModalInstance = new bootstrap.Modal($('adminActionModal'));
+
+  // Debounced search
+  let searchTimer;
+  $('searchQuery').addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      currentSearch = $('searchQuery').value.trim();
+      currentPage = 0;
+      loadBookings();
+    }, 300);
+  });
+
+  $('btnClearSearch').addEventListener('click', () => {
+    $('searchQuery').value = '';
+    currentSearch = '';
+    currentPage = 0;
+    loadBookings();
+  });
+
+  // Filter Listeners
+  $('statusFilter').addEventListener('change', () => {
+    currentStatus = $('statusFilter').value;
+    currentPage = 0;
+    loadBookings();
+  });
+
+  $('typeFilter').addEventListener('change', () => {
+    currentType = $('typeFilter').value;
+    currentPage = 0;
+    loadBookings();
+  });
+
+  $('serviceFilter').addEventListener('change', () => {
+    currentServiceId = $('serviceFilter').value;
+    currentPage = 0;
+    loadBookings();
+  });
+
+  let subTimer;
+  $('subServiceFilter').addEventListener('input', () => {
+    clearTimeout(subTimer);
+    subTimer = setTimeout(() => {
+      currentSubService = $('subServiceFilter').value.trim();
+      currentPage = 0;
+      loadBookings();
+    }, 300);
+  });
+
+  let areaTimer;
+  $('areaFilter').addEventListener('input', () => {
+    clearTimeout(areaTimer);
+    areaTimer = setTimeout(() => {
+      currentArea = $('areaFilter').value.trim();
+      currentPage = 0;
+      loadBookings();
+    }, 300);
+  });
+
+  $('providerFilter').addEventListener('change', () => {
+    currentProviderId = $('providerFilter').value;
+    currentPage = 0;
+    loadBookings();
+  });
+
+  $('customerFilter').addEventListener('change', () => {
+    currentCustomerId = $('customerFilter').value;
+    currentPage = 0;
+    loadBookings();
+  });
+
+  $('fromDateFilter').addEventListener('change', () => {
+    fromDate = $('fromDateFilter').value;
+    currentPage = 0;
+    loadBookings();
+  });
+
+  $('toDateFilter').addEventListener('change', () => {
+    toDate = $('toDateFilter').value;
+    currentPage = 0;
+    loadBookings();
+  });
+
+  $('sortFilter').addEventListener('change', () => {
+    currentSort = $('sortFilter').value;
+    currentPage = 0;
+    loadBookings();
+  });
+
+  $('pageSizeSelect').addEventListener('change', () => {
+    pageSize = Number($('pageSizeSelect').value) || 15;
+    currentPage = 0;
+    loadBookings();
+  });
+
+  $('btnResetFilters').addEventListener('click', resetAllFilters);
+
+  // Tab Switching
+  document.querySelectorAll('.filter-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      switchFilterTab(btn.dataset.status);
+    });
+  });
+
+  // Check URL query parameters
+  const urlParams = new URLSearchParams(location.search);
+  if (urlParams.get('status')) {
+    switchFilterTab(urlParams.get('status'));
+  } else if (urlParams.get('type')) {
+    currentType = urlParams.get('type');
+    $('typeFilter').value = currentType;
+    switchFilterTab('QUICK_SERVICE');
+  } else {
+    loadBookings();
+  }
+
+  loadDropdownFilters();
+  updateKPIs();
+});
+
+function showAlert(text, ok = false) {
+  const el = $('pageAlert');
+  if (!el) return;
+  el.className = `alert alert-${ok ? 'success' : 'danger'} alert-dismissible fade show shadow-sm rounded-3`;
+  el.innerHTML = `
+    <div class="d-flex align-items-center justify-content-between">
+      <div><i class="bi bi-${ok ? 'check-circle-fill text-success' : 'exclamation-octagon-fill text-danger'} me-2"></i>${esc(text)}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>`;
+  el.classList.remove('d-none');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function loadDropdownFilters() {
+  try {
+    const [svcs, provs, custs] = await Promise.all([
+      api('/admin/services').catch(() => []),
+      api('/admin/providers').catch(() => []),
+      api('/admin/customers').catch(() => [])
+    ]);
+
+    const sSelect = $('serviceFilter');
+    sSelect.innerHTML = '<option value="">All Services</option>' +
+      (svcs || []).map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+
+    const pSelect = $('providerFilter');
+    pSelect.innerHTML = '<option value="">All Providers</option>' +
+      (provs || []).map(a => `<option value="${a.provider.id}">${esc(a.provider.businessName)} (#${a.provider.id})</option>`).join('');
+
+    const cSelect = $('customerFilter');
+    cSelect.innerHTML = '<option value="">All Customers</option>' +
+      (custs || []).map(c => `<option value="${c.id}">${esc(c.name)} (#${c.id})</option>`).join('');
+  } catch (err) {
+    console.warn('Could not populate dropdown filters:', err);
+  }
+}
+
+function switchFilterTab(tabKey) {
+  currentTab = tabKey;
+  currentPage = 0;
+
+  document.querySelectorAll('.filter-tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.status === tabKey);
+  });
+
+  const listContainer = $('viewBookingsList');
+  const anaContainer = $('viewAnalytics');
+  const filterBar = $('bookingFilterBar');
+
+  if (tabKey === 'ANALYTICS') {
+    listContainer.classList.add('d-none');
+    filterBar.classList.add('d-none');
+    anaContainer.classList.remove('d-none');
+    loadAnalytics();
+    return;
+  }
+
+  anaContainer.classList.add('d-none');
+  listContainer.classList.remove('d-none');
+  filterBar.classList.remove('d-none');
+
+  if (tabKey === 'ALL') {
+    currentStatus = '';
+    currentType = '';
+  } else if (tabKey === 'ACTIVE') {
+    currentStatus = 'ACTIVE';
+    currentType = '';
+  } else if (tabKey === 'QUICK_SERVICE') {
+    currentStatus = '';
+    currentType = 'QUICK_SERVICE';
+  } else {
+    currentStatus = tabKey;
+    currentType = '';
+  }
+
+  $('statusFilter').value = currentStatus;
+  $('typeFilter').value = currentType;
+
+  loadBookings();
+}
+
+function resetAllFilters() {
+  $('searchQuery').value = '';
+  $('statusFilter').value = '';
+  $('typeFilter').value = '';
+  $('serviceFilter').value = '';
+  $('subServiceFilter').value = '';
+  $('areaFilter').value = '';
+  $('providerFilter').value = '';
+  $('customerFilter').value = '';
+  $('fromDateFilter').value = '';
+  $('toDateFilter').value = '';
+  $('sortFilter').value = 'id:desc';
+  $('pageSizeSelect').value = '15';
+
+  currentSearch = '';
+  currentStatus = '';
+  currentType = '';
+  currentServiceId = '';
+  currentSubService = '';
+  currentArea = '';
+  currentProviderId = '';
+  currentCustomerId = '';
+  fromDate = '';
+  toDate = '';
+  currentSort = 'id:desc';
+  pageSize = 15;
+  currentPage = 0;
+
+  switchFilterTab('ALL');
+}
+
+async function loadBookings(showSpin = false) {
+  const spin = $('btnRefreshSpin');
+  if (showSpin && spin) spin.classList.add('spin-animation');
+
+  const tbody = $('bookingTableBody');
+  tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading reservations...</td></tr>`;
+
+  const [sortBy, sortDir] = currentSort.split(':');
+  let url = `/admin/bookings?page=${currentPage}&size=${pageSize}&sortBy=${sortBy}&sortDir=${sortDir}`;
+
+  if (currentSearch) url += `&search=${encodeURIComponent(currentSearch)}`;
+  if (currentStatus) url += `&status=${encodeURIComponent(currentStatus)}`;
+  if (currentType) url += `&type=${encodeURIComponent(currentType)}`;
+  if (currentServiceId) url += `&serviceId=${encodeURIComponent(currentServiceId)}`;
+  if (currentSubService) url += `&subService=${encodeURIComponent(currentSubService)}`;
+  if (currentProviderId) url += `&providerId=${encodeURIComponent(currentProviderId)}`;
+  if (currentCustomerId) url += `&customerId=${encodeURIComponent(currentCustomerId)}`;
+  if (currentArea) url += `&area=${encodeURIComponent(currentArea)}`;
+  if (fromDate) url += `&fromDate=${encodeURIComponent(fromDate)}`;
+  if (toDate) url += `&toDate=${encodeURIComponent(toDate)}`;
+
+  try {
+    const res = await api(url);
+    const isPage = res && typeof res === 'object' && !Array.isArray(res) && Array.isArray(res.content);
+    const list = isPage ? res.content : (Array.isArray(res) ? res : []);
+
+    renderBookingsTable(list);
+
+    const totalElements = isPage ? (res.totalElements ?? list.length) : list.length;
+    const totalPages = isPage ? (res.totalPages ?? Math.max(1, Math.ceil(totalElements / pageSize))) : Math.max(1, Math.ceil(totalElements / pageSize));
+    const pageNum = isPage ? (res.number ?? currentPage) : currentPage;
+
+    if ($('pageInfoText')) {
+      $('pageInfoText').textContent = `Showing ${list.length} of ${totalElements} reservations (Page ${pageNum + 1} of ${totalPages})`;
+    }
+    if ($('btnPrevPage')) $('btnPrevPage').disabled = (pageNum <= 0);
+    if ($('btnNextPage')) $('btnNextPage').disabled = (pageNum + 1 >= totalPages || list.length === 0);
+
+    updateKPIs();
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-danger py-4 text-center"><i class="bi bi-exclamation-triangle-fill me-1"></i>Failed to load bookings: ${esc(err.message)}</td></tr>`;
+  } finally {
+    if (showSpin && spin) spin.classList.remove('spin-animation');
+  }
+}
+
+function changePage(delta) {
+  currentPage += delta;
+  if (currentPage < 0) currentPage = 0;
+  loadBookings();
+}
+
+async function updateKPIs() {
+  try {
+    const ana = await api('/admin/bookings/analytics');
+    if ($('cntTotalBookings')) $('cntTotalBookings').textContent = ana.totalBookings ?? '-';
+    if ($('cntActiveBookings')) $('cntActiveBookings').textContent = ana.activeBookings ?? '-';
+    if ($('cntQuickBookings')) $('cntQuickBookings').textContent = ana.quickServiceCount ?? '-';
+    if ($('cntCompletedBookings')) $('cntCompletedBookings').textContent = ana.completedBookings ?? '-';
+    if ($('cntCancelledBookings')) $('cntCancelledBookings').textContent = ana.cancelledBookings ?? '-';
+  } catch (e) {
+    console.warn('Could not load booking analytics KPIs:', e);
+  }
+}
+
+function renderBookingsTable(items) {
+  const tbody = $('bookingTableBody');
+  if (!items || items.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center py-5 text-muted">
+          <i class="bi bi-folder2-open fs-2 d-block text-secondary mb-2"></i>
+          <strong>No bookings found matching current filters</strong>
+          <div class="small">Try clearing search terms or selecting another status tab.</div>
+        </td>
+      </tr>`;
+    return;
+  }
+
+  tbody.innerHTML = items.map(b => {
+    const isQuick = b.bookingType === 'QUICK_SERVICE';
+    const stBadgeClass = `status-badge-${b.status}`;
+    const stLabel = STATUS[b.status] ? STATUS[b.status][1] : b.status;
+
+    let whenDisplay = '';
+    if (isQuick) {
+      whenDisplay = `<span class="badge bg-warning-subtle text-warning border border-warning-subtle"><i class="bi bi-lightning-charge-fill me-1"></i>On-Demand Dispatch</span>`;
+    } else if (b.bookingDate && b.bookingTime) {
+      const timeStr = typeof b.bookingTime === 'string' ? b.bookingTime.slice(0, 5) : b.bookingTime;
+      whenDisplay = `<div><i class="bi bi-calendar3 text-muted me-1"></i>${b.bookingDate}</div><div class="text-muted" style="font-size:0.75rem;"><i class="bi bi-clock text-muted me-1"></i>${timeStr}</div>`;
+    } else {
+      whenDisplay = `<span class="text-muted small">Scheduled</span>`;
+    }
+
+    const createdStr = b.createdAt ? new Date(b.createdAt).toLocaleDateString() : '';
+
+    return `
+      <tr>
+        <td class="ps-4">
+          <div class="font-monospace fw-bold text-dark">#${b.id}</div>
+          <span class="badge ${isQuick ? 'bg-warning-subtle text-warning border border-warning-subtle' : 'bg-light text-secondary border'}" style="font-size:0.68rem;">
+            ${isQuick ? 'QUICK SERVICE' : 'STANDARD'}
+          </span>
+          ${createdStr ? `<div class="text-muted mt-0.5" style="font-size:0.68rem;">${createdStr}</div>` : ''}
+        </td>
+        <td>
+          <div class="fw-bold text-dark">${esc(b.serviceName || 'Service')}</div>
+          ${b.subServiceName ? `<div class="badge bg-light text-secondary border font-normal" style="font-size:0.7rem;">${esc(b.subServiceName)}</div>` : ''}
+        </td>
+        <td class="small">
+          <div class="fw-semibold text-dark">${esc(b.customerName || 'Customer')}</div>
+          ${b.customerPhone ? `<div class="text-muted" style="font-size:0.72rem;"><i class="bi bi-telephone text-muted me-1"></i>${esc(b.customerPhone)}</div>` : ''}
+          <div class="text-muted text-truncate" style="max-width:180px; font-size:0.72rem;" title="${esc(b.area || b.address || '')}">
+            <i class="bi bi-geo-alt text-muted me-1"></i>${esc(b.area || b.address || 'Locality')}
+          </div>
+        </td>
+        <td class="small">
+          <div class="fw-semibold text-dark cursor-pointer text-decoration-none" onclick="openBookingDetails(${b.id})">
+            ${esc(b.providerBusinessName || b.businessName || 'Assigned Provider')}
+          </div>
+          ${b.providerPhone ? `<div class="text-muted" style="font-size:0.72rem;"><i class="bi bi-telephone text-muted me-1"></i>${esc(b.providerPhone)}</div>` : ''}
+          <div class="small text-muted">ID #${b.providerId}</div>
+        </td>
+        <td>
+          ${whenDisplay}
+        </td>
+        <td>
+          <span class="badge ${stBadgeClass} px-2.5 py-1 rounded-pill fw-bold" style="font-size: 0.73rem;">
+            ${esc(stLabel)}
+          </span>
+          <div class="small text-muted mt-0.5" style="font-size:0.7rem;">
+            ${b.price != null ? `₹${b.price}` : 'Doorstep'} · ${esc(b.paymentStatus || 'Pending')}
+          </div>
+        </td>
+        <td class="text-end pe-4 text-nowrap">
+          <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-2.5 py-1 me-1 shadow-xs" onclick="openBookingDetails(${b.id})">
+            <i class="bi bi-eye me-1"></i>Details
+          </button>
+          <button type="button" class="btn btn-light btn-sm rounded-pill px-2.5 py-1 text-secondary border shadow-xs" onclick="quickOpenAction(${b.id}, '${b.status}')" title="Admin actions">
+            <i class="bi bi-sliders"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// =================================================================
+// BOOKING DETAILS MODAL & AUDIT TIMELINE
+// =================================================================
+async function openBookingDetails(bookingId) {
+  try {
+    const detail = await api(`/admin/bookings/${bookingId}/details`);
+    activeBookingDetail = detail;
+    populateBookingDetailModal(detail);
+    bookingDetailModalInstance.show();
+  } catch (err) {
+    showAlert(err.message || 'Could not load booking details', false);
+  }
+}
+
+function populateBookingDetailModal(detail) {
+  if (!detail) return;
+  const b = detail.booking;
+  const isQuick = b.bookingType === 'QUICK_SERVICE';
+
+  // Header
+  $('bdmTitle').textContent = `Booking #${b.id}`;
+  $('bdmIdBadge').textContent = `#${b.id}`;
+  $('bdmTypeBadge').textContent = isQuick ? 'QUICK SERVICE (ON-DEMAND)' : 'STANDARD RESERVATION';
+  $('bdmTypeBadge').className = isQuick ? 'badge bg-warning-subtle text-warning border border-warning-subtle' : 'badge bg-light text-secondary border';
+
+  const stBadgeClass = `status-badge-${b.status}`;
+  const stLabel = STATUS[b.status] ? STATUS[b.status][1] : b.status;
+  $('bdmStatusBadge').className = `badge ${stBadgeClass} px-2.5 py-1 fw-bold`;
+  $('bdmStatusBadge').textContent = stLabel;
+
+  const createdDate = b.createdAt ? new Date(b.createdAt).toLocaleString() : 'N/A';
+  $('bdmSubhead').textContent = `Created: ${createdDate} · Service: ${b.serviceName || 'Service'}`;
+
+  // Customer Card
+  const c = detail.customer;
+  $('bdmCustId').textContent = c ? `Customer #${c.id}` : 'Customer';
+  $('bdmCustName').textContent = c ? c.name : (b.customerName || '-');
+  $('bdmCustPhone').textContent = c ? (c.phone || '-') : (b.customerPhone || 'Not shared yet');
+  $('bdmCustEmail').textContent = c ? (c.email || '-') : (b.customerEmail || '-');
+  $('bdmCustAddress').textContent = c ? (c.formattedAddress || c.address || b.address || '-') : (b.address || '-');
+  $('bdmCustArea').textContent = c ? (c.area || b.area || '-') : (b.area || '-');
+
+  // Provider Card
+  const p = detail.provider;
+  $('bdmProvId').textContent = p ? `Provider #${p.id}` : `Provider #${b.providerId}`;
+  $('bdmProvBizName').textContent = p ? (p.businessName || '-') : (b.providerBusinessName || b.businessName || '-');
+  $('bdmProvOwner').textContent = b.providerBusinessName || (p ? p.businessName : '-');
+  $('bdmProvPhone').textContent = b.providerPhone || (p ? p.phone : 'Not shared yet');
+  $('bdmProvEmail').textContent = b.providerEmail || (p ? p.email : '-');
+  $('bdmProvRating').innerHTML = p ? stars(p.rating, p.reviewCount) : 'New';
+  $('bdmProvRate').textContent = p && p.approxPrice != null ? `Approx ₹${p.approxPrice}` : '₹499 base rate';
+
+  // Review Section
+  const rev = detail.review;
+  const revCard = $('bdmReviewCard');
+  if (rev) {
+    revCard.classList.remove('d-none');
+    $('bdmReviewRating').textContent = `${rev.rating} ★`;
+    $('bdmReviewComment').textContent = `"${rev.review || 'No written text provided.'}"`;
+    $('bdmReviewDate').textContent = rev.createdAt ? new Date(rev.createdAt).toLocaleString() : '';
+  } else {
+    revCard.classList.add('d-none');
+  }
+
+  // Reservation & Billing Card
+  $('bdmServiceName').textContent = b.serviceName || 'Service';
+  $('bdmSubServiceName').textContent = b.subServiceName || 'General Diagnostic';
+  $('bdmWhenText').textContent = isQuick ? 'On-Demand Quick Service (Dispatched immediately)' : `${b.bookingDate} at ${b.bookingTime || 'Scheduled'}`;
+  $('bdmCompletedAt').textContent = b.completedAt ? new Date(b.completedAt).toLocaleString() : 'Not completed yet';
+  $('bdmPrice').textContent = detail.price != null ? `₹${detail.price}` : 'Doorstep Estimate';
+  $('bdmPaymentStatus').textContent = detail.paymentStatus || 'Pay on Completion';
+  $('bdmNotes').textContent = b.notes || 'None provided by customer.';
+
+  // Cancellation Reason
+  const cancelContainer = $('bdmCancelReasonContainer');
+  if (detail.cancellationReason) {
+    cancelContainer.classList.remove('d-none');
+    $('bdmCancellationReason').textContent = detail.cancellationReason;
+  } else {
+    cancelContainer.classList.add('d-none');
+  }
+
+  // Audit History Timeline
+  renderAuditTimeline(detail.history || []);
+
+  // Footer Buttons Availability
+  const isTerminal = ['COMPLETED', 'CANCELLED', 'REJECTED'].includes(b.status);
+  $('bdmBtnCancel').disabled = isTerminal;
+  $('bdmBtnReassign').disabled = isTerminal;
+}
+
+function renderAuditTimeline(history) {
+  const container = $('bdmTimeline');
+  if (!history || history.length === 0) {
+    container.innerHTML = '<div class="text-muted small py-2">No lifecycle events recorded yet for this booking.</div>';
+    $('bdmHistoryCount').textContent = '0 events';
+    return;
+  }
+
+  $('bdmHistoryCount').textContent = `${history.length} events`;
+
+  container.innerHTML = history.map(item => `
+    <div class="audit-node pb-3">
+      <div class="audit-dot"></div>
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-1 mb-1">
+        <div class="d-flex align-items-center gap-1.5">
+          <span class="badge bg-light text-dark border fw-bold" style="font-size:0.7rem;">${esc(item.action)}</span>
+          <span class="small fw-semibold text-dark">${esc(item.actorName || 'System')}</span>
+          <span class="badge bg-light text-secondary" style="font-size:0.65rem;">${esc(item.actorRole || 'SYSTEM')}</span>
+        </div>
+        <span class="text-muted" style="font-size:0.7rem;">${item.timestamp ? new Date(item.timestamp).toLocaleString() : ''}</span>
+      </div>
+      <div class="small text-muted" style="font-size:0.75rem;">
+        Transition: <span class="badge bg-light text-secondary">${esc(item.fromStatus || 'INIT')}</span> &rarr; <span class="badge bg-primary-subtle text-primary">${esc(item.toStatus)}</span>
+      </div>
+      ${item.reason ? `<div class="small text-dark mt-1" style="font-size:0.73rem;"><i class="bi bi-chat-left-text text-muted me-1"></i>${esc(item.reason)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+// =================================================================
+// ADMIN ACTION MODAL (STATUS TRANSITION & REASSIGNMENT)
+// =================================================================
+function quickOpenAction(bookingId, currentStatus) {
+  openBookingDetails(bookingId).then(() => {
+    openAdminActionModal();
+  });
+}
+
+function openAdminActionModal(preferredAction = null) {
+  if (!activeBookingDetail) return;
+  const b = activeBookingDetail.booking;
+
+  $('actionModalTitle').textContent = `Manage Booking #${b.id}`;
+  $('actionReason').value = '';
+
+  const groupStatus = $('groupActionStatus');
+  const groupReassign = $('groupActionReassign');
+  const targetSelect = $('actionTargetStatus');
+  const reassignSelect = $('actionReassignSelect');
+
+  if (preferredAction === 'CANCELLED') {
+    groupStatus.classList.remove('d-none');
+    groupReassign.classList.add('d-none');
+    targetSelect.value = 'CANCELLED';
+    $('actionModalPrompt').innerHTML = `You are performing an <strong>Administrative Cancellation</strong> for Booking <strong>#${b.id}</strong>. A mandatory reason is required.`;
+    $('btnConfirmAction').className = 'btn btn-danger btn-sm rounded-pill px-4 fw-semibold';
+    $('btnConfirmAction').textContent = 'Confirm Cancellation';
+  } else if (preferredAction === 'REASSIGN') {
+    groupStatus.classList.add('d-none');
+    groupReassign.classList.remove('d-none');
+    $('actionModalPrompt').innerHTML = `Select an eligible verified replacement provider to reassign Booking <strong>#${b.id}</strong>.`;
+    $('btnConfirmAction').className = 'btn btn-primary btn-sm rounded-pill px-4 fw-semibold';
+    $('btnConfirmAction').textContent = 'Confirm Reassignment';
+
+    // Populate eligible providers dropdown
+    const elig = activeBookingDetail.eligibleProviders || [];
+    if (elig.length > 0) {
+      reassignSelect.innerHTML = '<option value="">Choose an eligible replacement provider...</option>' +
+        elig.map(p => `<option value="${p.id}">${esc(p.businessName)} (Rating: ${p.rating} ★, Area: ${(p.areas || []).map(a => a.area).join(', ')})</option>`).join('');
+    } else {
+      reassignSelect.innerHTML = '<option value="">No other online matching providers available in area</option>';
+    }
+  } else {
+    groupStatus.classList.remove('d-none');
+    groupReassign.classList.add('d-none');
+    targetSelect.value = b.status;
+    $('actionModalPrompt').innerHTML = `Select a target status for Booking <strong>#${b.id}</strong> and record an administrative explanation.`;
+    $('btnConfirmAction').className = 'btn btn-primary btn-sm rounded-pill px-4 fw-semibold';
+    $('btnConfirmAction').textContent = 'Confirm Status Update';
+  }
+
+  adminActionModalInstance.show();
+}
+
+async function submitAdminAction() {
+  if (!activeBookingDetail) return;
+  const b = activeBookingDetail.booking;
+  const reason = $('actionReason').value.trim();
+  if (!reason) {
+    alert('Please enter a mandatory administrative reason or explanation for this action.');
+    $('actionReason').focus();
+    return;
+  }
+
+  const isReassign = !$('groupActionReassign').classList.contains('d-none');
+  const payload = {
+    reason: reason,
+    status: isReassign ? b.status : $('actionTargetStatus').value,
+    reassignProviderId: isReassign ? (Number($('actionReassignSelect').value) || null) : null
+  };
+
+  if (isReassign && !payload.reassignProviderId) {
+    alert('Please select a replacement provider from the dropdown.');
+    return;
+  }
+
+  try {
+    const updated = await api(`/admin/bookings/${b.id}/status`, {
+      method: 'PUT',
+      body: payload
+    });
+
+    adminActionModalInstance.hide();
+    activeBookingDetail = updated;
+    populateBookingDetailModal(updated);
+    showAlert(`Booking #${b.id} updated successfully. Event recorded in audit history.`, true);
+    loadBookings();
+    updateKPIs();
+  } catch (err) {
+    alert(err.message || 'Could not update booking status');
+  }
+}
+
+// =================================================================
+// ANALYTICS & TRENDS TAB
+// =================================================================
+async function loadAnalytics() {
+  try {
+    const data = await api('/admin/bookings/analytics');
+    if ($('analyticsTotalBadge')) $('analyticsTotalBadge').textContent = `${data.totalBookings || 0} Total`;
+    if ($('anaUnassigned')) $('anaUnassigned').textContent = data.unassignedQuickCount || 0;
+    if ($('anaDelayed')) $('anaDelayed').textContent = data.delayedQuickCount || 0;
+    if ($('anaTotalQuick')) $('anaTotalQuick').textContent = data.quickServiceCount || 0;
+
+    // Status Distribution Bars
+    const max = Math.max(1, ...Object.values(data.bookingsByStatus || {}));
+    const container = $('analyticsStatusBars');
+    container.innerHTML = Object.entries(data.bookingsByStatus || {}).map(([s, count]) => {
+      const info = STATUS[s] || ['secondary', s];
+      const pct = (count / max) * 100;
+      return `
+        <div class="mb-2">
+          <div class="d-flex justify-content-between align-items-center small mb-1">
+            <span class="fw-semibold text-dark">${esc(info[1])}</span>
+            <span class="badge bg-light text-secondary border font-monospace">${count}</span>
+          </div>
+          <div class="progress" style="height: 10px; border-radius: 6px;">
+            <div class="progress-bar bg-${info[0]}" role="progressbar" style="width: ${pct}%;"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Trends Table
+    const tbody = $('analyticsTrendRows');
+    const trends = data.dailyTrends || [];
+    if (trends.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">No trend data available for this range</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = trends.map(t => {
+      const rate = t.total > 0 ? ((t.completed / t.total) * 100).toFixed(0) : '0';
+      return `
+        <tr>
+          <td class="fw-semibold">${t.date}</td>
+          <td><span class="badge bg-light text-dark border">${t.total}</span></td>
+          <td><span class="badge bg-warning-subtle text-warning">${t.quickService}</span></td>
+          <td><span class="badge bg-success-subtle text-success">${t.completed}</span></td>
+          <td><span class="badge bg-danger-subtle text-danger">${t.cancelled}</span></td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="progress flex-grow-1" style="height: 6px; width: 60px;">
+                <div class="progress-bar bg-success" style="width: ${rate}%;"></div>
+              </div>
+              <span class="text-muted" style="font-size:0.72rem;">${rate}%</span>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) {
+    console.warn('Could not load booking analytics:', err);
+  }
+}
+</script>
+</body>
+</html>

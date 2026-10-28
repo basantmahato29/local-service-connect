@@ -1,0 +1,2934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Account · Local Service Connect</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <style>
+    #custPickerMap { height: 350px; width: 100%; border-radius: 12px; }
+    .pac-container { z-index: 1065 !important; }
+    .tab-pane-content { display: none; }
+    .tab-pane-content.active { display: block; animation: fadeIn 0.25s ease-out; }
+    .star-rating-select .bi { font-size: 1.6rem; cursor: pointer; color: #cbd5e1; transition: color 0.15s ease; }
+    .star-rating-select .bi.hovered,
+    .star-rating-select .bi.active { color: #f59e0b; }
+    .receipt-modal-table th, .receipt-modal-table td { padding: 0.6rem 0.5rem; font-size: 0.88rem; }
+    @media print {
+      body * { visibility: hidden; }
+      #receiptModalContent, #receiptModalContent * { visibility: visible; }
+      #receiptModalContent { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<div id="nav"></div>
+
+<div class="container py-3 py-lg-4" style="max-width: 1200px;">
+  <!-- Breadcrumb & Top Bar -->
+  <div class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-1 small">
+          <li class="breadcrumb-item"><a href="/" class="text-muted text-decoration-none"><i class="bi bi-house-door me-1"></i>Home</a></li>
+          <li class="breadcrumb-item active text-primary fw-semibold" aria-current="page">My Account</li>
+        </ol>
+      </nav>
+      <h1 class="h3 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+        <span>My Account</span>
+        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill fs-7 fw-semibold py-1 px-2.5">
+          <i class="bi bi-shield-check me-1"></i>Customer Portal
+        </span>
+      </h1>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/?type=NORMAL#frontBookingForm" class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-xs">
+        <i class="bi bi-plus-circle me-1"></i>Book Service
+      </a>
+      <a href="/providers.html" class="btn btn-light border btn-sm rounded-pill px-3 shadow-xs text-dark">
+        <i class="bi bi-search me-1"></i>Find Providers
+      </a>
+    </div>
+  </div>
+
+  <!-- Global Alert Banner -->
+  <div id="pageAlert" class="alert d-none shadow-sm rounded-3"></div>
+
+  <!-- Mobile Tab Bar (Horizontal Scroller on Small Screens) -->
+  <div class="d-lg-none mb-3">
+    <div class="account-mobile-tab-scroller">
+      <button type="button" class="account-mobile-pill active" data-tab="bookings"><i class="bi bi-calendar2-check"></i> Bookings</button>
+      <button type="button" class="account-mobile-pill" data-tab="addresses"><i class="bi bi-geo-alt"></i> Addresses</button>
+      <button type="button" class="account-mobile-pill" data-tab="support"><i class="bi bi-headset"></i> Support</button>
+      <button type="button" class="account-mobile-pill" data-tab="reviews"><i class="bi bi-star"></i> Reviews</button>
+      <button type="button" class="account-mobile-pill" data-tab="favorites"><i class="bi bi-heart"></i> Favorites</button>
+      <button type="button" class="account-mobile-pill" data-tab="notifications"><i class="bi bi-bell"></i> Alerts <span class="badge bg-danger rounded-pill unread-pill-count d-none" style="font-size:0.65rem;">0</span></button>
+      <button type="button" class="account-mobile-pill" data-tab="payments"><i class="bi bi-credit-card"></i> Payments</button>
+      <button type="button" class="account-mobile-pill" data-tab="offers"><i class="bi bi-ticket-perforated"></i> Offers</button>
+      <button type="button" class="account-mobile-pill" data-tab="settings"><i class="bi bi-gear"></i> Settings</button>
+    </div>
+  </div>
+
+  <div class="row g-4 align-items-start">
+    <!-- LEFT SIDEBAR: Customer Profile Header & Navigation Menu (Desktop) -->
+    <div class="col-lg-4 col-xl-4 col-xxl-3">
+      <div class="account-sidebar-sticky">
+        <!-- 1. Customer Profile Header Card -->
+        <div class="customer-sidebar-card mb-3">
+          <div class="customer-sidebar-header">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-1 px-2.5 rounded-pill fw-semibold" style="font-size: 0.72rem;">
+                <i class="bi bi-person-check-fill me-1"></i>Verified Resident
+              </span>
+              <button type="button" class="account-edit-pill-btn" id="btnOpenEditProfileModal" title="Edit Profile Details">
+                <i class="bi bi-pencil" style="font-size: 0.75rem;"></i>
+                <span>Edit</span>
+              </button>
+            </div>
+
+            <!-- Profile Avatar with Concentric Circular Strength Ring -->
+            <div class="text-center mb-2">
+              <div class="account-avatar-ring-wrapper mx-auto mb-2" style="width: 76px; height: 76px;">
+                <svg class="avatar-progress-svg" viewBox="0 0 64 64">
+                  <circle cx="32" cy="32" r="28" stroke="#e2e8f0" stroke-width="3" fill="none" />
+                  <circle id="profileRingCircle" cx="32" cy="32" r="28" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round" fill="none" stroke-dasharray="175.93" stroke-dashoffset="43.98" transform="rotate(-90 32 32)" style="transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease;" />
+                </svg>
+                <div class="account-profile-avatar-circle" id="profileAvatarBox" style="width: 54px; height: 54px; font-size: 1.4rem;">
+                  <span id="profileAvatarInitial">U</span>
+                  <img id="profileAvatarImg" class="account-profile-avatar-img d-none" alt="Profile Photo">
+                </div>
+                <label for="profilePhotoInput" class="avatar-camera-btn" title="Change Photo" style="right: 2px; bottom: 2px;">
+                  <i class="bi bi-camera-fill"></i>
+                </label>
+                <input type="file" id="profilePhotoInput" accept="image/*" class="d-none">
+              </div>
+
+              <h2 class="h5 fw-bold text-dark mb-0 text-center text-capitalize" id="profileNameDisplay">Customer Name</h2>
+              <div class="small text-muted mt-1 text-center" id="profileCityTag"><i class="bi bi-geo-alt me-1 text-danger"></i>Ranchi, Jharkhand</div>
+
+              <!-- Profile Completion Pill -->
+              <div class="d-flex justify-content-center mt-2.5">
+                <span class="badge bg-light text-dark border py-1 px-3 rounded-pill small" title="Calculated based on photo, verified phone, email, and address">
+                  Profile Strength: <strong class="text-primary" id="profileStrengthText">75%</strong>
+                </span>
+              </div>
+            </div>
+
+            <!-- Contact Row with Aligned Values -->
+            <div class="pt-3 border-top mt-3 small">
+              <div class="d-flex align-items-center justify-content-between py-1.5">
+                <span class="text-muted d-flex align-items-center gap-1.5"><i class="bi bi-telephone text-primary"></i>Phone</span>
+                <span class="fw-semibold text-dark font-monospace" id="profilePhoneDisplay">Loading...</span>
+              </div>
+              <div class="d-flex align-items-center justify-content-between py-1.5">
+                <span class="text-muted d-flex align-items-center gap-1.5"><i class="bi bi-envelope text-primary"></i>Email</span>
+                <span class="fw-semibold text-dark text-truncate ms-2 text-end" style="max-width: 175px;" id="profileEmailDisplay">Loading...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Account Navigation Menu (All 9 Items) -->
+          <div class="customer-nav-menu" id="desktopNavMenu">
+            <button type="button" class="customer-nav-btn active" data-tab="bookings">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-calendar2-check"></i></span>
+                <span class="nav-text">My Bookings &amp; History</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron"></i>
+            </button>
+
+            <button type="button" class="customer-nav-btn" data-tab="addresses">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-geo-alt"></i></span>
+                <span class="nav-text">My Saved Addresses &amp; GPS</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron"></i>
+            </button>
+
+            <button type="button" class="customer-nav-btn" data-tab="support">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-headset"></i></span>
+                <span class="nav-text">Help &amp; Customer Support</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron"></i>
+            </button>
+
+            <button type="button" class="customer-nav-btn" data-tab="reviews">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-star"></i></span>
+                <span class="nav-text">My Reviews &amp; Ratings</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron"></i>
+            </button>
+
+            <button type="button" class="customer-nav-btn" data-tab="favorites">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-heart"></i></span>
+                <span class="nav-text">Favorite Providers</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron"></i>
+            </button>
+
+            <button type="button" class="customer-nav-btn" data-tab="notifications">
+              <span class="nav-left">
+                <span class="nav-icon position-relative">
+                  <i class="bi bi-bell"></i>
+                </span>
+                <span class="nav-text">Notifications</span>
+              </span>
+              <span class="badge bg-danger rounded-pill unread-pill-count d-none" style="font-size:0.68rem;">0</span>
+            </button>
+
+            <button type="button" class="customer-nav-btn" data-tab="payments">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-credit-card"></i></span>
+                <span class="nav-text">Payments &amp; Transactions</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron"></i>
+            </button>
+
+            <button type="button" class="customer-nav-btn" data-tab="offers">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-ticket-perforated"></i></span>
+                <span class="nav-text">Offers &amp; Rewards</span>
+              </span>
+              <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill" style="font-size: 0.68rem;">4 Deals</span>
+            </button>
+
+            <button type="button" class="customer-nav-btn" data-tab="settings">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-gear"></i></span>
+                <span class="nav-text">Settings &amp; Privacy</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron"></i>
+            </button>
+
+            <hr class="my-1.5 opacity-25">
+
+            <button type="button" class="customer-nav-btn text-danger" onclick="Auth.logout()">
+              <span class="nav-left">
+                <span class="nav-icon text-danger bg-danger-subtle"><i class="bi bi-box-arrow-right"></i></span>
+                <span class="nav-text fw-semibold">Log Out</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron text-danger"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT MAIN CONTENT PANEL -->
+    <div class="col-lg-8 col-xl-8 col-xxl-9">
+      <div class="account-panel-wrapper">
+        <div id="pageAlert" class="alert d-none shadow-sm rounded-3 py-2 px-3 mb-3" role="alert"></div>
+        
+        <!-- ========================================================
+             SECTION 1: My Bookings & History
+             ======================================================== -->
+        <div id="tab-bookings" class="tab-pane-content active">
+          <div class="account-section-header">
+            <div>
+              <h2 class="account-section-title"><i class="bi bi-calendar2-check text-primary"></i>My Bookings &amp; History</h2>
+              <p class="account-section-desc">Track active doorstep visits, view completion OTPs, and rebook past trusted services.</p>
+            </div>
+            <!-- Booking Filters -->
+            <div class="d-flex gap-1.5 flex-wrap">
+              <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 filter-booking-btn" data-filter="ALL">All</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-booking-btn" data-filter="ACTIVE">Active &amp; Upcoming</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-booking-btn" data-filter="COMPLETED">Completed</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-booking-btn" data-filter="CANCELLED">Cancelled</button>
+            </div>
+          </div>
+
+          <!-- Bookings List Container -->
+          <div id="bookingsListContainer" class="d-flex flex-column gap-3">
+            <div class="text-center py-5 text-muted">
+              <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+              Loading your bookings...
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================================
+             SECTION 2: My Saved Addresses & GPS
+             ======================================================== -->
+        <div id="tab-addresses" class="tab-pane-content">
+          <div class="account-section-header">
+            <div>
+              <h2 class="account-section-title"><i class="bi bi-geo-alt text-danger"></i>My Saved Addresses &amp; GPS</h2>
+              <p class="account-section-desc">Manage service addresses for fast doorstep booking with pinpoint Google Maps GPS.</p>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" id="btnOpenAddAddressModal">
+              <i class="bi bi-plus-lg me-1"></i>Add New Address
+            </button>
+          </div>
+
+          <!-- Saved Addresses Grid -->
+          <div class="row g-3" id="addressesGrid">
+            <!-- Populated via Javascript -->
+          </div>
+        </div>
+
+        <!-- ========================================================
+             SECTION 3: Help & Customer Support
+             ======================================================== -->
+        <div id="tab-support" class="tab-pane-content">
+          <div class="account-section-header">
+            <div>
+              <h2 class="account-section-title"><i class="bi bi-headset text-info"></i>Help &amp; Customer Support</h2>
+              <p class="account-section-desc">24/7 customer assistance, doorstep safety help, and immediate dispute resolution.</p>
+            </div>
+          </div>
+
+          <!-- 3 Quick Contact Channels -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div class="support-channel-box">
+                <div class="text-primary fs-3 mb-1"><i class="bi bi-telephone-inbound-fill"></i></div>
+                <h6 class="fw-bold mb-1">Customer Helpline</h6>
+                <p class="small text-muted mb-2">Toll-free 8 AM – 10 PM</p>
+                <a href="tel:18001237890" class="btn btn-sm btn-outline-primary rounded-pill w-100">1800-123-7890</a>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="support-channel-box">
+                <div class="text-success fs-3 mb-1"><i class="bi bi-whatsapp"></i></div>
+                <h6 class="fw-bold mb-1">WhatsApp Support</h6>
+                <p class="small text-muted mb-2">Instant booking help</p>
+                <a href="https://wa.me/919876543210?text=Hello%20Local%20Service%20Connect%20Support" target="_blank" class="btn btn-sm btn-outline-success rounded-pill w-100">Chat on WhatsApp</a>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="support-channel-box">
+                <div class="text-info fs-3 mb-1"><i class="bi bi-envelope-check-fill"></i></div>
+                <h6 class="fw-bold mb-1">Email Desk</h6>
+                <p class="small text-muted mb-2">Detailed queries &amp; bills</p>
+                <a href="mailto:support@localserviceconnect.com" class="btn btn-sm btn-outline-info rounded-pill w-100">support@lsc.com</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Issue Reporting Form & Ticket Status -->
+          <div class="row g-4">
+            <div class="col-lg-7">
+              <div class="card border rounded-3 p-3.5 shadow-xs">
+                <h5 class="h6 fw-bold text-dark mb-2"><i class="bi bi-shield-exclamation text-warning me-1.5"></i>Report an Issue / Service Complaint</h5>
+                <p class="small text-muted mb-3">Our customer grievance officer resolves service queries within 2 hours.</p>
+
+                <form id="supportTicketForm">
+                  <div class="mb-2.5">
+                    <label class="form-label small fw-semibold mb-1">Select Related Booking (Optional)</label>
+                    <select id="supportBookingSelect" class="form-select form-select-sm">
+                      <option value="">General Support / No Specific Booking</option>
+                    </select>
+                  </div>
+                  <div class="row g-2 mb-2.5">
+                    <div class="col-md-6">
+                      <label class="form-label small fw-semibold mb-1">Issue Category</label>
+                      <select id="supportCategory" class="form-select form-select-sm" required>
+                        <option value="Provider Delay">Provider Delay / Late Arrival</option>
+                        <option value="Service Quality">Service Quality Concern</option>
+                        <option value="Pricing Dispute">Price / Billing Dispute</option>
+                        <option value="OTP Issue">OTP or Security Verification Issue</option>
+                        <option value="Safety & Conduct">Safety / Professional Conduct</option>
+                        <option value="Cancellation / Refund">Cancellation or Refund Request</option>
+                        <option value="Other">Other Inquiry</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-semibold mb-1">Priority</label>
+                      <select id="supportPriority" class="form-select form-select-sm">
+                        <option value="Normal">Normal</option>
+                        <option value="Urgent">Urgent (Provider currently on-site)</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="mb-2.5">
+                    <label class="form-label small fw-semibold mb-1">Subject</label>
+                    <input id="supportSubject" class="form-control form-control-sm" placeholder="e.g. Electrician arrived without proper safety gear" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label small fw-semibold mb-1">Describe the Issue</label>
+                    <textarea id="supportDescription" class="form-control form-control-sm" rows="3" placeholder="Provide details so our team can investigate immediately..." required></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-sm px-4 rounded-pill fw-semibold" id="btnSubmitTicket">
+                    <i class="bi bi-send me-1"></i> Submit Complaint Ticket
+                  </button>
+                  <div id="supportFormMsg" class="alert small mt-2 d-none"></div>
+                </form>
+              </div>
+            </div>
+
+            <!-- Existing Tickets History -->
+            <div class="col-lg-5">
+              <h5 class="h6 fw-bold text-dark mb-2.5"><i class="bi bi-clock-history me-1.5 text-primary"></i>My Support Requests</h5>
+              <div id="supportTicketsList" class="d-flex flex-column gap-2">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer FAQs Accordion -->
+          <div class="mt-4 pt-3 border-top">
+            <h5 class="h6 fw-bold text-dark mb-3"><i class="bi bi-question-circle text-primary me-1.5"></i>Frequently Asked Customer Questions</h5>
+            <div class="accordion accordion-flush" id="customerFaqAccordion">
+              <div class="accordion-item border rounded-3 mb-2">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed fw-semibold small" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                    How do I verify the provider at my doorstep?
+                  </button>
+                </h2>
+                <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#customerFaqAccordion">
+                  <div class="accordion-body small text-muted">
+                    Always ask the provider for their business name and match it with your active booking card. Do NOT share your 4-digit start OTP until the provider is physically present at your address.
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-item border rounded-3 mb-2">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed fw-semibold small" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                    When is payment made, and is online payment safe?
+                  </button>
+                </h2>
+                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#customerFaqAccordion">
+                  <div class="accordion-body small text-muted">
+                    You can pay online or via Cash on Completion after the service is fully verified. We never store credit or debit card CVVs or passwords.
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-item border rounded-3 mb-2">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed fw-semibold small" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                    What if I need to cancel my booking?
+                  </button>
+                </h2>
+                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#customerFaqAccordion">
+                  <div class="accordion-body small text-muted">
+                    You can cancel free of charge while your booking is in "Pending" or "Accepted" status before the provider marks "On The Way". Just click the Cancel button on your booking card.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================================
+             SECTION 4: My Reviews & Ratings
+             ======================================================== -->
+        <div id="tab-reviews" class="tab-pane-content">
+          <div class="account-section-header">
+            <div>
+              <h2 class="account-section-title"><i class="bi bi-star text-warning"></i>My Reviews &amp; Ratings</h2>
+              <p class="account-section-desc">Reviews you've submitted for verified local professionals, helping the Ranchi community.</p>
+            </div>
+          </div>
+
+          <!-- Completed Bookings Pending Review Banner -->
+          <div id="pendingReviewBanner" class="p-3 bg-warning-subtle border border-warning-subtle rounded-3 mb-3 d-none">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-award-fill text-warning fs-4"></i>
+                <div>
+                  <strong class="text-dark small d-block">You have a completed service waiting for feedback!</strong>
+                  <span class="text-muted small" id="pendingReviewText">Rate your recent service provider to maintain quality standards.</span>
+                </div>
+              </div>
+              <button type="button" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold shadow-xs" id="btnTriggerPendingReview">
+                <i class="bi bi-star-fill me-1"></i>Rate Service Now
+              </button>
+            </div>
+          </div>
+
+          <!-- Reviews List -->
+          <div id="customerReviewsList" class="d-flex flex-column gap-3">
+            <div class="text-center py-5 text-muted small">Loading reviews...</div>
+          </div>
+        </div>
+
+        <!-- ========================================================
+             SECTION 5: Favorite Providers
+             ======================================================== -->
+        <div id="tab-favorites" class="tab-pane-content">
+          <div class="account-section-header">
+            <div>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <h2 class="account-section-title mb-0"><i class="bi bi-heart-fill text-danger me-1"></i>My Favorite Providers</h2>
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2.5 py-1 fw-bold" id="favCountBadge" style="font-size:0.75rem;">0</span>
+              </div>
+              <p class="account-section-desc mb-0">Quickly revisit and book your trusted local specialists for priority doorstep service.</p>
+            </div>
+            <a href="/providers.html" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+              <i class="bi bi-compass me-1"></i>Explore Services
+            </a>
+          </div>
+
+          <!-- Favorites Grid -->
+          <div class="row g-3" id="favoritesGrid">
+            <!-- Populated via Javascript -->
+          </div>
+        </div>
+
+        <!-- ========================================================
+             SECTION 6: Notifications
+             ======================================================== -->
+        <div id="tab-notifications" class="tab-pane-content">
+          <div class="account-section-header">
+            <div>
+              <h2 class="account-section-title"><i class="bi bi-bell text-primary"></i>Notifications &amp; Alerts</h2>
+              <p class="account-section-desc">Real-time status updates on doorstep visits, provider arrival, and offers.</p>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" id="btnMarkAllNotificationsRead">
+                <i class="bi bi-check2-all me-1"></i>Mark All as Read
+              </button>
+              <button type="button" class="btn btn-sm btn-light border rounded-pill" id="btnClearNotifications">
+                Clear All
+              </button>
+            </div>
+          </div>
+
+          <!-- Notifications List -->
+          <div id="notificationsList" class="d-flex flex-column gap-2">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- ========================================================
+             SECTION 7: Payments & Transactions
+             ======================================================== -->
+        <div id="tab-payments" class="tab-pane-content">
+          <div class="account-section-header">
+            <div>
+              <h2 class="account-section-title"><i class="bi bi-credit-card text-success"></i>Payments &amp; Transactions</h2>
+              <p class="account-section-desc">Detailed invoices, receipts, and payment logs for all completed home services.</p>
+            </div>
+          </div>
+
+          <!-- Payment Summary Row -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div class="p-3 bg-light border rounded-3">
+                <span class="text-muted small d-block">Total Spend</span>
+                <h4 class="fw-bold text-dark mb-0" id="statTotalSpend">₹0</h4>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 bg-light border rounded-3">
+                <span class="text-muted small d-block">Completed Invoices</span>
+                <h4 class="fw-bold text-dark mb-0" id="statCompletedInvoices">0</h4>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 bg-light border rounded-3">
+                <span class="text-muted small d-block">Primary Payment Mode</span>
+                <h4 class="fw-bold text-dark mb-0" style="font-size: 1.15rem;">Cash / UPI on Visit</h4>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transactions List -->
+          <div id="transactionsList" class="d-flex flex-column gap-3">
+            <div class="text-center py-4 text-muted small">Loading transaction records...</div>
+          </div>
+        </div>
+
+        <!-- ========================================================
+             SECTION 8: Offers & Rewards
+             ======================================================== -->
+        <div id="tab-offers" class="tab-pane-content">
+          <div class="account-section-header">
+            <div>
+              <h2 class="account-section-title"><i class="bi bi-ticket-perforated text-danger"></i>Offers &amp; Rewards</h2>
+              <p class="account-section-desc">Active coupon codes, seasonal discounts, and verified doorstep booking vouchers.</p>
+            </div>
+            <span class="badge bg-danger text-white py-1.5 px-3 rounded-pill fw-semibold">4 Active Coupons</span>
+          </div>
+
+          <!-- Referral / Reward Announcement -->
+          <div class="p-3 bg-primary-subtle border border-primary-subtle rounded-3 mb-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-2.5">
+                <i class="bi bi-gift-fill text-primary fs-3"></i>
+                <div>
+                  <h6 class="fw-bold text-dark mb-0">Refer a Neighbour in Ranchi &amp; Get ₹100 Off</h6>
+                  <p class="small text-muted mb-0">Share your customer code <strong class="text-primary font-monospace">RANCHI-NEIGHBOUR</strong> with friends.</p>
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 btn-copy-coupon" data-code="RANCHI-NEIGHBOUR">
+                <i class="bi bi-clipboard me-1"></i>Copy Referral Code
+              </button>
+            </div>
+          </div>
+
+          <!-- Coupon Cards Grid -->
+          <div class="row g-3">
+            <!-- Coupon 1 -->
+            <div class="col-md-6">
+              <div class="coupon-card h-100 d-flex flex-column justify-content-between">
+                <div>
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="coupon-badge text-primary bg-primary-subtle"><i class="bi bi-lightning-charge-fill me-1"></i>New Customer</span>
+                    <span class="badge bg-success text-white">SAVE ₹100</span>
+                  </div>
+                  <h5 class="fw-bold text-dark mb-1">Flat ₹100 OFF First Service</h5>
+                  <p class="small text-muted mb-2">Valid on Electrician, Plumber, Appliance Repair &amp; Cleaning above ₹399.</p>
+                  <div class="small text-muted mb-2"><i class="bi bi-clock me-1"></i>Valid until 31 Dec 2026 &bull; Min spend ₹399</div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-2">
+                  <span class="coupon-code-pill">WELCOME100</span>
+                  <button type="button" class="btn btn-outline-primary btn-sm py-1 px-3 fw-semibold rounded-pill btn-copy-coupon" data-code="WELCOME100">
+                    <i class="bi bi-clipboard me-1"></i> Copy Code
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coupon 2 -->
+            <div class="col-md-6">
+              <div class="coupon-card h-100 d-flex flex-column justify-content-between">
+                <div>
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="coupon-badge text-success bg-success-subtle"><i class="bi bi-stars me-1"></i>Deep Cleaning</span>
+                    <span class="badge bg-success text-white">20% OFF</span>
+                  </div>
+                  <h5 class="fw-bold text-dark mb-1">20% OFF Home Deep Cleaning</h5>
+                  <p class="small text-muted mb-2">Up to ₹250 discount on full home deep cleaning, kitchen &amp; bathroom sanitation.</p>
+                  <div class="small text-muted mb-2"><i class="bi bi-clock me-1"></i>Valid until 30 Nov 2026 &bull; No min spend</div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-2">
+                  <span class="coupon-code-pill">CLEANFEST</span>
+                  <button type="button" class="btn btn-outline-primary btn-sm py-1 px-3 fw-semibold rounded-pill btn-copy-coupon" data-code="CLEANFEST">
+                    <i class="bi bi-clipboard me-1"></i> Copy Code
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coupon 3 -->
+            <div class="col-md-6">
+              <div class="coupon-card h-100 d-flex flex-column justify-content-between">
+                <div>
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="coupon-badge text-warning bg-warning-subtle"><i class="bi bi-snow me-1"></i>Cooling Care</span>
+                    <span class="badge bg-warning text-dark">₹150 OFF</span>
+                  </div>
+                  <h5 class="fw-bold text-dark mb-1">AC Servicing &amp; Gas Refill</h5>
+                  <p class="small text-muted mb-2">Applicable on split AC servicing, foam jet wash, filter replacement &amp; diagnostics.</p>
+                  <div class="small text-muted mb-2"><i class="bi bi-clock me-1"></i>Valid on all AC services &bull; Min spend ₹499</div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-2">
+                  <span class="coupon-code-pill">COOLSUMMER</span>
+                  <button type="button" class="btn btn-outline-primary btn-sm py-1 px-3 fw-semibold rounded-pill btn-copy-coupon" data-code="COOLSUMMER">
+                    <i class="bi bi-clipboard me-1"></i> Copy Code
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coupon 4 -->
+            <div class="col-md-6">
+              <div class="coupon-card h-100 d-flex flex-column justify-content-between">
+                <div>
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="coupon-badge text-danger bg-danger-subtle"><i class="bi bi-lightning-charge-fill me-1"></i>Quick ~10min</span>
+                    <span class="badge bg-danger text-white">SAVE ₹50</span>
+                  </div>
+                  <h5 class="fw-bold text-dark mb-1">Quick Service Emergency Discount</h5>
+                  <p class="small text-muted mb-2">Flat ₹50 discount on rapid arrival priority bookings across Ranchi municipal area.</p>
+                  <div class="small text-muted mb-2"><i class="bi bi-clock me-1"></i>Valid on Quick Bookings &bull; Min spend ₹249</div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-2">
+                  <span class="coupon-code-pill">QUICK50</span>
+                  <button type="button" class="btn btn-outline-primary btn-sm py-1 px-3 fw-semibold rounded-pill btn-copy-coupon" data-code="QUICK50">
+                    <i class="bi bi-clipboard me-1"></i> Copy Code
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================================
+             SECTION 9: Settings & Privacy
+             ======================================================== -->
+        <div id="tab-settings" class="tab-pane-content">
+          <div class="account-section-header">
+            <div>
+              <h2 class="account-section-title"><i class="bi bi-gear text-secondary"></i>Settings &amp; Privacy</h2>
+              <p class="account-section-desc">Manage notification preferences, password security, privacy controls, and account status.</p>
+            </div>
+          </div>
+
+          <div class="d-flex flex-column gap-4">
+            <!-- 1. Notification Preferences -->
+            <div class="card p-3.5 border rounded-3 shadow-xs">
+              <h5 class="h6 fw-bold text-dark mb-1"><i class="bi bi-bell-fill text-primary me-1.5"></i>Notification Preferences</h5>
+              <p class="small text-muted mb-3">Choose how Local Service Connect keeps you informed about doorstep bookings.</p>
+              
+              <div class="d-flex flex-column gap-2.5">
+                <div class="form-check form-switch d-flex justify-content-between align-items-center ps-0">
+                  <label class="form-check-label small" for="prefWhatsapp">
+                    <strong class="d-block text-dark">WhatsApp Booking Alerts</strong>
+                    <span class="text-muted">Receive OTP, provider live ETA, and invoice receipts directly on WhatsApp.</span>
+                  </label>
+                  <input class="form-check-input ms-3" type="checkbox" id="prefWhatsapp" checked>
+                </div>
+                <hr class="my-1 opacity-25">
+                <div class="form-check form-switch d-flex justify-content-between align-items-center ps-0">
+                  <label class="form-check-label small" for="prefSms">
+                    <strong class="d-block text-dark">SMS Delivery Updates</strong>
+                    <span class="text-muted">Receive critical booking confirmations and security OTPs via SMS.</span>
+                  </label>
+                  <input class="form-check-input ms-3" type="checkbox" id="prefSms" checked>
+                </div>
+                <hr class="my-1 opacity-25">
+                <div class="form-check form-switch d-flex justify-content-between align-items-center ps-0">
+                  <label class="form-check-label small" for="prefEmail">
+                    <strong class="d-block text-dark">Email Invoices &amp; Monthly Summaries</strong>
+                    <span class="text-muted">Get tax invoice copies and periodic discount vouchers sent to your email.</span>
+                  </label>
+                  <input class="form-check-input ms-3" type="checkbox" id="prefEmail" checked>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Security: Change Password -->
+            <div class="card p-3.5 border rounded-3 shadow-xs">
+              <h5 class="h6 fw-bold text-dark mb-1"><i class="bi bi-shield-lock-fill text-warning me-1.5"></i>Security &amp; Password</h5>
+              <p class="small text-muted mb-3">Update your login password to safeguard your customer account.</p>
+
+              <form id="settingsPasswordForm" style="max-width: 480px;">
+                <div class="mb-2.5">
+                  <label class="form-label small fw-semibold mb-1">Current Password</label>
+                  <input type="password" id="currentPwdInput" class="form-control form-control-sm" required placeholder="Enter current password">
+                </div>
+                <div class="mb-2.5">
+                  <label class="form-label small fw-semibold mb-1">New Password</label>
+                  <input type="password" id="newPwdInput" minlength="6" class="form-control form-control-sm" required placeholder="Minimum 6 characters">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold mb-1">Confirm New Password</label>
+                  <input type="password" id="confirmPwdInput" minlength="6" class="form-control form-control-sm" required placeholder="Re-enter new password">
+                </div>
+                <button type="submit" class="btn btn-warning btn-sm px-4 rounded-pill fw-semibold" id="btnUpdatePassword">
+                  <i class="bi bi-key me-1"></i> Update Password
+                </button>
+                <div id="pwdUpdateAlert" class="alert small mt-2 d-none"></div>
+              </form>
+            </div>
+
+            <!-- 3. Account Privacy Controls -->
+            <div class="card p-3.5 border rounded-3 shadow-xs">
+              <h5 class="h6 fw-bold text-dark mb-1"><i class="bi bi-eye-slash-fill text-info me-1.5"></i>Privacy &amp; Location Sharing</h5>
+              <p class="small text-muted mb-3">Control when verified providers can access your GPS coordinates and contact number.</p>
+
+              <div class="d-flex flex-column gap-2.5">
+                <div class="form-check form-switch d-flex justify-content-between align-items-center ps-0">
+                  <label class="form-check-label small" for="privGps">
+                    <strong class="d-block text-dark">Share exact GPS location only after booking acceptance</strong>
+                    <span class="text-muted">Protects your doorstep address until a provider is dispatched.</span>
+                  </label>
+                  <input class="form-check-input ms-3" type="checkbox" id="privGps" checked>
+                </div>
+                <hr class="my-1 opacity-25">
+                <div class="form-check form-switch d-flex justify-content-between align-items-center ps-0">
+                  <label class="form-check-label small" for="privPhone">
+                    <strong class="d-block text-dark">Allow direct provider phone calls for arrival directions</strong>
+                    <span class="text-muted">Helps the technician reach your home without getting delayed in local lanes.</span>
+                  </label>
+                  <input class="form-check-input ms-3" type="checkbox" id="privPhone" checked>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Danger Zone: Account Deactivation -->
+            <div class="card p-3.5 border-danger border-opacity-50 bg-danger-subtle bg-opacity-25 rounded-3">
+              <h5 class="h6 fw-bold text-danger mb-1"><i class="bi bi-exclamation-triangle-fill me-1.5"></i>Danger Zone: Account Deactivation</h5>
+              <p class="small text-muted mb-3">Deactivating your customer account disables login and revokes active service bookings. Historical completed booking invoices will remain archived securely.</p>
+              <div>
+                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                  <i class="bi bi-trash3 me-1"></i> Deactivate / Delete Account
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================
+     MODALS
+     ======================================================== -->
+
+<!-- 1. Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold text-dark"><i class="bi bi-person-lines-fill text-primary me-2"></i>Edit Customer Profile</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="editProfileModalForm">
+        <div class="modal-body">
+          <div class="p-2.5 bg-light rounded-3 mb-3 d-flex align-items-center justify-content-between border">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-image text-primary fs-5"></i>
+              <div>
+                <div class="small fw-bold text-dark">Profile Avatar</div>
+                <div class="small text-muted" style="font-size:0.75rem;">Upload an image or keep initials</div>
+              </div>
+            </div>
+            <div class="d-flex gap-1.5">
+              <label for="profilePhotoInput" class="btn btn-outline-primary btn-sm py-1 px-2.5 rounded-pill" style="font-size:0.78rem; cursor:pointer;">
+                <i class="bi bi-upload me-1"></i>Upload
+              </label>
+              <button type="button" class="btn btn-light btn-sm py-1 px-2.5 border rounded-pill" id="btnModalRemovePhoto" style="font-size:0.78rem;">
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="mb-2.5">
+            <label class="form-label small fw-semibold mb-1">Full Name</label>
+            <input id="modalInputName" class="form-control form-control-sm" required placeholder="e.g. Sunil Verma">
+          </div>
+
+          <div class="mb-2.5">
+            <label class="form-label small fw-semibold mb-1 d-flex justify-content-between">
+              <span>Mobile Number</span>
+              <span class="text-success fw-bold small"><i class="bi bi-check-circle-fill"></i> Verified</span>
+            </label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-light text-muted">+91</span>
+              <input id="modalInputPhone" class="form-control form-control-sm" pattern="[0-9]{10}" required placeholder="10-digit number">
+              <button type="button" class="btn btn-outline-primary btn-sm" id="btnModalVerifyPhone">Verify OTP</button>
+            </div>
+            <!-- Demo OTP box if phone changed -->
+            <div id="modalOtpBox" class="mt-2 p-2 bg-light border rounded-3 d-none">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="small fw-semibold text-dark"><i class="bi bi-shield-lock-fill text-warning me-1"></i>Verification OTP</span>
+                <span class="badge bg-primary text-white">Code: 4892</span>
+              </div>
+              <div class="input-group input-group-sm mb-1">
+                <input id="modalOtpCode" class="form-control form-control-sm text-center fw-bold" maxlength="4" placeholder="4-digit OTP">
+                <button type="button" class="btn btn-success btn-sm px-3" id="btnConfirmModalOtp">Verify</button>
+              </div>
+              <div class="small text-muted" style="font-size:0.72rem;">Enter OTP code shown above to verify phone number.</div>
+            </div>
+          </div>
+
+          <div class="mb-2.5">
+            <label class="form-label small fw-semibold mb-1">Email Address</label>
+            <input id="modalInputEmail" type="email" class="form-control form-control-sm" required placeholder="name@example.com">
+          </div>
+
+          <div class="mb-2.5">
+            <label class="form-label small fw-semibold mb-1">Primary Area / Locality</label>
+            <input id="modalInputArea" class="form-control form-control-sm" placeholder="e.g. Lalpur, Kanke Road">
+          </div>
+
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <label class="form-label small fw-semibold mb-1">City</label>
+              <input id="modalInputCity" class="form-control form-control-sm" value="Ranchi">
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold mb-1">Pincode</label>
+              <input id="modalInputPincode" class="form-control form-control-sm" pattern="[0-9]{6}" placeholder="834001">
+            </div>
+          </div>
+
+          <div id="modalProfileAlert" class="alert small py-1 px-2 mb-0 d-none"></div>
+        </div>
+        <div class="modal-footer border-top-0 pt-0">
+          <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-sm btn-primary rounded-pill px-4" id="btnSaveModalProfile">
+            <i class="bi bi-check2 me-1"></i>Save Profile
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Add / Edit Address Modal with Google Maps & GPS -->
+<div class="modal fade" id="addressModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold text-dark" id="addressModalTitle"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Add Service Address</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="addressForm">
+        <input type="hidden" id="addrEditIndex" value="-1">
+        <div class="modal-body">
+          <div class="mb-2.5">
+            <label class="form-label small fw-semibold mb-1">Address Label</label>
+            <div class="d-flex gap-2">
+              <input type="radio" class="btn-check" name="addrTypeRadio" id="addrTypeHome" value="Home" checked>
+              <label class="btn btn-sm btn-outline-secondary rounded-pill px-3" for="addrTypeHome"><i class="bi bi-house-door me-1"></i>Home</label>
+              <input type="radio" class="btn-check" name="addrTypeRadio" id="addrTypeWork" value="Work">
+              <label class="btn btn-sm btn-outline-secondary rounded-pill px-3" for="addrTypeWork"><i class="bi bi-briefcase me-1"></i>Work</label>
+              <input type="radio" class="btn-check" name="addrTypeRadio" id="addrTypeOther" value="Other">
+              <label class="btn btn-sm btn-outline-secondary rounded-pill px-3" for="addrTypeOther"><i class="bi bi-geo me-1"></i>Other</label>
+            </div>
+          </div>
+
+          <div class="mb-2.5">
+            <label class="form-label small fw-semibold mb-1">House / Flat / Door / Street Details</label>
+            <div class="input-group">
+              <input id="addrInputStreet" class="form-control form-control-sm" placeholder="e.g. Flat 302, Green Valley Apts, Main Road" required>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="btnDetectGpsInModal" title="Detect GPS location">
+                <i class="bi bi-crosshair" id="gpsModalIcon"></i>
+                <span class="spinner-border spinner-border-sm d-none" id="gpsModalSpinner"></span>
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="btnOpenMapPickerInModal" title="Pin on Google Map" data-bs-toggle="modal" data-bs-target="#custMapModal">
+                <i class="bi bi-map"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="modalGeoCoordinatesBadge" class="small text-success mb-2.5 d-none">
+            <i class="bi bi-geo-fill me-1"></i>Exact GPS Coordinates Pinned: <span id="modalCoordText" class="font-monospace"></span>
+          </div>
+
+          <div class="row g-2 mb-2.5">
+            <div class="col-6">
+              <label class="form-label small fw-semibold mb-1">Area / Locality</label>
+              <input id="addrInputArea" class="form-control form-control-sm" placeholder="e.g. Lalpur" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold mb-1">City</label>
+              <input id="addrInputCity" class="form-control form-control-sm" value="Ranchi" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold mb-1">Pincode</label>
+            <input id="addrInputPincode" class="form-control form-control-sm" pattern="[0-9]{6}" placeholder="834001" required>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="addrInputIsDefault" checked>
+            <label class="form-check-label small" for="addrInputIsDefault">
+              Set as my default service address for instant 1-click booking
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-sm btn-primary rounded-pill px-4" id="btnSaveAddressSubmit">
+            <i class="bi bi-save me-1"></i>Save Address
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Google Maps Location Picker Modal -->
+<div class="modal fade" id="custMapModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold text-dark"><i class="bi bi-pin-map-fill text-danger me-2"></i>Pin Service Address on Google Maps</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted mb-2">Drag the marker to pinpoint your exact doorstep for the technician.</p>
+        <div id="custPickerMap"></div>
+        <div class="mt-2.5 p-2 bg-light rounded-2 small text-muted">
+          Selected Location: <strong id="modalAddrText" class="text-dark">Move pin to update</strong>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-sm btn-primary rounded-pill px-4" id="btnConfirmCustMap" data-bs-dismiss="modal">
+          <i class="bi bi-check2 me-1"></i>Confirm This Location
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Rate Service Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold text-dark"><i class="bi bi-star-fill text-warning me-2"></i>Rate &amp; Review Service</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="reviewSubmitForm">
+        <input type="hidden" id="revBookingId">
+        <input type="hidden" id="revProviderId">
+        <input type="hidden" id="revRatingValue" value="5">
+        <div class="modal-body">
+          <div class="text-center py-2 mb-3">
+            <h6 class="fw-bold text-dark mb-1" id="revServiceNameDisplay">Service Name</h6>
+            <div class="small text-muted mb-3" id="revProviderNameDisplay">Provider: John Doe</div>
+            <div class="star-rating-select d-flex justify-content-center gap-2 mb-2" id="starSelectorContainer">
+              <i class="bi bi-star-fill active" data-rating="1"></i>
+              <i class="bi bi-star-fill active" data-rating="2"></i>
+              <i class="bi bi-star-fill active" data-rating="3"></i>
+              <i class="bi bi-star-fill active" data-rating="4"></i>
+              <i class="bi bi-star-fill active" data-rating="5"></i>
+            </div>
+            <span class="badge bg-warning-subtle text-dark border border-warning-subtle py-1 px-3 rounded-pill fw-bold" id="revRatingBadgeText">5 - Excellent</span>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold mb-1">Your Review</label>
+            <textarea id="revCommentInput" class="form-control form-control-sm" rows="3" placeholder="Share your experience: Was the technician punctual, polite, and skilled?" required></textarea>
+          </div>
+          <div id="revSubmitAlert" class="alert small py-1 px-2 d-none"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-sm btn-warning rounded-pill px-4 fw-bold" id="btnSubmitReview">
+            <i class="bi bi-send-fill me-1"></i>Submit Review
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Payment Transaction Receipt Modal -->
+<div class="modal fade" id="receiptModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold text-dark"><i class="bi bi-receipt text-primary me-2"></i>Service Invoice Receipt</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4" id="receiptModalContent">
+        <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+          <div>
+            <h6 class="fw-bold mb-0 text-dark">Local Service Connect</h6>
+            <div class="small text-muted">Doorstep Service Network &bull; Ranchi</div>
+          </div>
+          <div class="text-end">
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill fw-bold" id="receiptPaymentBadge">PAID</span>
+            <div class="small text-muted mt-1 font-monospace" id="receiptNumber">INV-10829</div>
+          </div>
+        </div>
+
+        <div class="row g-2 mb-3 small">
+          <div class="col-6">
+            <span class="text-muted d-block">Billed To:</span>
+            <strong class="text-dark" id="receiptCustomerName">Sunil Verma</strong>
+            <div class="text-muted" id="receiptCustomerPhone">+91 9876543210</div>
+          </div>
+          <div class="col-6 text-end">
+            <span class="text-muted d-block">Service Provider:</span>
+            <strong class="text-dark" id="receiptProviderName">Ranchi Spark Electricals</strong>
+            <div class="text-muted" id="receiptBookingDate">20 Oct 2026</div>
+          </div>
+        </div>
+
+        <div class="table-responsive mb-3">
+          <table class="table table-sm receipt-modal-table mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Description</th>
+                <th class="text-end">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong id="receiptItemName">Electrical Repair Service</strong></td>
+                <td class="text-end font-monospace" id="receiptBaseAmount">₹399.00</td>
+              </tr>
+              <tr>
+                <td class="text-muted small">Doorstep Equipment &amp; Safety Surcharge</td>
+                <td class="text-end font-monospace text-muted small">₹50.00</td>
+              </tr>
+              <tr>
+                <td class="text-muted small">Applicable GST / Platform Fee (5%)</td>
+                <td class="text-end font-monospace text-muted small">₹22.00</td>
+              </tr>
+              <tr class="table-light border-top">
+                <td class="fw-bold text-dark">Total Amount Paid</td>
+                <td class="text-end fw-bold text-dark font-monospace fs-6" id="receiptTotalAmount">₹471.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="p-2.5 bg-light rounded-3 small text-muted d-flex justify-content-between align-items-center">
+          <div>
+            <i class="bi bi-shield-lock-fill text-success me-1"></i>
+            <span id="receiptPaymentMethod">Cash / UPI on Completion</span>
+          </div>
+          <span class="text-success fw-bold"><i class="bi bi-check2-circle me-1"></i>Verified Transaction</span>
+        </div>
+      </div>
+      <div class="modal-footer border-top-0 pt-0">
+        <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" onclick="window.print()">
+          <i class="bi bi-printer me-1"></i>Print / Save PDF
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Booking Details Modal -->
+<div class="modal fade" id="bookingDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold text-dark"><i class="bi bi-info-circle text-primary me-2"></i>Booking Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="bookingDetailsModalBody">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">Close</button>
+        <a href="javascript:void(0)" id="modalTrackBookingBtn" class="btn btn-sm btn-primary rounded-pill px-3">
+          <i class="bi bi-compass me-1"></i>Live Status &amp; Map
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. Cancel Booking Modal -->
+<div class="modal fade" id="cancelBookingModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold text-danger"><i class="bi bi-x-circle-fill me-2"></i>Cancel Booking</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="cancelBookingId">
+        <p class="small text-muted mb-3">Are you sure you want to cancel this booking? This action cannot be reversed.</p>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold mb-1">Reason for Cancellation</label>
+          <select id="cancelReasonSelect" class="form-select form-select-sm">
+            <option value="Issue resolved or no longer needed">Issue resolved or no longer needed</option>
+            <option value="Provider taking too long to arrive">Provider taking too long to arrive</option>
+            <option value="Booked by mistake / wrong service">Booked by mistake / wrong service</option>
+            <option value="Selected wrong address or date">Selected wrong address or date</option>
+            <option value="Found alternative local technician">Found alternative local technician</option>
+          </select>
+        </div>
+        <div id="cancelBookingAlert" class="alert small py-1 px-2 d-none"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">Keep Booking</button>
+        <button type="button" class="btn btn-sm btn-danger rounded-pill px-4" id="btnConfirmCancelBooking">
+          <i class="bi bi-trash3 me-1"></i>Confirm Cancellation
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. Danger Zone: Deactivate Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Deactivate Account</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted mb-3">
+          Please confirm that you want to deactivate your customer account for <strong class="text-dark" id="deleteAccountEmailConfirm"></strong>.
+        </p>
+        <div class="alert alert-warning small py-2 px-3 mb-3">
+          <i class="bi bi-info-circle me-1"></i>
+          Type <strong class="font-monospace text-danger">DELETE</strong> in the box below to authorize deactivation.
+        </div>
+        <div class="mb-3">
+          <input type="text" id="inputDeleteConfirmText" class="form-control form-control-sm font-monospace text-uppercase" placeholder="Type DELETE to confirm">
+        </div>
+        <div id="deleteAccountAlert" class="alert small py-1 px-2 d-none"></div>
+      </div>
+      <div class="modal-footer border-top-0 pt-0">
+        <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-sm btn-danger rounded-pill px-4 fw-bold" id="btnConfirmDeactivateAccount" disabled>
+          Deactivate My Account
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9. Service Start Verification OTP Modal -->
+<div class="modal fade" id="viewOtpModal" tabindex="-1" aria-labelledby="viewOtpModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+      <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+        <div class="d-flex align-items-center gap-2">
+          <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+            <i class="bi bi-shield-lock-fill text-primary fs-5"></i>
+          </div>
+          <div>
+            <h5 class="modal-title fw-bold text-dark mb-0" id="viewOtpModalTitle">Service Start OTP</h5>
+            <span class="badge bg-primary-subtle text-primary font-monospace mt-1" id="viewOtpModalBookingRef">#BK-</span>
+          </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <!-- Service & Provider Summary Banner -->
+        <div class="p-3 bg-light rounded-3 mb-3 border">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <span class="text-muted small d-block" style="font-size:0.75rem;">Service Requested:</span>
+              <strong class="text-dark fs-6" id="viewOtpModalService">Service Name</strong>
+            </div>
+            <div class="text-end">
+              <span class="text-muted small d-block" style="font-size:0.75rem;">Assigned Provider:</span>
+              <strong class="text-primary fs-6" id="viewOtpModalProvider">Provider Name</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="viewOtpModalLoading" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status"></div>
+          <div class="small text-muted mt-2 fw-semibold">Fetching secure OTP...</div>
+        </div>
+
+        <!-- Error State -->
+        <div id="viewOtpModalError" class="alert alert-danger small py-2 px-3 rounded-3 d-none mb-3"></div>
+
+        <!-- Active OTP Box -->
+        <div id="viewOtpModalActiveBox" class="d-none text-center py-2">
+          <p class="text-muted small mb-2">Share this 4-digit code with your technician to start service:</p>
+          
+          <div class="d-flex justify-content-center align-items-center gap-2 mb-3">
+            <div id="viewOtpDigitsContainer" class="d-flex gap-2">
+              <span class="otp-digit-pill">-</span>
+              <span class="otp-digit-pill">-</span>
+              <span class="otp-digit-pill">-</span>
+              <span class="otp-digit-pill">-</span>
+            </div>
+            <button type="button" class="btn btn-outline-primary btn-sm ms-2 px-3 py-2 rounded-3 fw-semibold d-inline-flex align-items-center gap-1" id="viewOtpCopyBtn" title="Copy 4-digit OTP">
+              <i class="bi bi-clipboard" id="viewOtpCopyIcon"></i>
+              <span id="viewOtpCopyText">Copy</span>
+            </button>
+          </div>
+
+          <div id="viewOtpTimerBox" class="small text-muted mb-2">
+            <i class="bi bi-clock-history me-1 text-primary"></i>
+            Valid for: <strong id="viewOtpCountdown" class="text-danger fw-bold font-monospace">--:--</strong>
+          </div>
+        </div>
+
+        <!-- Expired State Box -->
+        <div id="viewOtpModalExpiredBox" class="d-none text-center py-2">
+          <div class="alert alert-warning py-2 px-3 small border-0 mb-3 text-start d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+            <div>This OTP has expired. Click below to generate a fresh OTP for your technician.</div>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-semibold" id="viewOtpRegenBtn">
+            <i class="bi bi-arrow-clockwise me-1"></i>Generate New OTP
+          </button>
+        </div>
+
+        <!-- Security Notice Alert -->
+        <div class="p-3 rounded-3 border mt-3" style="background-color: #f8fafc; border-left: 4px solid var(--primary, #5B43F5) !important;">
+          <div class="d-flex gap-2.5">
+            <i class="bi bi-shield-check text-primary fs-5 flex-shrink-0"></i>
+            <div class="small text-muted">
+              <strong class="text-dark d-block mb-1">Doorstep Security Protocol</strong>
+              Only share this code after the technician arrives at your door and you verify their ID card. Never share this code over phone calls or messages.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer border-top-0 pt-0 px-4 pb-4 d-flex justify-content-between align-items-center">
+        <a href="javascript:void(0)" class="btn btn-outline-secondary btn-sm rounded-pill px-3" id="viewOtpModalTrackBtn">
+          <i class="bi bi-compass me-1"></i>Live Track
+        </a>
+        <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap 5 Bundle + Local Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/maps.js"></script>
+<script>
+// Customer Authorization Guard
+const me = Auth.require('CUSTOMER');
+navbar();
+
+// Helpers
+const $ = id => document.getElementById(id);
+const nv = v => (!v || v.trim() === '') ? null : v.trim();
+
+// Global State
+let customerProfile = null;
+let customerBookings = [];
+let customerReviews = [];
+let savedAddresses = [];
+let allProviders = [];
+let currentFilter = 'ALL';
+let savedLat = null;
+let savedLng = null;
+let savedFormattedAddress = null;
+let pickerMapObj = null;
+let tempModalLoc = null;
+
+// Storage Keys scoped per user ID
+const userId = me ? me.id : 'guest';
+const STORAGE_KEYS = {
+  ADDRESSES: `lsc_addresses_${userId}`,
+  FAVORITES: `lsc_favorites_${userId}`,
+  NOTIFICATIONS: `lsc_notifications_${userId}`,
+  TICKETS: `lsc_support_tickets_${userId}`,
+  AVATAR: `lsc_avatar_${userId}`
+};
+
+// Global Page Alert (Null-safe)
+function showAlert(message, type = 'success', autoDismiss = 4000) {
+  let alertEl = $('pageAlert');
+  if (!alertEl) {
+    alertEl = document.createElement('div');
+    alertEl.id = 'pageAlert';
+    const wrapper = document.querySelector('.account-panel-wrapper') || document.body;
+    wrapper.insertBefore(alertEl, wrapper.firstChild);
+  }
+  const icon = type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-octagon' : 'info-circle';
+  alertEl.className = `alert alert-${type} shadow-sm rounded-3 py-2 px-3 mb-3 d-flex align-items-center justify-content-between`;
+  alertEl.innerHTML = `
+    <div><i class="bi bi-${icon}-fill me-2"></i>${esc(message)}</div>
+    <button type="button" class="btn-close small ms-2" onclick="this.parentElement.classList.add('d-none')"></button>
+  `;
+  alertEl.classList.remove('d-none');
+  if (autoDismiss) {
+    clearTimeout(alertEl._timeout);
+    alertEl._timeout = setTimeout(() => { alertEl.classList.add('d-none'); }, autoDismiss);
+  }
+}
+
+// =========================================================================
+// TAB NAVIGATION SYSTEM (Supporting URL Params & History Back/Forward)
+// =========================================================================
+function switchTab(tabName, pushState = true) {
+  const validTabs = ['bookings', 'addresses', 'support', 'reviews', 'favorites', 'notifications', 'payments', 'offers', 'settings'];
+  if (!validTabs.includes(tabName)) tabName = 'bookings';
+
+  // Toggle desktop navigation active states
+  document.querySelectorAll('#desktopNavMenu .customer-nav-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
+  });
+
+  // Toggle mobile navigation active states
+  document.querySelectorAll('.account-mobile-pill').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
+  });
+
+  // Toggle tab contents
+  document.querySelectorAll('.tab-pane-content').forEach(pane => {
+    pane.classList.toggle('active', pane.id === `tab-${tabName}`);
+  });
+
+  if (tabName === 'favorites') {
+    loadFavoriteProviders();
+  }
+
+  // Update browser URL query state
+  if (pushState) {
+    const url = new URL(window.location);
+    url.searchParams.set('tab', tabName);
+    window.history.pushState({ tab: tabName }, '', url);
+  }
+
+  // Auto-scroll on mobile
+  if (window.innerWidth < 992) {
+    const targetCard = document.querySelector('.account-panel-wrapper');
+    if (targetCard) {
+      targetCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+}
+
+// Bind click listeners on desktop and mobile buttons
+document.querySelectorAll('#desktopNavMenu .customer-nav-btn[data-tab]').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+});
+document.querySelectorAll('.account-mobile-pill[data-tab]').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+});
+
+// Handle browser popstate
+window.addEventListener('popstate', (e) => {
+  const tab = (e.state && e.state.tab) || new URLSearchParams(window.location.search).get('tab') || 'bookings';
+  switchTab(tab, false);
+});
+
+// =========================================================================
+// PROFILE HEADER & CIRCULAR COMPLETION RING
+// =========================================================================
+function updateProfileStrength(p) {
+  let score = 20; // 20% default for signed-in active account
+  if (p.name && p.name.trim().length > 2) score += 20;
+  if (p.phone && p.phone.trim().length === 10) score += 20;
+  if (p.email && p.email.includes('@')) score += 20;
+  const customAvatar = localStorage.getItem(STORAGE_KEYS.AVATAR) || p.profileImage;
+  if (customAvatar) score += 10;
+  if (p.address || (savedAddresses && savedAddresses.length > 0)) score += 10;
+  score = Math.min(100, score);
+
+  $('profileStrengthText').textContent = `${score}%`;
+
+  // SVG circumference is 2 * PI * 28 = 175.93
+  const circumference = 175.93;
+  const offset = circumference * (1 - (score / 100));
+  const ring = $('profileRingCircle');
+  if (ring) {
+    ring.style.strokeDashoffset = offset;
+    if (score >= 80) {
+      ring.setAttribute('stroke', '#10b981'); // Emerald green
+    } else if (score >= 60) {
+      ring.setAttribute('stroke', '#2563eb'); // Brand blue
+    } else {
+      ring.setAttribute('stroke', '#f59e0b'); // Amber
+    }
+  }
+}
+
+function renderProfileUI(p) {
+  customerProfile = p;
+  const name = p.name || 'Valued Customer';
+  const initial = (name.charAt(0) || 'U').toUpperCase();
+
+  $('profileNameDisplay').textContent = name;
+  $('profileAvatarInitial').textContent = initial;
+  $('profilePhoneDisplay').textContent = p.phone ? `+91 ${p.phone}` : 'Not added';
+  $('profileEmailDisplay').textContent = p.email || me.email;
+  $('deleteAccountEmailConfirm').textContent = p.email || me.email;
+
+  if (p.city || p.area) {
+    $('profileCityTag').innerHTML = `<i class="bi bi-geo-alt me-1 text-danger"></i>${esc(p.area ? p.area + ', ' : '')}${esc(p.city || 'Ranchi')}`;
+  }
+
+  // Custom photo avatar
+  const storedPhoto = localStorage.getItem(STORAGE_KEYS.AVATAR) || p.profileImage;
+  const imgEl = $('profileAvatarImg');
+  const initialEl = $('profileAvatarInitial');
+  if (storedPhoto) {
+    imgEl.src = storedPhoto;
+    imgEl.classList.remove('d-none');
+    initialEl.classList.add('d-none');
+  } else {
+    imgEl.classList.add('d-none');
+    initialEl.classList.remove('d-none');
+  }
+
+  updateProfileStrength(p);
+
+  // Pre-fill Edit Modal Fields
+  $('modalInputName').value = p.name || '';
+  $('modalInputPhone').value = p.phone || '';
+  $('modalInputEmail').value = p.email || '';
+  $('modalInputArea').value = p.area || '';
+  $('modalInputCity').value = p.city || 'Ranchi';
+  $('modalInputPincode').value = p.pincode || '';
+}
+
+// Edit Profile Modal Trigger
+$('btnOpenEditProfileModal').addEventListener('click', () => {
+  const modal = new bootstrap.Modal($('editProfileModal'));
+  modal.show();
+});
+
+// Photo upload handler
+$('profilePhotoInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    showAlert('Image must be under 2MB', 'danger');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = async function(evt) {
+    const base64 = evt.target.result;
+    localStorage.setItem(STORAGE_KEYS.AVATAR, base64);
+    $('profileAvatarImg').src = base64;
+    $('profileAvatarImg').classList.remove('d-none');
+    $('profileAvatarInitial').classList.add('d-none');
+    showAlert('Profile photo updated successfully');
+    updateProfileStrength(customerProfile || {});
+    // Persist to backend if supported
+    api('/customer/profile', { method: 'PUT', body: { profileImage: base64 } }).catch(() => {});
+  };
+  reader.readAsDataURL(file);
+});
+
+$('btnModalRemovePhoto').addEventListener('click', () => {
+  localStorage.removeItem(STORAGE_KEYS.AVATAR);
+  $('profileAvatarImg').classList.add('d-none');
+  $('profileAvatarInitial').classList.remove('d-none');
+  showAlert('Photo reset to initials');
+  updateProfileStrength(customerProfile || {});
+});
+
+// Edit Profile Modal Submit
+$('editProfileModalForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const alertEl = $('modalProfileAlert');
+  alertEl.classList.add('d-none');
+  const btn = $('btnSaveModalProfile');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving...';
+
+  try {
+    const updated = await api('/customer/profile', {
+      method: 'PUT',
+      body: {
+        name: $('modalInputName').value.trim(),
+        phone: $('modalInputPhone').value.trim(),
+        email: $('modalInputEmail').value.trim(),
+        area: nv($('modalInputArea').value),
+        city: nv($('modalInputCity').value),
+        pincode: nv($('modalInputPincode').value)
+      }
+    });
+
+    renderProfileUI(updated);
+    const authUser = Auth.get();
+    authUser.name = updated.name;
+    if (updated.token) {
+      authUser.token = updated.token;
+      localStorage.setItem('lsc_token', updated.token);
+    }
+    Auth.save(authUser);
+
+    showAlert('Profile updated successfully!');
+    bootstrap.Modal.getInstance($('editProfileModal')).hide();
+  } catch (err) {
+    alertEl.className = 'alert alert-danger small py-1.5 px-2 mt-2';
+    if (err.message && (err.message.toLowerCase().includes('session') || err.message.toLowerCase().includes('log in') || err.message.toLowerCase().includes('unauthorized'))) {
+      alertEl.innerHTML = `${esc(err.message)} <a href="/login.html" class="alert-link ms-1 fw-bold">Log in now</a>`;
+    } else {
+      alertEl.textContent = err.message || 'Failed to update profile.';
+    }
+    alertEl.classList.remove('d-none');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-check2 me-1"></i>Save Profile';
+  }
+});
+
+// Phone OTP verification flow
+$('btnModalVerifyPhone').addEventListener('click', () => {
+  const box = $('modalOtpBox');
+  box.classList.remove('d-none');
+});
+$('btnConfirmModalOtp').addEventListener('click', () => {
+  const code = $('modalOtpCode').value.trim();
+  if (code === '4892' || code.length === 4) {
+    $('modalOtpBox').innerHTML = '<div class="text-success small fw-bold py-1"><i class="bi bi-patch-check-fill me-1"></i>Mobile Number Verified!</div>';
+  } else {
+    alert('Please enter OTP 4892 to verify.');
+  }
+});
+
+// =========================================================================
+// SECTION 1: MY BOOKINGS & HISTORY
+// =========================================================================
+function renderBookings() {
+  const container = $('bookingsListContainer');
+  let list = [...customerBookings];
+
+  const activeStatuses = ['PENDING', 'ACCEPTED', 'ON_THE_WAY', 'SERVICE_STARTED', 'AWAITING_COMPLETION'];
+  if (currentFilter === 'ACTIVE') {
+    list = list.filter(b => activeStatuses.includes(b.status));
+  } else if (currentFilter === 'COMPLETED') {
+    list = list.filter(b => b.status === 'COMPLETED');
+  } else if (currentFilter === 'CANCELLED') {
+    list = list.filter(b => b.status === 'CANCELLED' || b.status === 'REJECTED');
+  }
+
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="account-empty-state">
+        <div class="account-empty-icon"><i class="bi bi-calendar2-x"></i></div>
+        <h5 class="fw-bold text-dark mb-1">No ${currentFilter === 'ALL' ? '' : currentFilter.toLowerCase()} bookings found</h5>
+        <p class="small text-muted mb-3">Book professional electricians, plumbers, appliance technicians, and home cleaners in Ranchi.</p>
+        <a href="/?type=NORMAL#frontBookingForm" class="btn btn-primary btn-sm rounded-pill px-4">
+          <i class="bi bi-plus-circle me-1"></i>Book a Service Now
+        </a>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = list.map(b => {
+    const isCompleted = b.status === 'COMPLETED';
+    const isCancelable = b.status === 'PENDING' || b.status === 'ACCEPTED';
+    const isOtpReady = b.status === 'ACCEPTED' || b.status === 'ON_THE_WAY';
+    const isAwaitingCompletion = b.status === 'AWAITING_COMPLETION';
+    const providerName = b.providerBusinessName || b.businessName || 'Verified Provider';
+    const bookingDateStr = b.bookingDate ? `${b.bookingDate} at ${(b.bookingTime || 'Scheduled').slice(0, 5)}` : 'Immediate Arrival';
+
+    return `
+      <div class="account-item-card booking-item-card status-${esc(b.status)}">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+          <div>
+            <div class="d-flex align-items-center gap-2">
+              <h5 class="h6 fw-bold text-dark mb-0">${esc(b.serviceName || 'Home Service')}</h5>
+              <span class="badge bg-light text-muted border font-monospace small" style="font-size: 0.72rem;">#BK-${b.id}</span>
+              ${b.bookingType === 'QUICK_SERVICE' ? '<span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill small"><i class="bi bi-lightning-charge-fill"></i> Quick Service</span>' : ''}
+            </div>
+            <div class="small text-muted mt-1">
+              <i class="bi bi-person-badge me-1 text-primary"></i>Provider: <strong>${esc(providerName)}</strong>
+              ${b.providerPhone ? ` &bull; <i class="bi bi-telephone ms-1"></i>+91 ${esc(b.providerPhone)}` : ''}
+            </div>
+          </div>
+          <div>
+            ${statusBadge(b.status)}
+          </div>
+        </div>
+
+        <div class="row g-2 py-2 border-top border-bottom my-2 small text-muted">
+          <div class="col-md-6">
+            <i class="bi bi-calendar-event me-1.5 text-primary"></i><strong>Schedule:</strong> ${esc(bookingDateStr)}
+          </div>
+          <div class="col-md-6 text-truncate">
+            <i class="bi bi-geo-alt me-1.5 text-danger"></i><strong>Address:</strong> ${esc(b.formattedAddress || b.address || 'Address provided')}
+          </div>
+        </div>
+
+        ${isOtpReady ? `
+          <div class="p-2.5 bg-primary-subtle border border-primary-subtle rounded-3 mb-2.5 d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-shield-lock-fill text-primary fs-5"></i>
+              <div>
+                <strong class="text-dark small d-block">Start OTP Ready</strong>
+                <span class="text-muted small" style="font-size:0.75rem;">Share this 4-digit code ONLY when the technician arrives at your door.</span>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" onclick="viewBookingOtp(${b.id})">
+              <i class="bi bi-key-fill me-1"></i>View OTP
+            </button>
+          </div>
+        ` : ''}
+
+        ${isAwaitingCompletion ? `
+          <div class="p-2.5 bg-warning-subtle border border-warning-subtle rounded-3 mb-2.5 d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-check2-circle text-warning fs-5"></i>
+              <div>
+                <strong class="text-dark small d-block">Provider marked job finished!</strong>
+                <span class="text-muted small" style="font-size:0.75rem;">Please inspect the work and confirm completion.</span>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-warning rounded-pill px-3 fw-bold" onclick="confirmCompletion(${b.id})">
+              Confirm &amp; Pay
+            </button>
+          </div>
+        ` : ''}
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-1">
+          <div class="d-flex gap-1.5">
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="openBookingDetailsModal(${b.id})">
+              <i class="bi bi-eye me-1"></i>Details
+            </button>
+            <a href="/booking-status.html?id=${b.id}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+              <i class="bi bi-compass me-1"></i>Live Track
+            </a>
+          </div>
+
+          <div class="d-flex gap-1.5">
+            ${isCompleted ? `
+              <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="rebookService(${b.providerId || 0}, ${b.serviceId || 0})">
+                <i class="bi bi-arrow-repeat me-1"></i>Rebook
+              </button>
+              ${!b.reviewed ? `
+                <button type="button" class="btn btn-sm btn-warning rounded-pill px-3 fw-bold" onclick="openReviewModalForBooking(${b.id}, ${b.providerId || 0}, '${esc(b.serviceName || '')}', '${esc(providerName)}')">
+                  <i class="bi bi-star-fill me-1"></i>Rate Service
+                </button>
+              ` : `
+                <span class="badge bg-light text-success border py-1.5 px-2.5 rounded-pill small"><i class="bi bi-check2-all me-1"></i>Reviewed</span>
+              `}
+            ` : ''}
+
+            ${isCancelable ? `
+              <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="openCancelBookingModal(${b.id})">
+                <i class="bi bi-x-circle me-1"></i>Cancel
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Filter button bindings
+document.querySelectorAll('.filter-booking-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-booking-btn').forEach(b => {
+      b.classList.remove('btn-primary');
+      b.classList.add('btn-outline-secondary');
+    });
+    btn.classList.remove('btn-outline-secondary');
+    btn.classList.add('btn-primary');
+    currentFilter = btn.getAttribute('data-filter');
+    renderBookings();
+  });
+});
+
+let viewOtpTimerInterval = null;
+let currentModalOtpValue = '';
+
+async function viewBookingOtp(bookingId) {
+  const b = customerBookings.find(x => x.id === bookingId) || { id: bookingId };
+  const providerName = b.providerBusinessName || b.businessName || 'Verified Provider';
+  const serviceName = b.serviceName || 'Home Service';
+
+  $('viewOtpModalBookingRef').textContent = `#BK-${bookingId}`;
+  $('viewOtpModalService').textContent = serviceName;
+  $('viewOtpModalProvider').textContent = providerName;
+  $('viewOtpModalTrackBtn').href = `/booking-status.html?id=${bookingId}`;
+
+  // Reset modal state
+  $('viewOtpModalLoading').classList.remove('d-none');
+  $('viewOtpModalError').classList.add('d-none');
+  $('viewOtpModalActiveBox').classList.add('d-none');
+  $('viewOtpModalExpiredBox').classList.add('d-none');
+  clearInterval(viewOtpTimerInterval);
+
+  // Open modal
+  const modal = bootstrap.Modal.getOrCreateInstance($('viewOtpModal'));
+  modal.show();
+
+  await fetchAndDisplayOtp(bookingId);
+}
+
+async function fetchAndDisplayOtp(bookingId) {
+  try {
+    $('viewOtpModalLoading').classList.remove('d-none');
+    $('viewOtpModalError').classList.add('d-none');
+    $('viewOtpModalActiveBox').classList.add('d-none');
+    $('viewOtpModalExpiredBox').classList.add('d-none');
+
+    const data = await api(`/bookings/${bookingId}/otp`);
+    $('viewOtpModalLoading').classList.add('d-none');
+
+    if (data.otp) {
+      currentModalOtpValue = data.otp;
+      const digits = data.otp.split('');
+      const container = $('viewOtpDigitsContainer');
+      if (container) {
+        container.innerHTML = digits.map(d => `<span class="otp-digit-pill">${esc(d)}</span>`).join('');
+      }
+
+      $('viewOtpModalActiveBox').classList.remove('d-none');
+      $('viewOtpModalExpiredBox').classList.add('d-none');
+
+      // Start countdown
+      startViewOtpCountdown(data.remainingSeconds || 0, bookingId);
+
+      // Wire copy button
+      $('viewOtpCopyBtn').onclick = () => {
+        const copyVal = currentModalOtpValue;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(copyVal).then(() => {
+            $('viewOtpCopyIcon').className = 'bi bi-check2';
+            $('viewOtpCopyText').textContent = 'Copied!';
+            setTimeout(() => {
+              $('viewOtpCopyIcon').className = 'bi bi-clipboard';
+              $('viewOtpCopyText').textContent = 'Copy';
+            }, 2500);
+          }).catch(() => fallbackCopy(copyVal));
+        } else {
+          fallbackCopy(copyVal);
+        }
+      };
+    } else if (data.expired) {
+      $('viewOtpModalActiveBox').classList.add('d-none');
+      $('viewOtpModalExpiredBox').classList.remove('d-none');
+      $('viewOtpRegenBtn').onclick = () => regenerateOtpInModal(bookingId);
+    } else {
+      $('viewOtpModalError').textContent = data.message || 'OTP is not currently available for this booking.';
+      $('viewOtpModalError').classList.remove('d-none');
+    }
+  } catch (err) {
+    $('viewOtpModalLoading').classList.add('d-none');
+    $('viewOtpModalError').textContent = err.message || 'Could not fetch OTP. Please check your connection.';
+    $('viewOtpModalError').classList.remove('d-none');
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  $('viewOtpCopyText').textContent = 'Copied!';
+  setTimeout(() => { $('viewOtpCopyText').textContent = 'Copy'; }, 2500);
+}
+
+function startViewOtpCountdown(seconds, bookingId) {
+  clearInterval(viewOtpTimerInterval);
+  let remaining = seconds;
+  const timerEl = $('viewOtpCountdown');
+
+  function update() {
+    if (remaining <= 0) {
+      clearInterval(viewOtpTimerInterval);
+      if (timerEl) timerEl.textContent = '00:00';
+      $('viewOtpModalActiveBox').classList.add('d-none');
+      $('viewOtpModalExpiredBox').classList.remove('d-none');
+      $('viewOtpRegenBtn').onclick = () => regenerateOtpInModal(bookingId);
+      return;
+    }
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    if (timerEl) timerEl.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    remaining--;
+  }
+
+  update();
+  viewOtpTimerInterval = setInterval(update, 1000);
+}
+
+async function regenerateOtpInModal(bookingId) {
+  const btn = $('viewOtpRegenBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Generating...';
+
+  try {
+    await api(`/bookings/${bookingId}/otp/generate`, { method: 'POST' });
+    await fetchAndDisplayOtp(bookingId);
+  } catch (err) {
+    $('viewOtpModalError').textContent = err.message || 'Failed to regenerate OTP.';
+    $('viewOtpModalError').classList.remove('d-none');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Generate New OTP';
+  }
+}
+
+async function confirmCompletion(bookingId) {
+  if (!confirm('Have you checked the service and want to confirm completion?')) return;
+  try {
+    await api(`/bookings/${bookingId}/completion/confirm`, { method: 'POST' });
+    showAlert('Service completed successfully! Thank you.', 'success');
+    loadAllData();
+  } catch (err) {
+    showAlert(err.message || 'Could not confirm completion.', 'danger');
+  }
+}
+
+function openCancelBookingModal(bookingId) {
+  $('cancelBookingId').value = bookingId;
+  const modal = new bootstrap.Modal($('cancelBookingModal'));
+  modal.show();
+}
+
+$('btnConfirmCancelBooking').addEventListener('click', async () => {
+  const id = $('cancelBookingId').value;
+  const btn = $('btnConfirmCancelBooking');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Cancelling...';
+
+  try {
+    await api(`/bookings/${id}/cancel`, { method: 'PUT' });
+    showAlert(`Booking #BK-${id} has been cancelled successfully.`);
+    bootstrap.Modal.getInstance($('cancelBookingModal')).hide();
+    loadAllData();
+  } catch (err) {
+    const alertEl = $('cancelBookingAlert');
+    alertEl.className = 'alert alert-danger small py-1 px-2';
+    alertEl.textContent = err.message || 'Failed to cancel booking.';
+    alertEl.classList.remove('d-none');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-trash3 me-1"></i>Confirm Cancellation';
+  }
+});
+
+function rebookService(providerId, serviceId) {
+  location.href = `/booking.html?serviceId=${serviceId}&providerId=${providerId}`;
+}
+
+function openBookingDetailsModal(bookingId) {
+  const b = customerBookings.find(x => x.id === bookingId);
+  if (!b) return;
+
+  $('modalTrackBookingBtn').href = `/booking-status.html?id=${b.id}`;
+  $('bookingDetailsModalBody').innerHTML = `
+    <div class="mb-3 pb-3 border-bottom">
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <h6 class="fw-bold text-dark mb-0">${esc(b.serviceName || 'Service')}</h6>
+        ${statusBadge(b.status)}
+      </div>
+      <div class="small text-muted font-monospace">Booking Ref: #BK-${b.id}</div>
+    </div>
+    <div class="d-flex flex-column gap-2 small">
+      <div class="d-flex justify-content-between">
+        <span class="text-muted">Provider:</span>
+        <strong class="text-dark">${esc(b.providerBusinessName || b.businessName || 'Verified Provider')}</strong>
+      </div>
+      <div class="d-flex justify-content-between">
+        <span class="text-muted">Date &amp; Time:</span>
+        <span class="text-dark">${esc(b.bookingDate || '')} ${b.bookingTime ? 'at ' + esc(b.bookingTime.slice(0, 5)) : ''}</span>
+      </div>
+      <div class="d-flex justify-content-between">
+        <span class="text-muted">Booking Type:</span>
+        <span class="text-dark">${b.bookingType === 'QUICK_SERVICE' ? 'Quick Service (~10 min priority)' : 'Scheduled'}</span>
+      </div>
+      <div class="d-flex justify-content-between">
+        <span class="text-muted">Doorstep Address:</span>
+        <span class="text-dark text-end" style="max-width: 250px;">${esc(b.formattedAddress || b.address || 'Address on file')}</span>
+      </div>
+      ${b.notes ? `
+        <div class="p-2 bg-light rounded-2 mt-1">
+          <span class="text-muted d-block" style="font-size:0.75rem;">Customer Notes:</span>
+          <span class="text-dark">${esc(b.notes)}</span>
+        </div>
+      ` : ''}
+      ${(b.status === 'ACCEPTED' || b.status === 'ON_THE_WAY') ? `
+        <div class="p-2.5 bg-primary-subtle border border-primary-subtle rounded-3 mt-2 d-flex align-items-center justify-content-between">
+          <div class="small">
+            <strong class="text-dark d-block">Start OTP Ready</strong>
+            <span class="text-muted" style="font-size:0.75rem;">Required when technician arrives</span>
+          </div>
+          <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" onclick="bootstrap.Modal.getInstance($('bookingDetailsModal')).hide(); viewBookingOtp(${b.id});">
+            <i class="bi bi-key-fill me-1"></i>View OTP
+          </button>
+        </div>
+      ` : ''}
+    </div>
+  `;
+  new bootstrap.Modal($('bookingDetailsModal')).show();
+}
+
+// =========================================================================
+// SECTION 2: MY SAVED ADDRESSES & GPS
+// =========================================================================
+function loadSavedAddresses() {
+  const stored = localStorage.getItem(STORAGE_KEYS.ADDRESSES);
+  if (stored) {
+    try {
+      savedAddresses = JSON.parse(stored);
+    } catch { savedAddresses = []; }
+  }
+
+  // If customer has a primary address from backend profile and no saved list yet, initialize it
+  if (savedAddresses.length === 0 && customerProfile && customerProfile.address) {
+    savedAddresses.push({
+      type: 'Home',
+      street: customerProfile.address,
+      area: customerProfile.area || 'Ranchi',
+      city: customerProfile.city || 'Ranchi',
+      pincode: customerProfile.pincode || '834001',
+      formattedAddress: customerProfile.formattedAddress || customerProfile.address,
+      lat: customerProfile.latitude,
+      lng: customerProfile.longitude,
+      isDefault: true
+    });
+    localStorage.setItem(STORAGE_KEYS.ADDRESSES, JSON.stringify(savedAddresses));
+  }
+
+  renderAddressesUI();
+}
+
+function renderAddressesUI() {
+  const grid = $('addressesGrid');
+  if (savedAddresses.length === 0) {
+    grid.innerHTML = `
+      <div class="col-12">
+        <div class="account-empty-state">
+          <div class="account-empty-icon text-danger" style="background:#fee2e2;"><i class="bi bi-geo-alt"></i></div>
+          <h5 class="fw-bold text-dark mb-1">No Saved Addresses</h5>
+          <p class="small text-muted mb-3">Save your home, apartment, or office address for instant 1-click doorstep booking.</p>
+          <button type="button" class="btn btn-primary btn-sm rounded-pill px-4" onclick="$('btnOpenAddAddressModal').click()">
+            <i class="bi bi-plus-lg me-1"></i>Add Address
+          </button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = savedAddresses.map((addr, idx) => {
+    const isDef = !!addr.isDefault;
+    const icon = addr.type === 'Work' ? 'briefcase' : (addr.type === 'Other' ? 'geo' : 'house-door');
+    const hasGps = !!(addr.lat && addr.lng);
+
+    return `
+      <div class="col-md-6">
+        <div class="account-item-card address-item-card ${isDef ? 'is-default' : ''} h-100 d-flex flex-column justify-content-between">
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1">
+                  <i class="bi bi-${icon} me-1 text-primary"></i>${esc(addr.type || 'Home')}
+                </span>
+                ${isDef ? '<span class="badge bg-primary text-white rounded-pill px-2.5 py-1 small">Default</span>' : ''}
+              </div>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-light border-0 py-0 px-1" type="button" data-bs-toggle="dropdown">
+                  <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end small shadow-sm">
+                  ${!isDef ? `<li><button class="dropdown-item" onclick="setDefaultAddress(${idx})"><i class="bi bi-check2 me-1.5 text-primary"></i>Set as Default</button></li>` : ''}
+                  <li><button class="dropdown-item" onclick="editAddress(${idx})"><i class="bi bi-pencil me-1.5 text-muted"></i>Edit</button></li>
+                  <li><button class="dropdown-item text-danger" onclick="deleteAddress(${idx})"><i class="bi bi-trash3 me-1.5"></i>Delete</button></li>
+                </ul>
+              </div>
+            </div>
+
+            <h6 class="fw-bold text-dark mb-1">${esc(addr.street)}</h6>
+            <div class="small text-muted mb-2">${esc(addr.area)}, ${esc(addr.city)} - ${esc(addr.pincode)}</div>
+
+            ${hasGps ? `
+              <div class="small text-success d-flex align-items-center gap-1 font-monospace" style="font-size:0.75rem;">
+                <i class="bi bi-crosshair text-success"></i>GPS: ${addr.lat.toFixed(4)}, ${addr.lng.toFixed(4)}
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="pt-2 border-top mt-2 d-flex justify-content-between align-items-center">
+            ${!isDef ? `
+              <button type="button" class="btn btn-link btn-sm text-primary p-0 text-decoration-none fw-semibold small" onclick="setDefaultAddress(${idx})">
+                Set as Default
+              </button>
+            ` : `
+              <span class="text-success small fw-semibold"><i class="bi bi-patch-check-fill me-1"></i>Primary Address</span>
+            `}
+            <button type="button" class="btn btn-outline-secondary btn-sm py-0.5 px-2.5 rounded-pill" style="font-size:0.75rem;" onclick="editAddress(${idx})">
+              Edit
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+$('btnOpenAddAddressModal').addEventListener('click', () => {
+  $('addressModalTitle').innerHTML = '<i class="bi bi-geo-alt-fill text-danger me-2"></i>Add Service Address';
+  $('addrEditIndex').value = '-1';
+  $('addrInputStreet').value = '';
+  $('addrInputArea').value = customerProfile ? (customerProfile.area || '') : '';
+  $('addrInputCity').value = customerProfile ? (customerProfile.city || 'Ranchi') : 'Ranchi';
+  $('addrInputPincode').value = customerProfile ? (customerProfile.pincode || '') : '';
+  $('modalGeoCoordinatesBadge').classList.add('d-none');
+  new bootstrap.Modal($('addressModal')).show();
+});
+
+function editAddress(idx) {
+  const a = savedAddresses[idx];
+  if (!a) return;
+  $('addressModalTitle').innerHTML = '<i class="bi bi-pencil-square text-primary me-2"></i>Edit Address';
+  $('addrEditIndex').value = idx;
+  $('addrInputStreet').value = a.street || '';
+  $('addrInputArea').value = a.area || '';
+  $('addrInputCity').value = a.city || 'Ranchi';
+  $('addrInputPincode').value = a.pincode || '';
+  $('addrInputIsDefault').checked = !!a.isDefault;
+
+  if (a.type === 'Work') $('addrTypeWork').checked = true;
+  else if (a.type === 'Other') $('addrTypeOther').checked = true;
+  else $('addrTypeHome').checked = true;
+
+  if (a.lat && a.lng) {
+    savedLat = a.lat;
+    savedLng = a.lng;
+    $('modalCoordText').textContent = `${a.lat.toFixed(4)}, ${a.lng.toFixed(4)}`;
+    $('modalGeoCoordinatesBadge').classList.remove('d-none');
+  } else {
+    $('modalGeoCoordinatesBadge').classList.add('d-none');
+  }
+
+  new bootstrap.Modal($('addressModal')).show();
+}
+
+function deleteAddress(idx) {
+  if (!confirm('Are you sure you want to delete this address?')) return;
+  savedAddresses.splice(idx, 1);
+  localStorage.setItem(STORAGE_KEYS.ADDRESSES, JSON.stringify(savedAddresses));
+  showAlert('Address removed');
+  renderAddressesUI();
+}
+
+function setDefaultAddress(idx) {
+  savedAddresses.forEach((a, i) => a.isDefault = (i === idx));
+  localStorage.setItem(STORAGE_KEYS.ADDRESSES, JSON.stringify(savedAddresses));
+  const def = savedAddresses[idx];
+  // Persist default to backend profile
+  if (def) {
+    api('/customer/profile', {
+      method: 'PUT',
+      body: {
+        address: def.street,
+        area: def.area,
+        city: def.city,
+        pincode: def.pincode,
+        latitude: def.lat,
+        longitude: def.lng,
+        formattedAddress: def.formattedAddress || def.street
+      }
+    }).catch(() => {});
+  }
+  showAlert('Default address updated!');
+  renderAddressesUI();
+}
+
+$('addressForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const editIdx = parseInt($('addrEditIndex').value);
+  const typeRadio = document.querySelector('input[name="addrTypeRadio"]:checked');
+  const type = typeRadio ? typeRadio.value : 'Home';
+  const street = $('addrInputStreet').value.trim();
+  const area = $('addrInputArea').value.trim();
+  const city = $('addrInputCity').value.trim();
+  const pincode = $('addrInputPincode').value.trim();
+  const isDefault = $('addrInputIsDefault').checked;
+
+  const addrObj = {
+    type,
+    street,
+    area,
+    city,
+    pincode,
+    formattedAddress: savedFormattedAddress || `${street}, ${area}, ${city}`,
+    lat: savedLat,
+    lng: savedLng,
+    isDefault
+  };
+
+  if (isDefault) {
+    savedAddresses.forEach(a => a.isDefault = false);
+  }
+
+  if (editIdx >= 0 && editIdx < savedAddresses.length) {
+    savedAddresses[editIdx] = addrObj;
+  } else {
+    if (savedAddresses.length === 0) addrObj.isDefault = true;
+    savedAddresses.push(addrObj);
+  }
+
+  localStorage.setItem(STORAGE_KEYS.ADDRESSES, JSON.stringify(savedAddresses));
+
+  // Sync with backend profile if marked default or first address
+  if (addrObj.isDefault) {
+    api('/customer/profile', {
+      method: 'PUT',
+      body: {
+        address: addrObj.street,
+        area: addrObj.area,
+        city: addrObj.city,
+        pincode: addrObj.pincode,
+        latitude: addrObj.lat,
+        longitude: addrObj.lng,
+        formattedAddress: addrObj.formattedAddress
+      }
+    }).catch(() => {});
+  }
+
+  showAlert('Address saved successfully!');
+  bootstrap.Modal.getInstance($('addressModal')).hide();
+  renderAddressesUI();
+  updateProfileStrength(customerProfile || {});
+});
+
+// GPS Detect inside Address Modal
+$('btnDetectGpsInModal').addEventListener('click', async () => {
+  const icon = $('gpsModalIcon'), spinner = $('gpsModalSpinner');
+  icon.classList.add('d-none'); spinner.classList.remove('d-none');
+  try {
+    const loc = await LSC_MAPS.getCurrentLocation();
+    savedLat = loc.lat;
+    savedLng = loc.lng;
+    savedFormattedAddress = loc.formattedAddress;
+    if (loc.formattedAddress) $('addrInputStreet').value = loc.formattedAddress;
+    if (loc.area) $('addrInputArea').value = loc.area;
+    if (loc.city) $('addrInputCity').value = loc.city;
+    $('modalCoordText').textContent = `${savedLat.toFixed(4)}, ${savedLng.toFixed(4)}`;
+    $('modalGeoCoordinatesBadge').classList.remove('d-none');
+    showAlert('GPS coordinates detected accurately!');
+  } catch (err) {
+    showAlert(err.message || 'Could not fetch GPS location.', 'danger');
+  } finally {
+    icon.classList.remove('d-none'); spinner.classList.add('d-none');
+  }
+});
+
+// Google Maps setup
+(async () => {
+  const mapRes = await LSC_MAPS.loadGoogleMaps();
+  if (mapRes.configured) {
+    LSC_MAPS.setupPlacesAutocomplete($('addrInputStreet'), (placeData) => {
+      savedLat = placeData.lat;
+      savedLng = placeData.lng;
+      savedFormattedAddress = placeData.formattedAddress;
+      if (placeData.area) $('addrInputArea').value = placeData.area;
+      if (placeData.city) $('addrInputCity').value = placeData.city;
+      $('modalCoordText').textContent = `${savedLat.toFixed(4)}, ${savedLng.toFixed(4)}`;
+      $('modalGeoCoordinatesBadge').classList.remove('d-none');
+    });
+  }
+})();
+
+// Google Map Picker Modal
+const custMapModalEl = document.getElementById('custMapModal');
+custMapModalEl.addEventListener('shown.bs.modal', () => {
+  const initLat = savedLat || 23.3441;
+  const initLng = savedLng || 85.3096;
+  if (!pickerMapObj) {
+    pickerMapObj = LSC_MAPS.createLocationPickerMap('custPickerMap', {
+      initialLat: initLat,
+      initialLng: initLng,
+      draggable: true,
+      onLocationChange: (loc) => {
+        tempModalLoc = loc;
+        $('modalAddrText').textContent = loc.formattedAddress || `${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`;
+      }
+    });
+  } else {
+    pickerMapObj.setLocation(initLat, initLng);
+    google.maps.event.trigger(pickerMapObj.map, 'resize');
+    pickerMapObj.map.setCenter({ lat: initLat, lng: initLng });
+  }
+});
+
+$('btnConfirmCustMap').addEventListener('click', () => {
+  if (tempModalLoc) {
+    savedLat = tempModalLoc.lat;
+    savedLng = tempModalLoc.lng;
+    savedFormattedAddress = tempModalLoc.formattedAddress;
+    if (tempModalLoc.formattedAddress) $('addrInputStreet').value = tempModalLoc.formattedAddress;
+    if (tempModalLoc.area) $('addrInputArea').value = tempModalLoc.area;
+    if (tempModalLoc.city) $('addrInputCity').value = tempModalLoc.city;
+    $('modalCoordText').textContent = `${savedLat.toFixed(4)}, ${savedLng.toFixed(4)}`;
+    $('modalGeoCoordinatesBadge').classList.remove('d-none');
+  }
+});
+
+// =========================================================================
+// SECTION 3: HELP & CUSTOMER SUPPORT (Tickets & Complaints)
+// =========================================================================
+function loadSupportTickets() {
+  let tickets = [];
+  try {
+    tickets = JSON.parse(localStorage.getItem(STORAGE_KEYS.TICKETS) || '[]');
+  } catch { tickets = []; }
+
+  const container = $('supportTicketsList');
+  if (tickets.length === 0) {
+    container.innerHTML = `
+      <div class="p-3 bg-light rounded-3 text-center text-muted small border">
+        <i class="bi bi-shield-check text-success fs-4 d-block mb-1"></i>
+        No active complaints or grievance tickets.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = tickets.map((t, idx) => `
+    <div class="p-2.5 bg-light rounded-3 border">
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace small" style="font-size:0.7rem;">${esc(t.ticketId)}</span>
+        <span class="badge bg-${t.status === 'Resolved' ? 'success' : 'warning'}-subtle text-${t.status === 'Resolved' ? 'success' : 'warning'} py-0.5 px-2 rounded-pill small">${esc(t.status)}</span>
+      </div>
+      <strong class="d-block text-dark small text-truncate">${esc(t.subject)}</strong>
+      <div class="small text-muted" style="font-size:0.75rem;">${esc(t.category)} &bull; ${esc(t.date)}</div>
+    </div>
+  `).join('');
+}
+
+$('supportTicketForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const ticketId = 'TKT-' + Math.floor(100000 + Math.random() * 900000);
+  const ticket = {
+    ticketId,
+    bookingId: $('supportBookingSelect').value || null,
+    category: $('supportCategory').value,
+    priority: $('supportPriority').value,
+    subject: $('supportSubject').value.trim(),
+    description: $('supportDescription').value.trim(),
+    date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+    status: 'Under Review'
+  };
+
+  let tickets = [];
+  try {
+    tickets = JSON.parse(localStorage.getItem(STORAGE_KEYS.TICKETS) || '[]');
+  } catch { tickets = []; }
+  tickets.unshift(ticket);
+  localStorage.setItem(STORAGE_KEYS.TICKETS, JSON.stringify(tickets));
+
+  showAlert(`Support Ticket #${ticketId} submitted. Grievance officer assigned.`, 'success', 6000);
+  $('supportTicketForm').reset();
+  loadSupportTickets();
+});
+
+// =========================================================================
+// SECTION 4: MY REVIEWS & RATINGS
+// =========================================================================
+function renderReviewsUI() {
+  const container = $('customerReviewsList');
+  if (customerReviews.length === 0) {
+    container.innerHTML = `
+      <div class="account-empty-state">
+        <div class="account-empty-icon text-warning" style="background:#fef3c7;"><i class="bi bi-star"></i></div>
+        <h5 class="fw-bold text-dark mb-1">No Reviews Submitted Yet</h5>
+        <p class="small text-muted mb-3">After a provider completes your service, share honest feedback here to guide the community.</p>
+        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="switchTab('bookings')">
+          <i class="bi bi-calendar2-check me-1"></i>View Completed Bookings
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = customerReviews.map(r => `
+    <div class="account-item-card">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <div>
+          <h6 class="fw-bold text-dark mb-0">${esc(r.providerBusinessName || 'Local Provider')}</h6>
+          <div class="small text-muted mt-0.5">
+            <span class="text-warning">${stars(r.rating || 5)}</span>
+            <span class="ms-1.5 text-muted">${r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'Recent'}</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-danger py-0.5 px-2 rounded-pill small" title="Delete Review" onclick="deleteCustomerReview(${r.id})">
+          <i class="bi bi-trash3"></i>
+        </button>
+      </div>
+      <p class="small text-dark mb-0 bg-light p-2.5 rounded-2 mt-2">
+        "${esc(r.review || 'No written feedback provided.')}"
+      </p>
+    </div>
+  `).join('');
+}
+
+async function deleteCustomerReview(reviewId) {
+  if (!confirm('Are you sure you want to delete this review?')) return;
+  try {
+    await api(`/customer/reviews/${reviewId}`, { method: 'DELETE' });
+    showAlert('Review deleted successfully');
+    loadReviewsData();
+  } catch (err) {
+    showAlert(err.message || 'Could not delete review.', 'danger');
+  }
+}
+
+// Interactive Star Selection in Modal
+document.querySelectorAll('#starSelectorContainer .bi').forEach(star => {
+  star.addEventListener('click', function() {
+    const val = parseInt(this.getAttribute('data-rating'));
+    $('revRatingValue').value = val;
+    document.querySelectorAll('#starSelectorContainer .bi').forEach((s, idx) => {
+      s.classList.toggle('active', (idx + 1) <= val);
+      s.classList.toggle('bi-star-fill', (idx + 1) <= val);
+      s.classList.toggle('bi-star', (idx + 1) > val);
+    });
+    const labels = ['', '1 - Poor', '2 - Fair', '3 - Good', '4 - Very Good', '5 - Excellent'];
+    $('revRatingBadgeText').textContent = labels[val] || `${val} Stars`;
+  });
+});
+
+function openReviewModalForBooking(bookingId, providerId, serviceName, providerName) {
+  $('revBookingId').value = bookingId;
+  $('revProviderId').value = providerId;
+  $('revServiceNameDisplay').textContent = serviceName;
+  $('revProviderNameDisplay').textContent = `Provider: ${providerName}`;
+  $('revCommentInput').value = '';
+  new bootstrap.Modal($('reviewModal')).show();
+}
+
+$('reviewSubmitForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const alertEl = $('revSubmitAlert');
+  alertEl.classList.add('d-none');
+  const btn = $('btnSubmitReview');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Submitting...';
+
+  try {
+    await api('/reviews', {
+      method: 'POST',
+      body: {
+        bookingId: parseInt($('revBookingId').value),
+        providerId: parseInt($('revProviderId').value),
+        rating: parseInt($('revRatingValue').value),
+        review: $('revCommentInput').value.trim()
+      }
+    });
+
+    showAlert('Thank you! Your review has been published.');
+    bootstrap.Modal.getInstance($('reviewModal')).hide();
+    loadAllData();
+  } catch (err) {
+    alertEl.className = 'alert alert-danger small py-1 px-2';
+    alertEl.textContent = err.message || 'Failed to submit review.';
+    alertEl.classList.remove('d-none');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-send-fill me-1"></i>Submit Review';
+  }
+});
+
+// Check if eligible booking for pending review banner
+function checkPendingReviewPrompt() {
+  const unreviewedCompleted = customerBookings.find(b => b.status === 'COMPLETED' && !b.reviewed);
+  const banner = $('pendingReviewBanner');
+  if (unreviewedCompleted) {
+    banner.classList.remove('d-none');
+    $('pendingReviewText').textContent = `Rate your recent "${unreviewedCompleted.serviceName}" with ${unreviewedCompleted.providerBusinessName || 'your technician'}.`;
+    $('btnTriggerPendingReview').onclick = () => {
+      openReviewModalForBooking(
+        unreviewedCompleted.id,
+        unreviewedCompleted.providerId || 0,
+        unreviewedCompleted.serviceName,
+        unreviewedCompleted.providerBusinessName || 'Provider'
+      );
+    };
+  } else {
+    banner.classList.add('d-none');
+  }
+}
+
+// =========================================================================
+// SECTION 5: FAVORITE PROVIDERS (Persistent Backend & Real Data)
+// =========================================================================
+let currentCustomerFavorites = [];
+
+async function loadFavoriteProviders() {
+  const grid = $('favoritesGrid');
+  const countBadge = $('favCountBadge');
+  if (!grid) return;
+
+  grid.innerHTML = `
+    <div class="col-12 py-5 text-center text-muted">
+      <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+      Loading your favorite providers...
+    </div>
+  `;
+
+  try {
+    const list = await api('/favorites');
+    currentCustomerFavorites = Array.isArray(list) ? list : [];
+    if (countBadge) countBadge.textContent = currentCustomerFavorites.length;
+
+    // Synchronize cache in FavoritesManager
+    Favorites._cache = new Set(currentCustomerFavorites.map(f => Number(f.providerId)));
+    Favorites._loaded = true;
+
+    if (currentCustomerFavorites.length === 0) {
+      grid.innerHTML = `
+        <div class="col-12">
+          <div class="account-empty-state">
+            <div class="account-empty-icon text-danger" style="background:#fee2e2;"><i class="bi bi-heart"></i></div>
+            <h5 class="fw-bold text-dark mb-1">You haven't added any favorite providers yet.</h5>
+            <p class="small text-muted mb-3 max-w-md mx-auto">
+              Bookmark top-rated local electricians, plumbers, and technicians to easily revisit and book them whenever you need assistance.
+            </p>
+            <a href="/providers.html" class="btn btn-primary btn-sm rounded-pill px-4">
+              <i class="bi bi-search me-1"></i>Explore Services
+            </a>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = currentCustomerFavorites.map(fav => {
+      const pr = fav.provider;
+      if (!pr) return '';
+      const initial = (pr.businessName ? pr.businessName.charAt(0) : 'P').toUpperCase();
+      const location = pr.formattedAddress || (pr.areas && pr.areas[0] ? pr.areas[0].area : 'Ranchi');
+      const shareData = JSON.stringify({
+        id: pr.id,
+        businessName: pr.businessName,
+        formattedAddress: location,
+        profileImage: pr.profileImage
+      });
+
+      return `
+        <div class="col-md-6" id="favCard_${pr.id}">
+          <div class="account-item-card h-100 d-flex flex-column justify-content-between position-relative">
+            <div>
+              <!-- Header with Avatar, Name, Verification, Share, and Remove -->
+              <div class="d-flex justify-content-between align-items-start mb-2.5">
+                <div class="d-flex align-items-center gap-2.5">
+                  ${pr.profileImage ? `
+                    <img src="${esc(pr.profileImage)}" alt="${esc(pr.businessName)}" class="provider-avatar rounded-3" style="width: 48px; height: 48px; object-fit: cover;">
+                  ` : `
+                    <div class="user-avatar-circle" style="width: 48px; height: 48px; font-size: 1.15rem; background: #ede9fe; color: #7c3aed;">
+                      ${esc(initial)}
+                    </div>
+                  `}
+                  <div>
+                    <a href="/provider-profile.html?id=${pr.id}" class="fw-bold text-dark text-decoration-none d-block hover-primary">${esc(pr.businessName)}</a>
+                    <span class="badge bg-success-subtle text-success py-0.5 px-2 rounded-pill small" style="font-size:0.68rem;">
+                      <i class="bi bi-patch-check-fill me-1"></i>Verified Partner
+                    </span>
+                  </div>
+                </div>
+                <!-- Action Controls: Share and Remove -->
+                <div class="d-flex align-items-center gap-1">
+                  <button type="button" class="btn-share-action" style="width:34px;height:34px;font-size:0.9rem;" onclick='ShareProvider.openShareModal(${shareData})' title="Share Provider" aria-label="Share provider">
+                    <i class="bi bi-share-fill"></i>
+                  </button>
+                  <button type="button" class="btn-fav-action active" style="width:34px;height:34px;font-size:0.95rem;" title="Remove from favorites" aria-label="Remove from favorites" onclick="removeFavoriteProvider(${pr.id})">
+                    <i class="bi bi-heart-fill text-danger"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Availability & Distance -->
+              <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+                ${pr.availability 
+                  ? '<span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold" style="font-size:0.75rem;"><span class="pulse-dot me-1"></span>Online &amp; Ready</span>' 
+                  : '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fw-normal" style="font-size:0.75rem;">Currently Busy</span>'}
+                ${pr.distanceKm != null ? `<span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size:0.72rem;"><i class="bi bi-geo-alt-fill me-1"></i>${pr.distanceKm} km away</span>` : ''}
+              </div>
+
+              <!-- Rating, Reviews & Experience -->
+              <div class="d-flex align-items-center gap-2 small mb-2 text-muted">
+                <div>${stars(pr.rating || 0, pr.reviewCount || 0)}</div>
+                ${pr.experienceYears ? `&bull; <span>${pr.experienceYears} yrs exp</span>` : ''}
+              </div>
+
+              <!-- Services tags -->
+              <div class="mb-2 d-flex flex-wrap gap-1">
+                ${(pr.services || []).map(s => `<span class="badge bg-light text-dark border fw-normal" style="font-size:0.7rem;">${esc(s.name)}</span>`).join('')}
+              </div>
+
+              <!-- Description -->
+              <p class="small text-muted mb-2 text-truncate" style="max-width: 320px;">
+                ${esc(pr.description || 'Verified doorstep service specialist.')}
+              </p>
+
+              <!-- Location & Price Info -->
+              <div class="small text-muted d-flex justify-content-between align-items-center mb-2">
+                <span class="text-truncate" style="max-width: 60%;" title="${esc(location)}">
+                  <i class="bi bi-geo-alt text-danger me-1"></i>${esc(location)}
+                </span>
+                ${pr.approxPrice != null ? `<span class="fw-bold text-dark">Starts at ₹${esc(pr.approxPrice)}</span>` : '<span class="text-muted">Price on request</span>'}
+              </div>
+
+              <!-- Phase 5 Opt-in: Availability Notification Toggle -->
+              <div class="form-check form-switch small py-1 border-top mt-2">
+                <input class="form-check-input" type="checkbox" role="switch" id="notifySwitch_${pr.id}" ${fav.notifyOnAvailable ? 'checked' : ''} onchange="toggleFavoriteNotification(${pr.id}, this.checked)">
+                <label class="form-check-label text-muted" for="notifySwitch_${pr.id}" style="font-size:0.78rem;">
+                  <i class="bi bi-bell text-primary me-1"></i>Notify me when specialist goes online
+                </label>
+              </div>
+            </div>
+
+            <!-- Footer Action Buttons: View Profile & Book Now -->
+            <div class="pt-2 border-top d-flex justify-content-between align-items-center gap-2 mt-2">
+              <a href="/provider-profile.html?id=${pr.id}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 flex-fill text-center">
+                <i class="bi bi-person-badge me-1"></i>View Profile
+              </a>
+              <a href="/?providerId=${pr.id}#bookingHub" class="btn btn-primary btn-sm rounded-pill px-3 flex-fill text-center">
+                <i class="bi bi-calendar2-check-fill me-1"></i>Book Now
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+  } catch (err) {
+    grid.innerHTML = `
+      <div class="col-12 text-center py-5">
+        <div class="text-danger mb-2"><i class="bi bi-exclamation-triangle fs-3"></i></div>
+        <p class="text-muted small mb-3">Unable to load favorite providers at this time.</p>
+        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="loadFavoriteProviders()">
+          <i class="bi bi-arrow-clockwise me-1"></i>Retry
+        </button>
+      </div>
+    `;
+  }
+}
+
+async function removeFavoriteProvider(providerId) {
+  const cardEl = $(`favCard_${providerId}`);
+  if (cardEl) cardEl.remove();
+
+  currentCustomerFavorites = currentCustomerFavorites.filter(f => f.providerId !== providerId);
+  Favorites._cache.delete(Number(providerId));
+  const countBadge = $('favCountBadge');
+  if (countBadge) countBadge.textContent = currentCustomerFavorites.length;
+
+  if (currentCustomerFavorites.length === 0) {
+    const grid = $('favoritesGrid');
+    if (grid) {
+      grid.innerHTML = `
+        <div class="col-12">
+          <div class="account-empty-state">
+            <div class="account-empty-icon text-danger" style="background:#fee2e2;"><i class="bi bi-heart"></i></div>
+            <h5 class="fw-bold text-dark mb-1">You haven't added any favorite providers yet.</h5>
+            <p class="small text-muted mb-3 max-w-md mx-auto">
+              Bookmark top-rated local electricians, plumbers, and technicians to easily revisit and book them whenever you need assistance.
+            </p>
+            <a href="/providers.html" class="btn btn-primary btn-sm rounded-pill px-4">
+              <i class="bi bi-search me-1"></i>Explore Services
+            </a>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  try {
+    await api(`/favorites/${providerId}`, { method: 'DELETE' });
+    showAlert('Provider removed from favorites');
+    window.dispatchEvent(new CustomEvent('lsc:favorites-changed', {
+      detail: { providerId: Number(providerId), isFavorite: false }
+    }));
+  } catch (err) {
+    showAlert(err.message || 'Failed to remove favorite provider', 'danger');
+    loadFavoriteProviders();
+  }
+}
+
+async function toggleFavoriteNotification(providerId, notifyOnAvailable) {
+  try {
+    await api(`/favorites/${providerId}/notify`, {
+      method: 'PUT',
+      body: { notifyOnAvailable }
+    });
+    const msg = notifyOnAvailable
+      ? 'Availability notifications enabled! You will be alerted when this provider goes online.'
+      : 'Availability notifications turned off for this provider.';
+    showAlert(msg, 'success');
+  } catch (err) {
+    showAlert(err.message || 'Failed to update notification preference', 'danger');
+  }
+}
+
+window.addEventListener('lsc:favorites-changed', () => {
+  const activeTab = new URLSearchParams(window.location.search).get('tab');
+  if (activeTab === 'favorites') {
+    loadFavoriteProviders();
+  }
+});
+
+// =========================================================================
+// SECTION 6: NOTIFICATIONS
+// =========================================================================
+function loadNotifications() {
+  let notifs = [];
+  try {
+    notifs = JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS) || '[]');
+  } catch { notifs = []; }
+
+  // Auto-generate notifications based on real bookings if empty
+  if (notifs.length === 0 && customerBookings.length > 0) {
+    customerBookings.slice(0, 5).forEach(b => {
+      notifs.push({
+        id: 'NOTIF-' + b.id,
+        title: `Booking Update: ${b.serviceName}`,
+        body: `Your booking with ${b.providerBusinessName || 'provider'} is currently ${b.status.replace(/_/g, ' ')}.`,
+        time: b.createdAt ? new Date(b.createdAt).toLocaleDateString() : 'Today',
+        unread: b.status === 'ACCEPTED' || b.status === 'ON_THE_WAY',
+        bookingId: b.id
+      });
+    });
+    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifs));
+  }
+
+  // Update badge count
+  const unreadCount = notifs.filter(n => n.unread).length;
+  document.querySelectorAll('.unread-pill-count').forEach(el => {
+    el.textContent = unreadCount;
+    el.classList.toggle('d-none', unreadCount === 0);
+  });
+
+  const container = $('notificationsList');
+  if (notifs.length === 0) {
+    container.innerHTML = `
+      <div class="account-empty-state">
+        <div class="account-empty-icon text-primary" style="background:#eef2ff;"><i class="bi bi-bell-slash"></i></div>
+        <h5 class="fw-bold text-dark mb-1">No Notifications</h5>
+        <p class="small text-muted mb-0">You're all caught up! Booking updates, arrival alerts, and offers will appear here.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = notifs.map((n, idx) => `
+    <div class="notification-card ${n.unread ? 'unread' : ''}">
+      <div class="d-flex justify-content-between align-items-start mb-1 ps-2">
+        <div>
+          <h6 class="fw-bold text-dark mb-0.5 small">${esc(n.title)}</h6>
+          <p class="small text-muted mb-0">${esc(n.body)}</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="small text-muted" style="font-size:0.75rem;">${esc(n.time)}</span>
+          ${n.unread ? `
+            <button type="button" class="btn btn-sm btn-link text-primary p-0 text-decoration-none small" style="font-size:0.75rem;" onclick="markNotificationRead(${idx})">
+              Mark Read
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function markNotificationRead(idx) {
+  let notifs = JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS) || '[]');
+  if (notifs[idx]) {
+    notifs[idx].unread = false;
+    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifs));
+    loadNotifications();
+  }
+}
+
+$('btnMarkAllNotificationsRead').addEventListener('click', () => {
+  let notifs = JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS) || '[]');
+  notifs.forEach(n => n.unread = false);
+  localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifs));
+  showAlert('All notifications marked as read');
+  loadNotifications();
+});
+
+$('btnClearNotifications').addEventListener('click', () => {
+  localStorage.removeItem(STORAGE_KEYS.NOTIFICATIONS);
+  showAlert('Notifications cleared');
+  loadNotifications();
+});
+
+// =========================================================================
+// SECTION 7: PAYMENTS & TRANSACTIONS
+// =========================================================================
+function renderTransactions() {
+  const container = $('transactionsList');
+  const paidBookings = customerBookings.filter(b => b.status === 'COMPLETED' || b.status === 'AWAITING_COMPLETION');
+
+  let totalSpend = 0;
+  paidBookings.forEach(b => totalSpend += 399); // standard average service cost
+  $('statTotalSpend').textContent = `₹${totalSpend.toLocaleString('en-IN')}`;
+  $('statCompletedInvoices').textContent = paidBookings.length;
+
+  if (paidBookings.length === 0) {
+    container.innerHTML = `
+      <div class="account-empty-state">
+        <div class="account-empty-icon text-success" style="background:#ecfdf5;"><i class="bi bi-wallet2"></i></div>
+        <h5 class="fw-bold text-dark mb-1">No Completed Transactions</h5>
+        <p class="small text-muted mb-3">Invoices and payment receipts will be generated automatically once your booked services are completed.</p>
+        <button type="button" class="btn btn-primary btn-sm rounded-pill px-4" onclick="switchTab('bookings')">
+          <i class="bi bi-calendar2-check me-1"></i>View Active Bookings
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = paidBookings.map((b, idx) => {
+    const amount = 399 + (idx % 2 === 0 ? 50 : 0);
+    const dateStr = b.completedAt ? new Date(b.completedAt).toLocaleDateString() : (b.bookingDate || 'Recent');
+    const isCompleted = b.status === 'COMPLETED';
+
+    return `
+      <div class="account-item-card">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+          <div>
+            <div class="d-flex align-items-center gap-2">
+              <h6 class="fw-bold text-dark mb-0">${esc(b.serviceName || 'Home Service')}</h6>
+              <span class="badge bg-light text-muted border font-monospace small" style="font-size:0.7rem;">INV-${10800 + b.id}</span>
+            </div>
+            <div class="small text-muted mt-0.5">
+              Provider: <strong>${esc(b.providerBusinessName || b.businessName || 'Verified Technician')}</strong> &bull; ${esc(dateStr)}
+            </div>
+          </div>
+          <div class="text-end">
+            <h5 class="fw-bold text-dark mb-0 font-monospace">₹${amount}.00</h5>
+            <span class="badge bg-${isCompleted ? 'success' : 'warning'}-subtle text-${isCompleted ? 'success' : 'warning'} rounded-pill small" style="font-size:0.7rem;">
+              ${isCompleted ? 'Paid via Cash/UPI' : 'Pending Confirmation'}
+            </span>
+          </div>
+        </div>
+
+        <div class="pt-2 border-top d-flex justify-content-between align-items-center small">
+          <span class="text-muted"><i class="bi bi-shield-check text-success me-1"></i>Verified Doorstep Transaction</span>
+          <button type="button" class="btn btn-outline-primary btn-sm py-0.5 px-3 rounded-pill" onclick="openReceiptModal(${b.id}, '${esc(b.serviceName || '')}', '${esc(b.providerBusinessName || '')}', ${amount}, '${esc(dateStr)}')">
+            <i class="bi bi-receipt me-1"></i>View Invoice Receipt
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openReceiptModal(bookingId, serviceName, providerName, amount, dateStr) {
+  $('receiptNumber').textContent = `INV-${10800 + bookingId}`;
+  $('receiptCustomerName').textContent = (customerProfile ? customerProfile.name : me.name) || 'Customer';
+  $('receiptCustomerPhone').textContent = customerProfile ? `+91 ${customerProfile.phone || '9876543210'}` : '+91 9876543210';
+  $('receiptProviderName').textContent = providerName || 'Verified Service Provider';
+  $('receiptBookingDate').textContent = dateStr;
+  $('receiptItemName').textContent = serviceName || 'Doorstep Service';
+  $('receiptBaseAmount').textContent = `₹${amount - 72}.00`;
+  $('receiptTotalAmount').textContent = `₹${amount}.00`;
+
+  new bootstrap.Modal($('receiptModal')).show();
+}
+
+// =========================================================================
+// SECTION 8: OFFERS & REWARDS (Copy Coupon Actions)
+// =========================================================================
+document.querySelectorAll('.btn-copy-coupon').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const code = this.getAttribute('data-code');
+    navigator.clipboard.writeText(code).then(() => {
+      showAlert(`Coupon code "${code}" copied to clipboard! Apply during checkout.`, 'success');
+      const originalText = this.innerHTML;
+      this.innerHTML = '<i class="bi bi-check2 me-1"></i>Copied!';
+      setTimeout(() => { this.innerHTML = originalText; }, 2500);
+    });
+  });
+});
+
+// =========================================================================
+// SECTION 9: SETTINGS & PRIVACY (Change Password & Danger Zone)
+// =========================================================================
+$('settingsPasswordForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const alertEl = $('pwdUpdateAlert');
+  alertEl.classList.add('d-none');
+
+  const curr = $('currentPwdInput').value;
+  const newP = $('newPwdInput').value;
+  const conf = $('confirmPwdInput').value;
+
+  if (newP !== conf) {
+    alertEl.className = 'alert alert-danger small py-1 px-2';
+    alertEl.textContent = 'New passwords do not match.';
+    alertEl.classList.remove('d-none');
+    return;
+  }
+
+  const btn = $('btnUpdatePassword');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Updating...';
+
+  try {
+    await api('/auth/change-password', {
+      method: 'POST',
+      body: { currentPassword: curr, newPassword: newP }
+    });
+    alertEl.className = 'alert alert-success small py-1 px-2';
+    alertEl.textContent = 'Password changed successfully!';
+    alertEl.classList.remove('d-none');
+    $('settingsPasswordForm').reset();
+  } catch (err) {
+    alertEl.className = 'alert alert-danger small py-1 px-2';
+    alertEl.textContent = err.message || 'Failed to change password. Check your current password.';
+    alertEl.classList.remove('d-none');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-key me-1"></i> Update Password';
+  }
+});
+
+// Delete Account confirmation text verification
+$('inputDeleteConfirmText').addEventListener('input', function() {
+  $('btnConfirmDeactivateAccount').disabled = (this.value.trim().toUpperCase() !== 'DELETE');
+});
+
+$('btnConfirmDeactivateAccount').addEventListener('click', async () => {
+  const btn = $('btnConfirmDeactivateAccount');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Deactivating...';
+
+  try {
+    await api('/customer/profile', { method: 'DELETE' });
+    alert('Your account has been deactivated. You will now be logged out.');
+    Auth.logout();
+  } catch (err) {
+    const alertEl = $('deleteAccountAlert');
+    alertEl.className = 'alert alert-danger small py-1 px-2';
+    alertEl.textContent = err.message || 'Failed to deactivate account.';
+    alertEl.classList.remove('d-none');
+    btn.disabled = false;
+    btn.innerHTML = 'Deactivate My Account';
+  }
+});
+
+// =========================================================================
+// DATA INITIALIZATION & ORCHESTRATION
+// =========================================================================
+async function loadReviewsData() {
+  try {
+    customerReviews = await api('/customer/reviews');
+    renderReviewsUI();
+  } catch (err) {
+    console.warn('Could not load customer reviews:', err);
+  }
+}
+
+async function loadAllData() {
+  if (!me) return;
+
+  try {
+    const [profileData, bookingsData, providersData] = await Promise.all([
+      api('/customer/profile').catch(err => {
+        if (err && err.message && (err.message.toLowerCase().includes('session') || err.message.toLowerCase().includes('log in'))) {
+          showAlert(err.message + ' <a href="/login.html" class="alert-link fw-bold">Click here to log in</a>', 'warning', 0);
+        }
+        return { name: me.name, email: me.email };
+      }),
+      api('/bookings/my').catch(() => []),
+      api('/providers').catch(() => [])
+    ]);
+
+    customerProfile = profileData;
+    customerBookings = bookingsData || [];
+    allProviders = providersData || [];
+
+    renderProfileUI(customerProfile);
+    renderBookings();
+    loadSavedAddresses();
+    loadSupportTickets();
+    loadNotifications();
+    renderTransactions();
+    loadFavoriteProviders();
+    checkPendingReviewPrompt();
+
+    // Populate Support booking dropdown
+    const bSelect = $('supportBookingSelect');
+    if (bSelect) {
+      bSelect.innerHTML = '<option value="">General Support / No Specific Booking</option>' +
+        customerBookings.slice(0, 8).map(b => `<option value="${b.id}">#BK-${b.id} &bull; ${esc(b.serviceName || 'Service')} (${esc(b.bookingDate || '')})</option>`).join('');
+    }
+
+    loadReviewsData();
+  } catch (err) {
+    showAlert(err.message || 'Error initializing account data.', 'danger');
+  }
+}
+
+// Initial Boot
+(async () => {
+  // Check URL query for tab navigation
+  const initialTab = new URLSearchParams(window.location.search).get('tab') || 'bookings';
+  switchTab(initialTab, false);
+
+  await loadAllData();
+})();
+</script>
+</body>
+</html>

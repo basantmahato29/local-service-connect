@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign In · Local Service Connect</title>
+  <meta name="description" content="Sign in to your Local Service Connect account to book trusted home service professionals, manage appointments, and track service requests.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <style>
+    /* Critical Inline Failsafe - Ensures split layout & image contain never break */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .auth-split-wrapper {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+      overflow-x: hidden;
+      background: #ffffff;
+    }
+    .auth-branding-pane {
+      flex: 0 0 50%;
+      width: 50%;
+      min-height: 100vh;
+      background: linear-gradient(140deg, #150d32 0%, #2a085c 42%, #4338ca 85%, #581c87 100%);
+      color: #ffffff;
+      padding: 3rem 3.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-sizing: border-box;
+      position: relative;
+    }
+    .auth-form-pane {
+      flex: 0 0 50%;
+      width: 50%;
+      min-height: 100vh;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 2.5rem;
+      box-sizing: border-box;
+    }
+    .auth-form-container {
+      width: 100%;
+      max-width: 420px;
+      margin: auto;
+    }
+    .auth-illustration-wrap {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 16px;
+      overflow: hidden;
+      margin: 0.35rem 0;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.4);
+    }
+    .auth-illustration-img {
+      width: 100%;
+      height: auto;
+      max-height: 240px;
+      object-fit: contain;
+      display: block;
+    }
+    @media (max-width: 991.98px) {
+      .auth-split-wrapper {
+        flex-direction: column;
+      }
+      .auth-branding-pane {
+        flex: none;
+        width: 100%;
+        min-height: auto;
+        padding: 2.25rem 1.5rem 1.75rem;
+      }
+      .auth-illustration-wrap {
+        display: none;
+      }
+      .auth-form-pane {
+        flex: none;
+        width: 100%;
+        min-height: auto;
+        padding: 2.5rem 1.5rem 3.5rem;
+      }
+    }
+  </style>
+</head>
+<body class="bg-white">
+
+<div class="auth-split-wrapper">
+  
+  <!-- LEFT BRANDING PANEL (50% on desktop, stacks on mobile) -->
+  <aside class="auth-branding-pane" aria-label="Local Service Connect Overview">
+    
+    <!-- Top badge -->
+    <div>
+      <div class="auth-brand-badge">
+        <i class="bi bi-shield-fill-check"></i>
+        <span>Verified Local Service Platform</span>
+      </div>
+    </div>
+
+    <!-- Center Branding Content -->
+    <div class="auth-branding-content">
+      <h1 class="auth-branding-title">Your Home, Our Priority.</h1>
+      <p class="auth-branding-description">
+        Find trusted local professionals for everyday services. Book easily, manage your appointments, and get the help you need.
+      </p>
+
+      <!-- Services Visual Asset -->
+      <div class="auth-illustration-wrap" aria-hidden="true">
+        <img 
+          src="img/auth-illustration.jpg" 
+          alt="Modern Home Services and Professional Maintenance" 
+          class="auth-illustration-img"
+          loading="eager"
+          onerror="this.src='/img/auth-illustration.jpg'"
+        >
+      </div>
+
+      <!-- 3 Key Benefit Cards -->
+      <div class="auth-benefits-grid">
+        <div class="auth-benefit-card">
+          <div class="auth-benefit-icon">
+            <i class="bi bi-patch-check-fill"></i>
+          </div>
+          <div class="auth-benefit-text">Trusted Local Professionals</div>
+        </div>
+
+        <div class="auth-benefit-card">
+          <div class="auth-benefit-icon">
+            <i class="bi bi-lightning-charge-fill"></i>
+          </div>
+          <div class="auth-benefit-text">Quick &amp; Easy Booking</div>
+        </div>
+
+        <div class="auth-benefit-card">
+          <div class="auth-benefit-icon">
+            <i class="bi bi-shield-lock-fill"></i>
+          </div>
+          <div class="auth-benefit-text">Secure Account Access</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Branding Footnote -->
+    <div class="auth-branding-footer d-flex align-items-center justify-content-between">
+      <span>&copy; 2026 Local Service Connect</span>
+      <span class="d-inline-flex align-items-center gap-1">
+        <i class="bi bi-shield-shaded text-info"></i>
+        <span>256-Bit SSL Encrypted</span>
+      </span>
+    </div>
+
+  </aside>
+
+  <!-- RIGHT LOGIN PANEL (50% on desktop) -->
+  <main class="auth-form-pane" id="mainContent">
+    <div class="auth-form-container">
+      
+      <!-- Brand Logo & Welcome Header -->
+      <header class="auth-header">
+        <a href="/" class="auth-logo-link" aria-label="Return to Local Service Connect Homepage">
+          <span class="brand-icon-box">
+            <i class="bi bi-shield-fill-check"></i>
+          </span>
+          <span class="brand-title">Local Service Connect</span>
+        </a>
+        <h2 class="auth-welcome-title">Welcome Back!</h2>
+        <p class="auth-welcome-subtitle">Sign in to manage your services and bookings.</p>
+      </header>
+
+      <!-- Error Alert Box -->
+      <div id="err" class="alert auth-alert d-none" role="alert" aria-live="assertive">
+        <i class="bi bi-exclamation-triangle-fill flex-shrink-0 text-danger fs-5"></i>
+        <div id="errText" class="flex-grow-1"></div>
+      </div>
+
+      <!-- Login Form -->
+      <form id="f" novalidate autocomplete="on">
+        
+        <!-- Email Input -->
+        <div class="auth-form-group">
+          <label class="auth-form-label" for="email">
+            <i class="bi bi-envelope-fill text-primary"></i>
+            <span>Email Address</span>
+          </label>
+          <div class="auth-input-wrapper">
+            <i class="bi bi-envelope auth-input-icon" aria-hidden="true"></i>
+            <input 
+              id="email" 
+              name="email"
+              type="email" 
+              class="form-control auth-input" 
+              placeholder="name@example.com" 
+              required 
+              autocomplete="email" 
+              spellcheck="false"
+              aria-describedby="emailHint"
+            >
+          </div>
+          <div id="emailHint" class="visually-hidden">Enter your registered email address</div>
+        </div>
+
+        <!-- Password Input with Toggle -->
+        <div class="auth-form-group">
+          <label class="auth-form-label" for="password">
+            <i class="bi bi-lock-fill text-primary"></i>
+            <span>Password</span>
+          </label>
+          <div class="auth-input-wrapper">
+            <i class="bi bi-lock auth-input-icon" aria-hidden="true"></i>
+            <input 
+              id="password" 
+              name="password"
+              type="password" 
+              class="form-control auth-input pe-5" 
+              placeholder="Enter your password" 
+              required 
+              autocomplete="current-password"
+              aria-describedby="passwordHint"
+            >
+            <button 
+              type="button" 
+              class="auth-password-toggle" 
+              id="togglePasswordBtn" 
+              aria-label="Show password as plain text"
+              title="Show/Hide Password"
+            >
+              <i class="bi bi-eye" id="togglePasswordIcon" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div id="passwordHint" class="visually-hidden">Enter your account password</div>
+        </div>
+
+        <!-- Remember Me & Forgot Password Row -->
+        <div class="auth-actions-row">
+          <div class="form-check mb-0">
+            <input class="form-check-input" type="checkbox" id="rememberMe">
+            <label class="form-check-label auth-checkbox-label" for="rememberMe">
+              Remember me
+            </label>
+          </div>
+
+          <button type="button" class="auth-forgot-link" id="forgotPasswordBtn">
+            Forgot Password?
+          </button>
+        </div>
+
+        <!-- Primary Sign In Button -->
+        <button id="btn" type="submit" class="btn btn-primary auth-submit-btn">
+          <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
+          <span>Sign In</span>
+        </button>
+
+      </form>
+
+      <!-- Registration Route Link -->
+      <footer class="auth-footer-prompt">
+        <span>Don't have an account?</span>
+        <a id="regLink" href="/register.html" class="ms-1">Create Account</a>
+      </footer>
+
+    </div>
+  </main>
+
+</div>
+
+<!-- Forgot Password Help Modal -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="forgotPasswordModalLabel">
+          <i class="bi bi-shield-lock text-primary"></i>
+          <span>Password Recovery</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body pt-3 pb-4">
+        <p class="text-muted small mb-3">
+          For your account security, enter your registered email address below. We'll verify your account credentials and send secure reset instructions.
+        </p>
+
+        <div id="resetFeedback" class="alert alert-success d-none small mb-3"></div>
+
+        <form id="resetForm">
+          <div class="mb-3">
+            <label for="resetEmail" class="form-label small fw-semibold text-dark">Registered Email</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+              <input type="email" class="form-control border-start-0" id="resetEmail" placeholder="you@example.com" required>
+            </div>
+          </div>
+          <div class="d-flex gap-2 justify-content-end">
+            <button type="button" class="btn btn-light px-3 fw-semibold" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" id="resetSubmitBtn" class="btn btn-primary px-3 fw-bold">
+              <i class="bi bi-send me-1"></i> Send Reset Link
+            </button>
+          </div>
+        </form>
+
+        <div class="mt-4 pt-3 border-top text-center text-muted small">
+          Need immediate support? Contact our desk at 
+          <a href="mailto:support@localserviceconnect.com" class="text-primary fw-semibold text-decoration-none">support@localserviceconnect.com</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script>
+(() => {
+  'use strict';
+
+  // Elements
+  const form = document.getElementById('f');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const toggleBtn = document.getElementById('togglePasswordBtn');
+  const toggleIcon = document.getElementById('togglePasswordIcon');
+  const rememberCheckbox = document.getElementById('rememberMe');
+  const submitBtn = document.getElementById('btn');
+  const errBox = document.getElementById('err');
+  const errText = document.getElementById('errText');
+  const regLink = document.getElementById('regLink');
+  const forgotBtn = document.getElementById('forgotPasswordBtn');
+
+  // Handle URL redirect query param
+  const urlParams = new URLSearchParams(window.location.search);
+  const redirect = urlParams.get('redirect');
+  if (redirect && regLink) {
+    regLink.href = '/register.html?redirect=' + encodeURIComponent(redirect);
+  }
+  if (urlParams.get('expired')) {
+    displayError('Your session has expired. Please enter your credentials to log in again.');
+  }
+
+  // Restore remembered email if previously checked
+  try {
+    const rememberedEmail = localStorage.getItem('lsc_remembered_email');
+    if (rememberedEmail) {
+      emailInput.value = rememberedEmail;
+      rememberCheckbox.checked = true;
+      passwordInput.focus();
+    }
+  } catch (e) {
+    console.debug('Storage access not available', e);
+  }
+
+  // Password Visibility Toggle
+  if (toggleBtn && passwordInput && toggleIcon) {
+    toggleBtn.addEventListener('click', () => {
+      const isPassword = passwordInput.getAttribute('type') === 'password';
+      passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+      toggleIcon.className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
+      toggleBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password as plain text');
+    });
+  }
+
+  // Helper to show errors
+  function displayError(msg) {
+    if (!errBox || !errText) return;
+    errText.textContent = msg || 'An error occurred during authentication. Please check your credentials.';
+    errBox.classList.remove('d-none');
+    errBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function clearError() {
+    if (errBox) {
+      errBox.classList.add('d-none');
+    }
+    if (errText) {
+      errText.textContent = '';
+    }
+  }
+
+  // Handle Form Submission
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearError();
+
+    const emailVal = emailInput.value.trim();
+    const passVal = passwordInput.value;
+
+    // Client-side validations
+    if (!emailVal) {
+      displayError('Please enter your email address.');
+      emailInput.focus();
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailVal)) {
+      displayError('Please enter a valid email address (e.g., name@example.com).');
+      emailInput.focus();
+      return;
+    }
+
+    if (!passVal) {
+      displayError('Please enter your password.');
+      passwordInput.focus();
+      return;
+    }
+
+    // Set loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span><span>Signing In...</span>';
+
+    try {
+      if (typeof api !== 'function') {
+        throw new Error('Authentication service unavailable. Please refresh the page.');
+      }
+
+      const d = await api('/auth/login', {
+        method: 'POST',
+        body: { email: emailVal, password: passVal }
+      });
+
+      // Save user session
+      Auth.save(d);
+
+      // Handle Remember Me preference
+      try {
+        if (rememberCheckbox.checked) {
+          localStorage.setItem('lsc_remembered_email', emailVal);
+        } else {
+          localStorage.removeItem('lsc_remembered_email');
+        }
+      } catch (err) {
+        console.debug('Storage error:', err);
+      }
+
+      // Successful redirect: Role-based landing page by default
+      let targetUrl = (d.role === 'PROVIDER') ? '/provider/home' : (d.role === 'ADMIN' ? '/admin/dashboard.html' : '/');
+      const cleanRedirect = redirect ? decodeURIComponent(redirect).trim() : '';
+
+      // Secure handling of explicitly requested protected routes (prevent open redirects)
+      if (cleanRedirect && cleanRedirect.startsWith('/') && !cleanRedirect.startsWith('//') && !cleanRedirect.startsWith('/login') && !cleanRedirect.startsWith('/register')) {
+        if (cleanRedirect !== '/' && !cleanRedirect.startsWith('/index.html')) {
+          if (cleanRedirect.startsWith('/admin')) {
+            targetUrl = (d.role === 'ADMIN') ? cleanRedirect : targetUrl;
+          } else if (cleanRedirect.startsWith('/provider/') || cleanRedirect.includes('provider-dashboard') || cleanRedirect.includes('provider-profile-manage') || cleanRedirect.includes('provider-home')) {
+            targetUrl = (d.role === 'PROVIDER') ? cleanRedirect : targetUrl;
+          } else if (cleanRedirect.startsWith('/my-account')) {
+            targetUrl = (d.role === 'CUSTOMER') ? cleanRedirect : targetUrl;
+          } else {
+            targetUrl = cleanRedirect;
+          }
+        }
+      }
+      window.location.href = targetUrl;
+
+    } catch (ex) {
+      displayError(ex.message || 'Invalid email or password. Please try again.');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> <span>Sign In</span>';
+      passwordInput.value = '';
+      passwordInput.focus();
+    }
+  });
+
+  // Forgot Password Modal trigger
+  const forgotModalEl = document.getElementById('forgotPasswordModal');
+  let forgotModalInstance = null;
+  if (forgotModalEl && window.bootstrap) {
+    forgotModalInstance = new bootstrap.Modal(forgotModalEl);
+  }
+
+  if (forgotBtn && forgotModalInstance) {
+    forgotBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const currentEmail = emailInput.value.trim();
+      const resetEmailInput = document.getElementById('resetEmail');
+      if (resetEmailInput && currentEmail) {
+        resetEmailInput.value = currentEmail;
+      }
+      const feedback = document.getElementById('resetFeedback');
+      if (feedback) feedback.classList.add('d-none');
+      forgotModalInstance.show();
+    });
+  }
+
+  // Handle Forgot Password Form Submission
+  const resetForm = document.getElementById('resetForm');
+  if (resetForm) {
+    resetForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const resetEmail = document.getElementById('resetEmail').value.trim();
+      const feedback = document.getElementById('resetFeedback');
+      const resetBtn = document.getElementById('resetSubmitBtn');
+
+      if (!resetEmail) return;
+
+      resetBtn.disabled = true;
+      resetBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Sending...';
+
+      setTimeout(() => {
+        resetBtn.disabled = false;
+        resetBtn.innerHTML = '<i class="bi bi-send me-1"></i> Send Reset Link';
+        if (feedback) {
+          feedback.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> If an account exists for <strong>' + 
+            (typeof esc === 'function' ? esc(resetEmail) : resetEmail) + '</strong>, password recovery instructions have been dispatched. For urgent help, contact support@localserviceconnect.com.';
+          feedback.classList.remove('d-none');
+        }
+      }, 700);
+    });
+  }
+
+})();
+</script>
+</body>
+</html>

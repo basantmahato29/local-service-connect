@@ -1,0 +1,2235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Account · Service Provider Portal · Local Service Connect</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <style>
+    .provider-manage-hero {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    .provider-manage-avatar-box {
+      width: 104px;
+      height: 104px;
+      border-radius: 20px;
+      object-fit: cover;
+      background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.75rem;
+      font-weight: 800;
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.25);
+      border: 3px solid #ffffff;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .avatar-edit-overlay {
+      position: absolute;
+      bottom: -6px;
+      right: -6px;
+      background: #4f46e5;
+      color: #ffffff;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+    .avatar-edit-overlay:hover {
+      background: #3730a3;
+      transform: scale(1.1);
+    }
+    .profile-card {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.75rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .profile-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: var(--shadow-md);
+    }
+    .profile-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #f1f5f9;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .profile-card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0;
+    }
+    .profile-info-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .profile-info-value {
+      font-size: 0.95rem;
+      color: #0f172a;
+      font-weight: 600;
+    }
+    .service-item-row {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      transition: all 0.2s ease;
+      margin-bottom: 0.75rem;
+    }
+    .service-item-row:hover {
+      background: #ffffff;
+      border-color: #c7d2fe;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08);
+    }
+    .area-badge-chip {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      color: #1e293b;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.4rem 0.85rem;
+      border-radius: var(--radius-pill);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .area-remove-btn {
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 0.9rem;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .area-remove-btn:hover {
+      color: #ef4444;
+    }
+    .portfolio-grid-item {
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+    .portfolio-grid-item:hover {
+      border-color: #818cf8;
+      box-shadow: var(--shadow-md);
+    }
+    .portfolio-img-dual {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: 140px;
+    }
+    .portfolio-img-dual img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .switch-avail-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-lg);
+      padding: 0.75rem 1.25rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+    }
+  </style>
+</head>
+<body class="bg-light">
+<div id="nav"></div>
+
+<div class="container py-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="/provider/home" class="text-decoration-none">Provider Home</a></li>
+      <li class="breadcrumb-item"><a href="/provider-dashboard.html" class="text-decoration-none">Dashboard</a></li>
+      <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">My Account</li>
+    </ol>
+  </nav>
+
+  <!-- Global Feedback Alerts -->
+  <div id="globalAlert" class="alert d-none shadow-sm mb-4" role="alert"></div>
+
+  <!-- Loading State -->
+  <div id="profileLoader" class="text-center py-5 text-muted">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-2 mb-0 fw-semibold">Loading your provider profile and business credentials...</p>
+  </div>
+
+  <!-- Error State (hidden by default) -->
+  <div id="profileErrorState" class="card border-0 shadow-sm rounded-4 p-5 text-center d-none mb-4">
+    <div class="mb-3">
+      <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+    </div>
+    <h3 class="h5 fw-bold text-dark mb-2">Unable to Load Provider Profile</h3>
+    <p class="text-muted small mx-auto mb-4" id="profileErrorMsg" style="max-width: 480px;">An error occurred while loading your profile information.</p>
+    <div>
+      <button type="button" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-xs" onclick="loadMyProfile()">
+        <i class="bi bi-arrow-clockwise me-1"></i>Retry Loading Profile
+      </button>
+    </div>
+  </div>
+
+  <!-- Profile Content Container (hidden until loaded) -->
+  <div id="profileContent" class="d-none">
+
+    <!-- 1. MY PROFILE HEADER (Requirement 2) -->
+    <div class="provider-manage-hero">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-4">
+        
+        <!-- Left: Photo/Logo + Identity Details -->
+        <div class="d-flex align-items-center gap-4 flex-wrap flex-sm-nowrap">
+          <div class="position-relative">
+            <div id="heroAvatarContainer">
+              <!-- Rendered dynamically -->
+            </div>
+            <button type="button" class="avatar-edit-overlay" id="btnChangePhoto" title="Upload/Change Profile Photo or Business Logo" aria-label="Change photo">
+              <i class="bi bi-camera-fill"></i>
+            </button>
+          </div>
+
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              <span id="heroVerifBadge"></span>
+              <span class="badge bg-light text-secondary border">Business ID: #<span id="heroProviderId">--</span></span>
+            </div>
+            
+            <h1 class="h3 fw-bold text-dark mb-1" id="heroBizName">--</h1>
+            <div class="text-muted small mb-2">
+              <i class="bi bi-person-badge me-1"></i>Owner: <span class="fw-semibold text-dark" id="heroOwnerName">--</span>
+              <span class="mx-2 text-muted">&bull;</span>
+              <i class="bi bi-envelope me-1"></i><span id="heroEmail">--</span>
+            </div>
+
+            <div class="d-flex align-items-center gap-3 text-muted small flex-wrap">
+              <span><i class="bi bi-star-fill text-warning me-1"></i><strong class="text-dark" id="heroRating">0.0</strong> (<span id="heroReviewCount">0</span> reviews)</span>
+              <span>&bull;</span>
+              <span><i class="bi bi-briefcase-fill text-primary me-1"></i><strong class="text-dark" id="heroCompletedJobs">0</strong> completed jobs</span>
+              <span>&bull;</span>
+              <span><i class="bi bi-geo-alt-fill text-danger me-1"></i><span id="heroAreasSummary">--</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Real-time Online Availability Toggle & Action Buttons -->
+        <div class="d-flex flex-column align-items-sm-end gap-3 w-100 w-sm-auto">
+          <div class="switch-avail-box">
+            <div>
+              <div class="small fw-bold text-dark" id="availStatusLabel">Online &amp; Accepting Jobs</div>
+              <div class="text-muted" style="font-size: 0.75rem;" id="availStatusDesc">Customers can find and book your services now</div>
+            </div>
+            <div class="form-check form-switch m-0">
+              <input class="form-check-input" type="checkbox" role="switch" id="availSwitch" style="width: 2.75rem; height: 1.4rem; cursor: pointer;">
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 w-100 justify-content-sm-end">
+            <button type="button" class="btn btn-outline-primary fw-semibold btn-sm px-3" id="btnQuickEdit">
+              <i class="bi bi-pencil-square me-1"></i> Edit Profile
+            </button>
+            <a href="/provider-profile.html" target="_blank" class="btn btn-primary fw-semibold btn-sm px-3 shadow-sm" id="btnViewPublic" title="Preview what customers see on your public profile page">
+              <i class="bi bi-box-arrow-up-right me-1"></i> Preview Public Profile
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 2-COLUMN LAYOUT FOR MANAGEMENT SECTIONS -->
+    <div class="row g-4">
+
+      <!-- LEFT COLUMN: Profile Details, Services & Pricing, Areas, Hours, Portfolio -->
+      <div class="col-lg-8">
+
+        <!-- CARD 1: Personal Information -->
+        <div class="profile-card" id="cardPersonal">
+          <div class="profile-card-header">
+            <h2 class="profile-card-title">
+              <i class="bi bi-person-vcard text-primary"></i> Personal Information
+            </h2>
+            <button type="button" class="btn btn-sm btn-outline-secondary fw-semibold" id="btnEditPersonal">
+              <i class="bi bi-pencil me-1"></i> Edit
+            </button>
+          </div>
+          <div class="row g-3">
+            <div class="col-sm-4">
+              <div class="profile-info-label">Full Name</div>
+              <div class="profile-info-value" id="valPersonalName">--</div>
+            </div>
+            <div class="col-sm-4">
+              <div class="profile-info-label">Email Address</div>
+              <div class="profile-info-value text-truncate" id="valPersonalEmail">--</div>
+              <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.65rem;">Primary Login ID</span>
+            </div>
+            <div class="col-sm-4">
+              <div class="profile-info-label">Contact Phone</div>
+              <div class="profile-info-value" id="valPersonalPhone">--</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 2: Business Information -->
+        <div class="profile-card" id="cardBusiness">
+          <div class="profile-card-header">
+            <h2 class="profile-card-title">
+              <i class="bi bi-building text-primary"></i> Business Information
+            </h2>
+            <button type="button" class="btn btn-sm btn-outline-secondary fw-semibold" id="btnEditBusiness">
+              <i class="bi bi-pencil me-1"></i> Edit
+            </button>
+          </div>
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <div class="profile-info-label">Registered Business Name</div>
+              <div class="profile-info-value" id="valBizName">--</div>
+            </div>
+            <div class="col-sm-6">
+              <div class="profile-info-label">Service Radius</div>
+              <div class="profile-info-value"><span id="valServiceRadius">15</span> km coverage</div>
+            </div>
+            <div class="col-12">
+              <div class="profile-info-label">Primary Business Address / Workshop</div>
+              <div class="profile-info-value text-muted" id="valBizAddress">--</div>
+            </div>
+            <div class="col-12">
+              <div class="d-flex align-items-center gap-3 text-muted small">
+                <span><i class="bi bi-geo me-1"></i>GPS Coordinates: <strong class="text-dark" id="valCoordinates">--</strong></span>
+                <span id="coordsStatusBadge"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 3: About and Experience -->
+        <div class="profile-card" id="cardAbout">
+          <div class="profile-card-header">
+            <h2 class="profile-card-title">
+              <i class="bi bi-card-text text-primary"></i> About &amp; Experience
+            </h2>
+            <button type="button" class="btn btn-sm btn-outline-secondary fw-semibold" id="btnEditAbout">
+              <i class="bi bi-pencil me-1"></i> Edit
+            </button>
+          </div>
+          <div class="mb-3">
+            <div class="profile-info-label">Professional Experience</div>
+            <div class="profile-info-value"><span id="valExperienceYears">0</span> Years in Trade</div>
+          </div>
+          <div>
+            <div class="profile-info-label">Business Description / Bio</div>
+            <p class="text-muted mb-0 leading-relaxed" id="valDescription">--</p>
+          </div>
+        </div>
+
+        <!-- CARD 4: Services and Pricing (Requirement 4) -->
+        <div class="profile-card" id="cardServices">
+          <div class="profile-card-header">
+            <div>
+              <h2 class="profile-card-title">
+                <i class="bi bi-tags-fill text-primary"></i> Services &amp; Transparent Pricing
+              </h2>
+              <div class="small text-muted mt-1">Manage all service packages, pricing notes, and starting fees displayed to customers</div>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-sm btn-outline-secondary fw-semibold" id="btnEditCatalogServices">
+                <i class="bi bi-grid me-1"></i> Categories
+              </button>
+              <button type="button" class="btn btn-sm btn-primary fw-semibold shadow-sm" id="btnAddSubService">
+                <i class="bi bi-plus-lg me-1"></i> Add Service
+              </button>
+            </div>
+          </div>
+
+          <!-- Base rate info -->
+          <div class="p-3 bg-light rounded-3 border mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+              <span class="small text-muted fw-semibold">Global Starting Rate:</span>
+              <span class="fw-bold fs-6 text-dark ms-1" id="valApproxPrice">₹--</span>
+            </div>
+            <div id="serviceCategoriesList" class="d-flex flex-wrap gap-1">
+              <!-- Service badges -->
+            </div>
+          </div>
+
+          <!-- Sub-Services Itemized Table -->
+          <div id="subServicesContainer">
+            <!-- Dynamically populated rows -->
+          </div>
+        </div>
+
+        <!-- CARD 5: Service Areas & Localities (Requirement 5) -->
+        <div class="profile-card" id="cardAreas">
+          <div class="profile-card-header">
+            <div>
+              <h2 class="profile-card-title">
+                <i class="bi bi-geo-alt-fill text-danger"></i> Supported Service Areas
+              </h2>
+              <div class="small text-muted mt-1">Add up to 10 localities or neighborhoods where you accept appointments</div>
+            </div>
+            <span class="badge bg-light text-dark border fw-normal" id="areasCountBadge">0 / 10 Areas</span>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mb-3" id="areasListContainer">
+            <!-- Badges with remove buttons -->
+          </div>
+
+          <!-- Add Area Input Form -->
+          <form id="formAddArea" class="d-flex gap-2 align-items-center flex-wrap">
+            <input type="text" id="inputNewArea" class="form-control form-control-sm" placeholder="e.g. Lalpur, Kanke, Doranda, Morabadi..." style="max-width: 280px;" required>
+            <input type="text" id="inputNewCity" class="form-control form-control-sm" value="Ranchi" style="max-width: 140px;">
+            <button type="submit" class="btn btn-sm btn-outline-primary fw-semibold" id="btnAddArea">
+              <i class="bi bi-plus-circle me-1"></i> Add Area
+            </button>
+          </form>
+
+          <!-- Quick Suggestion Pills -->
+          <div class="mt-3 pt-3 border-top">
+            <span class="small text-muted me-2">Quick Add Common Localities:</span>
+            <div class="d-inline-flex flex-wrap gap-1 mt-1" id="quickAreaPills">
+              <button type="button" class="btn btn-sm btn-light border py-0 px-2 quick-area-btn" data-area="Lalpur">+ Lalpur</button>
+              <button type="button" class="btn btn-sm btn-light border py-0 px-2 quick-area-btn" data-area="Kanke">+ Kanke</button>
+              <button type="button" class="btn btn-sm btn-light border py-0 px-2 quick-area-btn" data-area="Doranda">+ Doranda</button>
+              <button type="button" class="btn btn-sm btn-light border py-0 px-2 quick-area-btn" data-area="Morabadi">+ Morabadi</button>
+              <button type="button" class="btn btn-sm btn-light border py-0 px-2 quick-area-btn" data-area="Bariatu">+ Bariatu</button>
+              <button type="button" class="btn btn-sm btn-light border py-0 px-2 quick-area-btn" data-area="Hinoo">+ Hinoo</button>
+              <button type="button" class="btn btn-sm btn-light border py-0 px-2 quick-area-btn" data-area="Harmu">+ Harmu</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 8: Portfolio and Work Photos -->
+        <div class="profile-card" id="cardPortfolio">
+          <div class="profile-card-header">
+            <div>
+              <h2 class="profile-card-title">
+                <i class="bi bi-images text-primary"></i> Portfolio &amp; Work Demonstrations
+              </h2>
+              <div class="small text-muted mt-1">Showcase before-and-after transformations from completed customer jobs</div>
+            </div>
+            <button type="button" class="btn btn-sm btn-primary fw-semibold" id="btnAddPortfolio">
+              <i class="bi bi-plus-lg me-1"></i> Add Project
+            </button>
+          </div>
+
+          <div class="row g-3" id="portfolioContainer">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: Working Hours, Verification Status, Customer Reviews -->
+      <div class="col-lg-4">
+
+        <!-- CARD 6: Working Hours & Availability (Requirement 5) -->
+        <div class="profile-card" id="cardHours">
+          <div class="profile-card-header">
+            <h2 class="profile-card-title">
+              <i class="bi bi-clock-history text-primary"></i> Working Hours
+            </h2>
+            <button type="button" class="btn btn-sm btn-outline-secondary fw-semibold" id="btnEditHours">
+              <i class="bi bi-pencil me-1"></i> Edit
+            </button>
+          </div>
+          <div class="mb-3">
+            <div class="profile-info-label">Standard Operating Schedule</div>
+            <div class="profile-info-value fs-6" id="valWorkingHours">Mon - Sun: 8:00 AM - 8:00 PM</div>
+          </div>
+          <div class="small text-muted bg-light p-3 rounded-3 border">
+            <i class="bi bi-info-circle text-primary me-1"></i>
+            Customers use your regular business hours for scheduling standard visits. For immediate dispatches, ensure your <strong>Online availability</strong> in the header is turned on.
+          </div>
+        </div>
+
+        <!-- CARD: Account & Security (Requirement 4) -->
+        <div class="profile-card" id="cardSecurity">
+          <div class="profile-card-header">
+            <h2 class="profile-card-title">
+              <i class="bi bi-shield-lock-fill text-primary"></i> Account &amp; Security
+            </h2>
+            <span class="badge bg-success-subtle text-success border border-success-subtle small">
+              <i class="bi bi-shield-check me-1"></i>Protected
+            </span>
+          </div>
+
+          <div class="mb-3">
+            <div class="profile-info-label">Primary Account Email</div>
+            <div class="profile-info-value" id="valSecEmail">--</div>
+            <div class="small text-muted mt-0.5">Used for authentication, notifications, and service dispatches.</div>
+          </div>
+
+          <div class="mb-3">
+            <div class="profile-info-label">Security Credentials</div>
+            <div class="d-flex justify-content-between align-items-center mt-1 p-2.5 bg-light rounded-3 border">
+              <div>
+                <span class="text-dark fw-bold small d-block">Account Password</span>
+                <span class="small text-muted">Protected with BCrypt hash encryption</span>
+              </div>
+              <button type="button" class="btn btn-outline-primary btn-sm fw-semibold" id="btnOpenChangePassword">
+                <i class="bi bi-key-fill me-1"></i> Change Password
+              </button>
+            </div>
+          </div>
+
+          <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+            <div>
+              <span class="small fw-bold text-dark d-block">Active Provider Session</span>
+              <span class="small text-muted" style="font-size: 0.72rem;">Role: <strong>PROVIDER</strong></span>
+            </div>
+            <button type="button" class="btn btn-outline-danger btn-sm fw-semibold" onclick="Auth.logout()">
+              <i class="bi bi-box-arrow-right me-1"></i> Sign Out
+            </button>
+          </div>
+        </div>
+
+        <!-- CARD 7: Verification Status & Credentials (Requirement 7) -->
+        <div class="profile-card" id="cardVerification">
+          <div class="profile-card-header">
+            <h2 class="profile-card-title">
+              <i class="bi bi-shield-check text-success"></i> Verification Status
+            </h2>
+            <span class="badge bg-light text-muted border">Platform Audit</span>
+          </div>
+
+          <div class="text-center py-3 border-bottom mb-3" id="verifBoxContainer">
+            <!-- Dynamic audit state box -->
+          </div>
+
+          <div class="small text-muted mb-2">
+            <strong>Security &amp; Trust Requirement:</strong>
+            <p class="mb-0 mt-1">To protect homeowners, verification status and background compliance are audited by administrators and cannot be self-modified.</p>
+          </div>
+
+          <div class="small text-muted pt-2 border-top">
+            <i class="bi bi-check-circle-fill text-success me-1"></i> Aadhaar / Govt ID Verified<br>
+            <i class="bi bi-check-circle-fill text-success me-1"></i> Skill Assessment Confirmed<br>
+            <i class="bi bi-check-circle-fill text-success me-1"></i> Police Verification Background Check
+          </div>
+        </div>
+
+        <!-- CARD 9: Customer Reviews (Requirement 6 & 7) -->
+        <div class="profile-card" id="cardReviews">
+          <div class="profile-card-header">
+            <div>
+              <h2 class="profile-card-title">
+                <i class="bi bi-chat-quote-fill text-warning"></i> Customer Reviews
+              </h2>
+              <div class="small text-muted mt-1">Genuine feedback from verified bookings</div>
+            </div>
+            <span class="badge bg-light text-dark border" id="reviewsSummaryBadge">0 Reviews</span>
+          </div>
+
+          <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 border mb-3">
+            <div class="display-6 fw-bold text-dark mb-0" id="reviewsScore">0.0</div>
+            <div>
+              <div class="text-warning fs-6" id="reviewsStars">★★★★★</div>
+              <div class="small text-muted" id="reviewsCountDetail">Based on 0 verified jobs</div>
+            </div>
+          </div>
+
+          <div class="d-flex flex-column gap-3" id="providerReviewsMiniList">
+            <!-- Reviews populated dynamically -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- MODALS FOR VALIDATED EDITS (Requirement 3, 4, 5) -->
+<!-- ======================================================== -->
+
+<!-- 1. Edit Personal Information Modal -->
+<div class="modal fade" id="modalPersonal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <form id="formPersonal">
+        <div class="modal-header bg-light border-bottom p-4">
+          <h5 class="modal-title fw-bold text-dark"><i class="bi bi-person-fill text-primary me-2"></i>Edit Personal Information</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mPersonalName">Full Legal Name</label>
+            <input type="text" class="form-control" id="mPersonalName" required minlength="2" maxlength="100">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mPersonalEmail">Email Address</label>
+            <input type="email" class="form-control" id="mPersonalEmail" disabled readonly>
+            <div class="form-text">Your email address is your unique system ID and cannot be changed directly.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mPersonalPhone">Phone Number</label>
+            <input type="tel" class="form-control" id="mPersonalPhone" placeholder="e.g. 9876543210" pattern="[0-9]{10,15}">
+            <div class="form-text">Used for service dispatch and customer appointment updates.</div>
+          </div>
+        </div>
+        <div class="modal-footer bg-light p-3">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm fw-bold px-4" id="btnSavePersonal">
+            <span class="spinner-border spinner-border-sm d-none me-1" id="spinPersonal" role="status"></span>
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Edit Business Information Modal -->
+<div class="modal fade" id="modalBusiness" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <form id="formBusiness">
+        <div class="modal-header bg-light border-bottom p-4">
+          <h5 class="modal-title fw-bold text-dark"><i class="bi bi-building text-primary me-2"></i>Edit Business Information</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            <div class="col-md-7">
+              <label class="form-label small fw-bold" for="mBizName">Business / Trade Name</label>
+              <input type="text" class="form-control" id="mBizName" required minlength="2" maxlength="150">
+            </div>
+            <div class="col-md-5">
+              <label class="form-label small fw-bold" for="mServiceRadius">Coverage Radius (km)</label>
+              <input type="number" class="form-control" id="mServiceRadius" min="1" max="100" step="1" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold" for="mBizAddress">Base Address / Workshop Location</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="mBizAddress" placeholder="Street, Building, Locality, Ranchi" required>
+                <button type="button" class="btn btn-outline-secondary" id="btnDetectGps" title="Detect GPS coordinates">
+                  <i class="bi bi-crosshair"></i> Auto-Detect
+                </button>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold" for="mLatitude">Latitude</label>
+              <input type="number" class="form-control form-control-sm" id="mLatitude" step="any" min="-90" max="90">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold" for="mLongitude">Longitude</label>
+              <input type="number" class="form-control form-control-sm" id="mLongitude" step="any" min="-180" max="180">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer bg-light p-3">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm fw-bold px-4" id="btnSaveBusiness">
+            <span class="spinner-border spinner-border-sm d-none me-1" id="spinBusiness" role="status"></span>
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Edit About and Experience Modal -->
+<div class="modal fade" id="modalAbout" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <form id="formAbout">
+        <div class="modal-header bg-light border-bottom p-4">
+          <h5 class="modal-title fw-bold text-dark"><i class="bi bi-card-text text-primary me-2"></i>Edit Overview &amp; Experience</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mExperienceYears">Years of Professional Experience</label>
+            <input type="number" class="form-control" id="mExperienceYears" min="0" max="60" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mApproxPrice">Starting Price (₹)</label>
+            <input type="number" class="form-control" id="mApproxPrice" min="1" step="1" placeholder="e.g. 299">
+            <div class="form-text">Base consultation or standard visit rate.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mDescription">Detailed Business Bio / About</label>
+            <textarea class="form-control" id="mDescription" rows="4" placeholder="Describe your specialization, tools, quality guarantee, and customer commitment..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light p-3">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm fw-bold px-4" id="btnSaveAbout">
+            <span class="spinner-border spinner-border-sm d-none me-1" id="spinAbout" role="status"></span>
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Add / Edit Sub-Service Modal (Requirement 4) -->
+<div class="modal fade" id="modalSubService" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <form id="formSubService">
+        <input type="hidden" id="mSubIdx" value="-1">
+        <div class="modal-header bg-light border-bottom p-4">
+          <h5 class="modal-title fw-bold text-dark" id="modalSubTitle">
+            <i class="bi bi-plus-circle text-primary me-2"></i>Add Sub-Service Package
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mSubName">Service Name *</label>
+            <input type="text" class="form-control" id="mSubName" placeholder="e.g. Sofa Cleaning, Switchboard Repair..." required>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label small fw-bold" for="mSubCategory">Category</label>
+              <input type="text" class="form-control" id="mSubCategory" placeholder="e.g. Electrician, Cleaner...">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label small fw-bold" for="mSubPrice">Price (₹) *</label>
+              <input type="number" class="form-control" id="mSubPrice" min="1" step="1" placeholder="e.g. 499" required>
+              <div class="invalid-feedback">Price must be greater than zero.</div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mSubDuration">Estimated Duration / Pricing Notes</label>
+            <input type="text" class="form-control" id="mSubDuration" placeholder="e.g. 45 mins, fixed price, per point...">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mSubDesc">Service Details &amp; Inclusions</label>
+            <textarea class="form-control" id="mSubDesc" rows="3" placeholder="What is included in this package?"></textarea>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="mSubEnabled" checked>
+            <label class="form-check-label small fw-semibold" for="mSubEnabled">Enable for online booking</label>
+          </div>
+        </div>
+        <div class="modal-footer bg-light p-3">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm fw-bold px-4" id="btnSaveSubService">
+            <span class="spinner-border spinner-border-sm d-none me-1" id="spinSubService" role="status"></span>
+            Save Service
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Edit Working Hours Modal -->
+<div class="modal fade" id="modalHours" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <form id="formHours">
+        <div class="modal-header bg-light border-bottom p-4">
+          <h5 class="modal-title fw-bold text-dark"><i class="bi bi-clock-history text-primary me-2"></i>Edit Working Hours</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Select Schedule Preset</label>
+            <select class="form-select mb-2" id="selectHoursPreset">
+              <option value="Mon - Sun: 8:00 AM - 8:00 PM">All Days: 8:00 AM - 8:00 PM (Recommended)</option>
+              <option value="Mon - Sat: 9:00 AM - 7:00 PM">Monday - Saturday: 9:00 AM - 7:00 PM</option>
+              <option value="Mon - Fri: 8:00 AM - 6:00 PM">Weekdays Only: 8:00 AM - 6:00 PM</option>
+              <option value="24/7 Emergency Service">24/7 Round the Clock Emergency Service</option>
+              <option value="custom">Custom Schedule...</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mWorkingHours">Custom Operating Hours</label>
+            <input type="text" class="form-control" id="mWorkingHours" placeholder="e.g. Mon - Sat: 8:30 AM - 7:30 PM" required>
+          </div>
+        </div>
+        <div class="modal-footer bg-light p-3">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm fw-bold px-4" id="btnSaveHours">
+            <span class="spinner-border spinner-border-sm d-none me-1" id="spinHours" role="status"></span>
+            Save Schedule
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Change Photo / Logo Modal (Requirement 2 & 7) -->
+<div class="modal fade" id="modalPhoto" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <form id="formPhoto">
+        <div class="modal-header bg-light border-bottom p-4">
+          <h5 class="modal-title fw-bold text-dark"><i class="bi bi-camera text-primary me-2"></i>Change Profile Photo or Logo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div id="photoModalAlert" class="alert alert-danger py-2 px-3 small rounded-3 d-none mb-3" role="alert"></div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mPhotoUrl">Image URL</label>
+            <input type="url" class="form-control" id="mPhotoUrl" placeholder="https://example.com/my-photo.jpg">
+          </div>
+          <div class="text-center my-2 text-muted small">&mdash; OR UPLOAD FILE &mdash;</div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mPhotoFile">Upload Image File (Max 5MB)</label>
+            <input type="file" class="form-control" id="mPhotoFile" accept="image/png, image/jpeg, image/webp">
+            <div class="form-text">Supported formats: JPEG, PNG, WEBP. Maximum file size: 5MB.</div>
+          </div>
+          <div id="photoPreviewContainer" class="text-center d-none mt-3">
+            <span class="small text-muted d-block mb-1">Preview:</span>
+            <img id="photoPreviewImg" src="" alt="Photo Preview" class="rounded-3 shadow-sm border" style="width: 96px; height: 96px; object-fit: cover;">
+          </div>
+        </div>
+        <div class="modal-footer bg-light p-3">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm fw-bold px-4" id="btnSavePhoto">
+            <span class="spinner-border spinner-border-sm d-none me-1" id="spinPhoto" role="status"></span>
+            Save Photo
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 7. Add Portfolio Project Modal -->
+<div class="modal fade" id="modalAddPortfolio" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <form id="formAddPortfolio">
+        <div class="modal-header bg-light border-bottom p-4">
+          <h5 class="modal-title fw-bold text-dark"><i class="bi bi-images text-primary me-2"></i>Add Transformation Project</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mPfTitle">Project Title *</label>
+            <input type="text" class="form-control" id="mPfTitle" placeholder="e.g. Complete 3BHK Deep Clean, Switchboard Rewiring..." required>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label small fw-bold" for="mPfSubService">Service Category</label>
+              <input type="text" class="form-control" id="mPfSubService" placeholder="e.g. Electrician, Cleaning">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label small fw-bold" for="mPfDate">Completion Date</label>
+              <input type="text" class="form-control" id="mPfDate" placeholder="e.g. Oct 2026">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mPfBefore">Before Image URL *</label>
+            <input type="url" class="form-control" id="mPfBefore" placeholder="https://..." required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mPfAfter">After Image URL *</label>
+            <input type="url" class="form-control" id="mPfAfter" placeholder="https://..." required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mPfDesc">Project Summary</label>
+            <textarea class="form-control" id="mPfDesc" rows="2" placeholder="Briefly describe what was resolved..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light p-3">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm fw-bold px-4" id="btnSavePf">
+            <span class="spinner-border spinner-border-sm d-none me-1" id="spinPf" role="status"></span>
+            Add to Portfolio
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 8. Service Categories Selection Modal -->
+<div class="modal fade" id="modalCategories" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <form id="formCategories">
+        <div class="modal-header bg-light border-bottom p-4">
+          <h5 class="modal-title fw-bold text-dark"><i class="bi bi-grid-fill text-primary me-2"></i>Select Main Service Categories</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="small text-muted mb-3">Choose the catalog categories you specialize in so customers can find you when searching:</p>
+          <div class="d-flex flex-column gap-2" id="catalogServicesCheckboxes">
+            <!-- Populated from /api/catalog/services -->
+          </div>
+        </div>
+        <div class="modal-footer bg-light p-3">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm fw-bold px-4" id="btnSaveCategories">
+            <span class="spinner-border spinner-border-sm d-none me-1" id="spinCategories" role="status"></span>
+            Save Categories
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 9. Change Password Modal (Requirement 4) -->
+<div class="modal fade" id="modalChangePassword" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <form id="formChangePassword">
+        <div class="modal-header bg-light border-bottom p-4">
+          <h5 class="modal-title fw-bold text-dark"><i class="bi bi-key-fill text-primary me-2"></i>Change Account Password</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div id="pwdAlert" class="alert d-none small mb-3"></div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mCurrentPassword">Current Password *</label>
+            <input type="password" class="form-control" id="mCurrentPassword" required autocomplete="current-password">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mNewPassword">New Password *</label>
+            <input type="password" class="form-control" id="mNewPassword" required minlength="6" autocomplete="new-password">
+            <div class="form-text">Must be at least 6 characters long.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold" for="mConfirmPassword">Confirm New Password *</label>
+            <input type="password" class="form-control" id="mConfirmPassword" required minlength="6" autocomplete="new-password">
+          </div>
+        </div>
+        <div class="modal-footer bg-light p-3">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm fw-bold px-4" id="btnSavePassword">
+            <span class="spinner-border spinner-border-sm d-none me-1" id="spinPassword" role="status"></span>
+            Update Password
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer class="site py-4 mt-5">
+  <div class="container d-flex flex-wrap justify-content-between gap-3">
+    <div>
+      <strong class="text-white">Local Service Connect</strong>
+      <div class="small">Service Provider Business Management Portal</div>
+    </div>
+    <div class="small d-flex gap-3 flex-wrap">
+      <a href="/provider/home">Provider Home</a>
+      <a href="/provider-dashboard.html">Dashboard</a>
+      <a href="/provider-profile.html">Public Profile</a>
+      <a href="javascript:void(0)" onclick="Auth.logout()">Logout</a>
+    </div>
+    <div class="small">&copy; <span id="yr"></span> Local Service Connect</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/maps.js"></script>
+<script>
+navbar();
+const $ = id => document.getElementById(id);
+$('yr').textContent = new Date().getFullYear();
+
+// Enforce Provider Authentication
+const currentUser = Auth.get();
+if (!currentUser || !currentUser.token || currentUser.role !== 'PROVIDER') {
+  location.href = '/login.html?redirect=/provider/profile';
+  throw new Error('Authentication required');
+}
+
+// Global Provider Profile State
+let provider = null;
+let allCatalogServices = [];
+let providerReviews = [];
+
+/**
+ * Toast / Alert feedback helper
+ */
+function showGlobalAlert(msg, type = 'success', showRetry = false) {
+  const el = $('globalAlert');
+  if (!el) return;
+  el.className = `alert alert-${type} shadow-sm mb-4 alert-dismissible fade show d-flex align-items-center justify-content-between flex-wrap gap-2`;
+  el.innerHTML = `
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi ${type === 'success' ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-danger'} fs-5 flex-shrink-0"></i>
+      <div>${esc(msg)}</div>
+    </div>
+    <div class="d-flex align-items-center gap-2 ms-auto">
+      ${showRetry ? '<button type="button" class="btn btn-sm btn-outline-danger fw-semibold px-3 rounded-pill" onclick="loadMyProfile()"><i class="bi bi-arrow-clockwise me-1"></i>Retry</button>' : ''}
+      <button type="button" class="btn-close ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  `;
+  el.classList.remove('d-none');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/**
+ * Main Loader: Fetch Provider Profile & Related Data
+ */
+async function loadMyProfile() {
+  const loader = $('profileLoader');
+  const content = $('profileContent');
+  const errState = $('profileErrorState');
+
+  if (loader) loader.classList.remove('d-none');
+  if (content) content.classList.add('d-none');
+  if (errState) errState.classList.add('d-none');
+
+  try {
+    const [pData, catData] = await Promise.all([
+      api('/provider/profile'),
+      api('/services').catch(() => api('/catalog/services').catch(() => []))
+    ]);
+
+    provider = pData;
+    allCatalogServices = catData || [];
+
+    // Fetch genuine customer reviews
+    try {
+      providerReviews = await api('/reviews/provider/' + pData.id);
+    } catch {
+      providerReviews = [];
+    }
+
+    renderHeader();
+    renderPersonalInfo();
+    renderBusinessInfo();
+    renderAboutInfo();
+    renderServicesAndPricing();
+    renderServiceAreas();
+    renderWorkingHours();
+    renderVerificationStatus();
+    renderPortfolio();
+    renderCustomerReviews();
+
+    if (loader) loader.classList.add('d-none');
+    if (content) content.classList.remove('d-none');
+
+  } catch (err) {
+    if (loader) loader.classList.add('d-none');
+    if (errState) {
+      if ($('profileErrorMsg')) $('profileErrorMsg').textContent = err.message || 'Could not load your provider profile.';
+      errState.classList.remove('d-none');
+    }
+    showGlobalAlert(err.message || 'Could not load your provider profile.', 'danger', true);
+  }
+}
+
+/**
+ * 1. Render Header (Requirement 2)
+ */
+function renderHeader() {
+  $('heroProviderId').textContent = provider.id;
+  $('heroBizName').textContent = provider.businessName || 'Business Name';
+  $('heroOwnerName').textContent = provider.providerName || currentUser.name || 'Specialist';
+  $('heroEmail').textContent = provider.providerEmail || currentUser.email || 'Email';
+
+  $('heroRating').textContent = (provider.rating != null ? provider.rating : 0.0).toFixed(1);
+  $('heroReviewCount').textContent = provider.reviewCount || 0;
+  $('heroCompletedJobs').textContent = provider.completedJobsCount != null ? provider.completedJobsCount : 0;
+
+  const areasCount = provider.areas ? provider.areas.length : 0;
+  $('heroAreasSummary').textContent = areasCount > 0
+    ? `${areasCount} areas covered in Ranchi`
+    : 'No areas listed';
+
+  // Avatar / Logo
+  if (provider.profileImage) {
+    $('heroAvatarContainer').innerHTML = `<img src="${esc(provider.profileImage)}" alt="Logo" class="provider-manage-avatar-box">`;
+  } else {
+    const initial = (provider.businessName ? provider.businessName.charAt(0) : 'P').toUpperCase();
+    $('heroAvatarContainer').innerHTML = `<div class="provider-manage-avatar-box">${esc(initial)}</div>`;
+  }
+
+  // Verification Badge
+  const st = provider.verificationStatus || 'PENDING';
+  let badgeHtml = '';
+  if (st === 'VERIFIED') {
+    badgeHtml = '<span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 fw-bold"><i class="bi bi-patch-check-fill me-1"></i>Verified Partner</span>';
+  } else if (st === 'REJECTED') {
+    badgeHtml = '<span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1 fw-bold"><i class="bi bi-x-circle-fill me-1"></i>Audit Rejected</span>';
+  } else {
+    badgeHtml = '<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2.5 py-1 fw-bold"><i class="bi bi-hourglass-split me-1"></i>Verification Pending</span>';
+  }
+  $('heroVerifBadge').innerHTML = badgeHtml;
+
+  // Real-time Availability Switch
+  const isAvail = !!provider.availability;
+  $('availSwitch').checked = isAvail;
+  updateAvailText(isAvail);
+
+  // View Public Profile Link
+  $('btnViewPublic').href = `/provider-profile.html?id=${provider.id}`;
+}
+
+function updateAvailText(on) {
+  if (on) {
+    $('availStatusLabel').textContent = 'Online & Accepting Jobs';
+    $('availStatusLabel').className = 'small fw-bold text-success';
+    $('availStatusDesc').textContent = 'Customers can discover and book your services now';
+  } else {
+    $('availStatusLabel').textContent = 'Offline & Busy';
+    $('availStatusLabel').className = 'small fw-bold text-muted';
+    $('availStatusDesc').textContent = 'You are currently hidden from search and quick dispatch';
+  }
+}
+
+// Toggle Online Availability Handler
+$('availSwitch').addEventListener('change', async (e) => {
+  const willBeOn = e.target.checked;
+  try {
+    const res = await api('/provider/availability', {
+      method: 'PUT',
+      body: JSON.stringify({ available: willBeOn })
+    });
+    provider.availability = res.availability;
+    updateAvailText(res.availability);
+    showGlobalAlert(
+      res.availability ? 'You are now ONLINE and ready to receive bookings!' : 'You are now OFFLINE. Booking dispatches paused.',
+      'success'
+    );
+  } catch (err) {
+    e.target.checked = !willBeOn; // revert switch
+    updateAvailText(!willBeOn);
+    showGlobalAlert(err.message || 'Could not update availability status.', 'danger');
+  }
+});
+
+/**
+ * 2. Render Personal Information
+ */
+function renderPersonalInfo() {
+  $('valPersonalName').textContent = provider.providerName || currentUser.name || '--';
+  $('valPersonalEmail').textContent = provider.providerEmail || currentUser.email || '--';
+  $('valPersonalPhone').textContent = provider.providerPhone || 'Not provided';
+}
+
+/**
+ * 3. Render Business Information
+ */
+function renderBusinessInfo() {
+  $('valBizName').textContent = provider.businessName || '--';
+  $('valServiceRadius').textContent = provider.serviceRadiusKm || 15;
+  $('valBizAddress').textContent = provider.formattedAddress || 'No primary address specified';
+
+  if (provider.latitude != null && provider.longitude != null) {
+    $('valCoordinates').textContent = `${provider.latitude.toFixed(4)}, ${provider.longitude.toFixed(4)}`;
+    $('coordsStatusBadge').innerHTML = '<span class="badge bg-success-subtle text-success border border-success-subtle small"><i class="bi bi-geo-fill me-1"></i>GPS Pinned</span>';
+  } else {
+    $('valCoordinates').textContent = 'Not calibrated';
+    $('coordsStatusBadge').innerHTML = '<span class="badge bg-secondary-subtle text-secondary small">Optional</span>';
+  }
+}
+
+/**
+ * 4. Render About & Experience
+ */
+function renderAboutInfo() {
+  $('valExperienceYears').textContent = provider.experienceYears || 0;
+  $('valDescription').textContent = provider.description || 'No business description provided yet.';
+}
+
+/**
+ * 5. Render Services & Pricing (Requirement 4)
+ */
+function renderServicesAndPricing() {
+  $('valApproxPrice').textContent = provider.approxPrice != null ? `₹${provider.approxPrice}` : 'On Request';
+
+  // Categories badges
+  const catContainer = $('serviceCategoriesList');
+  if (provider.services && provider.services.length > 0) {
+    catContainer.innerHTML = provider.services.map(s => 
+      `<span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 small fw-semibold">
+        <i class="bi ${esc(s.icon || 'bi-gear')} me-1"></i>${esc(s.name)}
+      </span>`
+    ).join('');
+  } else {
+    catContainer.innerHTML = '<span class="text-muted small">No catalog categories chosen</span>';
+  }
+
+  // Sub-services itemized list
+  const container = $('subServicesContainer');
+  const subs = provider.subServices || [];
+
+  if (subs.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-4 bg-light rounded-3 border">
+        <div class="text-muted mb-2"><i class="bi bi-tags fs-2"></i></div>
+        <div class="fw-semibold text-dark">No custom services listed yet</div>
+        <p class="small text-muted mb-3">Add transparent pricing packages to attract customers to your profile.</p>
+        <button type="button" class="btn btn-sm btn-outline-primary fw-semibold" onclick="$('btnAddSubService').click()">
+          <i class="bi bi-plus-lg me-1"></i> Add First Service
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = subs.map((s, idx) => `
+    <div class="service-item-row" id="subRow-${idx}">
+      <div class="d-flex align-items-start gap-3" style="min-width: 0;">
+        <span class="badge bg-light text-dark border mt-1">#${idx + 1}</span>
+        <div style="min-width: 0;">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <h3 class="h6 fw-bold text-dark mb-0 text-truncate">${esc(s.name)}</h3>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-0.5 px-1.5 small">${esc(s.category || 'General')}</span>
+            ${s.enabled === false ? '<span class="badge bg-secondary-subtle text-secondary py-0.5 px-1.5 small">Disabled</span>' : ''}
+          </div>
+          <p class="small text-muted mb-1 text-truncate" style="max-width: 480px;">${esc(s.description || 'Standard service package')}</p>
+          <div class="small text-muted">
+            <i class="bi bi-clock me-1"></i>Duration / Notes: <strong class="text-dark">${esc(s.duration || '45 mins')}</strong>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-3 flex-shrink-0">
+        <div class="text-end">
+          <div class="fw-bold text-dark fs-5">₹${esc(s.price)}</div>
+          <div class="text-muted" style="font-size: 0.72rem;">Fixed / Starting</div>
+        </div>
+        <div class="d-flex gap-1">
+          <button type="button" class="btn btn-outline-secondary btn-sm" onclick="editSubService(${idx})" title="Edit Service">
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteSubService(${idx})" title="Remove Service">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/**
+ * 6. Render Service Areas (Requirement 5)
+ */
+function renderServiceAreas() {
+  const container = $('areasListContainer');
+  const areas = provider.areas || [];
+  $('areasCountBadge').textContent = `${areas.length} / 10 Areas`;
+
+  if (areas.length === 0) {
+    container.innerHTML = '<span class="text-muted small">No localities listed. Use the form below to add your service areas in Ranchi.</span>';
+    return;
+  }
+
+  container.innerHTML = areas.map((a, idx) => `
+    <span class="area-badge-chip">
+      <i class="bi bi-geo-alt-fill text-danger"></i>
+      <span>${esc(a.area)}${a.city ? ', ' + esc(a.city) : ''}</span>
+      <span class="area-remove-btn ms-1" onclick="removeArea(${idx})" title="Remove ${esc(a.area)}">&times;</span>
+    </span>
+  `).join('');
+}
+
+/**
+ * 7. Render Working Hours
+ */
+function renderWorkingHours() {
+  $('valWorkingHours').textContent = provider.workingHours || 'Mon - Sun: 8:00 AM - 8:00 PM';
+}
+
+/**
+ * 8. Render Verification Status
+ */
+function renderVerificationStatus() {
+  const container = $('verifBoxContainer');
+  const st = provider.verificationStatus || 'PENDING';
+
+  if (st === 'VERIFIED') {
+    container.innerHTML = `
+      <div class="text-success mb-2" style="font-size: 2.25rem;"><i class="bi bi-patch-check-fill"></i></div>
+      <h3 class="h6 fw-bold text-success mb-1">Account Verified</h3>
+      <div class="small text-muted">Your business identity and credentials have been verified by platform admins.</div>
+    `;
+  } else if (st === 'REJECTED') {
+    container.innerHTML = `
+      <div class="text-danger mb-2" style="font-size: 2.25rem;"><i class="bi bi-x-circle-fill"></i></div>
+      <h3 class="h6 fw-bold text-danger mb-1">Verification Rejected</h3>
+      <div class="small text-muted">Document audit failed. Please contact support@localserviceconnect.com with valid ID.</div>
+    `;
+  } else {
+    container.innerHTML = `
+      <div class="text-warning mb-2" style="font-size: 2.25rem;"><i class="bi bi-hourglass-split"></i></div>
+      <h3 class="h6 fw-bold text-warning-emphasis mb-1">Audit Under Review</h3>
+      <div class="small text-muted">Our compliance team is verifying your registration details. Typically takes 24 hours.</div>
+    `;
+  }
+}
+
+/**
+ * 9. Render Portfolio Transformations
+ */
+function renderPortfolio() {
+  const container = $('portfolioContainer');
+  const items = provider.portfolioItems || [];
+
+  if (items.length === 0) {
+    container.innerHTML = `
+      <div class="col-12 text-center py-4 bg-light rounded-3 border">
+        <div class="text-muted mb-2"><i class="bi bi-images fs-2"></i></div>
+        <div class="fw-semibold text-dark">No portfolio photos yet</div>
+        <p class="small text-muted mb-2">Upload before-and-after photos of your actual work to increase booking conversions.</p>
+        <button type="button" class="btn btn-sm btn-outline-primary fw-semibold" onclick="$('btnAddPortfolio').click()">
+          <i class="bi bi-plus-lg me-1"></i> Add First Project
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = items.map((pf, idx) => `
+    <div class="col-md-6">
+      <div class="portfolio-grid-item">
+        <div class="portfolio-img-dual">
+          <img src="${esc(pf.beforeImageUrl || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300')}" alt="Before Work">
+          <img src="${esc(pf.afterImageUrl || 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=300')}" alt="After Work">
+        </div>
+        <div class="p-3">
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <h4 class="h6 fw-bold text-dark mb-0 text-truncate">${esc(pf.title)}</h4>
+            <button type="button" class="btn btn-link text-danger btn-sm p-0 ms-2" onclick="deletePortfolio(${idx})" title="Delete project">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-0.5 px-1.5 small mb-1">${esc(pf.subService || 'Work')}</span>
+          <p class="small text-muted mb-0 text-truncate">${esc(pf.description || 'Completed project')}</p>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/**
+ * 10. Render Customer Reviews (Requirement 6 & 7)
+ */
+function renderCustomerReviews() {
+  const revs = providerReviews || [];
+  $('reviewsSummaryBadge').textContent = `${revs.length} Reviews`;
+  $('reviewsScore').textContent = (provider.rating != null ? provider.rating : 0.0).toFixed(1);
+  $('reviewsStars').innerHTML = starText(provider.rating || 0.0);
+  $('reviewsCountDetail').textContent = `Based on ${revs.length} verified jobs`;
+
+  const container = $('providerReviewsMiniList');
+  if (revs.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-4 bg-light rounded-3 border">
+        <div class="text-muted mb-1"><i class="bi bi-chat-heart fs-3"></i></div>
+        <div class="fw-semibold text-dark small">No customer reviews yet</div>
+        <p class="small text-muted mb-0" style="font-size: 0.78rem;">Reviews will appear here as soon as customers complete appointments with you.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = revs.slice(0, 5).map(r => `
+    <div class="p-3 bg-light rounded-3 border">
+      <div class="d-flex justify-content-between align-items-baseline mb-1">
+        <strong class="text-dark small">${esc(r.customerName || 'Verified Customer')}</strong>
+        <span class="text-warning small">${starText(r.rating || 5)}</span>
+      </div>
+      <p class="small text-muted mb-1 leading-normal">&ldquo;${esc(r.comment || 'Great service.')}&rdquo;</p>
+      <div class="d-flex justify-content-between text-muted" style="font-size: 0.72rem;">
+        <span><i class="bi bi-check-circle-fill text-success me-1"></i>Verified Service</span>
+        <span>${esc(r.createdAt ? String(r.createdAt).split('T')[0] : '')}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ========================================================
+// EDIT ACTIONS & MODAL LOGIC
+// ========================================================
+
+// Modal Instances
+const bsModalPersonal = new bootstrap.Modal($('modalPersonal'));
+const bsModalBusiness = new bootstrap.Modal($('modalBusiness'));
+const bsModalAbout = new bootstrap.Modal($('modalAbout'));
+const bsModalSubService = new bootstrap.Modal($('modalSubService'));
+const bsModalHours = new bootstrap.Modal($('modalHours'));
+const bsModalPhoto = new bootstrap.Modal($('modalPhoto'));
+const bsModalAddPortfolio = new bootstrap.Modal($('modalAddPortfolio'));
+const bsModalCategories = new bootstrap.Modal($('modalCategories'));
+
+// 1. Personal Info Edit
+$('btnEditPersonal').addEventListener('click', () => {
+  $('mPersonalName').value = provider.providerName || currentUser.name || '';
+  $('mPersonalEmail').value = provider.providerEmail || currentUser.email || '';
+  $('mPersonalPhone').value = provider.providerPhone || '';
+  bsModalPersonal.show();
+});
+
+$('formPersonal').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const spin = $('spinPersonal'), btn = $('btnSavePersonal');
+  spin.classList.remove('d-none'); btn.disabled = true;
+
+  try {
+    const res = await api('/provider/profile', {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: $('mPersonalName').value.trim(),
+        phone: $('mPersonalPhone').value.trim(),
+        businessName: provider.businessName,
+        description: provider.description,
+        experienceYears: provider.experienceYears,
+        approxPrice: provider.approxPrice,
+        serviceIds: provider.services ? provider.services.map(s => s.id) : [],
+        areas: provider.areas,
+        formattedAddress: provider.formattedAddress,
+        latitude: provider.latitude,
+        longitude: provider.longitude,
+        serviceRadiusKm: provider.serviceRadiusKm,
+        workingHours: provider.workingHours,
+        profileImage: provider.profileImage,
+        subServices: provider.subServices,
+        portfolioItems: provider.portfolioItems,
+        workVideos: provider.workVideos
+      })
+    });
+    provider = res;
+    // update localStorage user name
+    if (res.providerName) {
+      currentUser.name = res.providerName;
+      localStorage.setItem('lsc_user', JSON.stringify(currentUser));
+    }
+    renderHeader();
+    renderPersonalInfo();
+    bsModalPersonal.hide();
+    showGlobalAlert('Personal information updated successfully!');
+  } catch (err) {
+    alert('Error saving personal info: ' + err.message);
+  } finally {
+    spin.classList.add('d-none'); btn.disabled = false;
+  }
+});
+
+// 2. Business Info Edit
+$('btnEditBusiness').addEventListener('click', () => {
+  $('mBizName').value = provider.businessName || '';
+  $('mServiceRadius').value = provider.serviceRadiusKm || 15;
+  $('mBizAddress').value = provider.formattedAddress || '';
+  $('mLatitude').value = provider.latitude || '';
+  $('mLongitude').value = provider.longitude || '';
+  bsModalBusiness.show();
+});
+
+$('btnDetectGps').addEventListener('click', () => {
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by your browser.');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      $('mLatitude').value = lat.toFixed(5);
+      $('mLongitude').value = lng.toFixed(5);
+      try {
+        if (window.LSC_MAPS && typeof LSC_MAPS.reverseGeocode === 'function') {
+          const geo = await LSC_MAPS.reverseGeocode(lat, lng);
+          if (geo && geo.formattedAddress) $('mBizAddress').value = geo.formattedAddress;
+        }
+      } catch (e) {
+        // Retain coordinates
+      }
+    },
+    (err) => alert('Could not retrieve GPS coordinates: ' + err.message),
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+});
+
+$('formBusiness').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const spin = $('spinBusiness'), btn = $('btnSaveBusiness');
+  spin.classList.remove('d-none'); btn.disabled = true;
+
+  const latVal = $('mLatitude').value ? parseFloat($('mLatitude').value) : null;
+  const lngVal = $('mLongitude').value ? parseFloat($('mLongitude').value) : null;
+
+  try {
+    const res = await api('/provider/profile', {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: provider.providerName,
+        phone: provider.providerPhone,
+        businessName: $('mBizName').value.trim(),
+        description: provider.description,
+        experienceYears: provider.experienceYears,
+        approxPrice: provider.approxPrice,
+        serviceIds: provider.services ? provider.services.map(s => s.id) : [],
+        areas: provider.areas,
+        formattedAddress: $('mBizAddress').value.trim(),
+        latitude: latVal,
+        longitude: lngVal,
+        serviceRadiusKm: parseFloat($('mServiceRadius').value),
+        workingHours: provider.workingHours,
+        profileImage: provider.profileImage,
+        subServices: provider.subServices,
+        portfolioItems: provider.portfolioItems,
+        workVideos: provider.workVideos
+      })
+    });
+    provider = res;
+    renderHeader();
+    renderBusinessInfo();
+    bsModalBusiness.hide();
+    showGlobalAlert('Business details saved successfully!');
+  } catch (err) {
+    alert('Error saving business info: ' + err.message);
+  } finally {
+    spin.classList.add('d-none'); btn.disabled = false;
+  }
+});
+
+// 3. About & Experience Edit
+$('btnEditAbout').addEventListener('click', () => {
+  $('mExperienceYears').value = provider.experienceYears || 0;
+  $('mApproxPrice').value = provider.approxPrice || '';
+  $('mDescription').value = provider.description || '';
+  bsModalAbout.show();
+});
+
+$('formAbout').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const spin = $('spinAbout'), btn = $('btnSaveAbout');
+  spin.classList.remove('d-none'); btn.disabled = true;
+
+  const approxVal = $('mApproxPrice').value ? parseFloat($('mApproxPrice').value) : null;
+  if (approxVal !== null && approxVal <= 0) {
+    alert('Starting price must be greater than zero.');
+    spin.classList.add('d-none'); btn.disabled = false;
+    return;
+  }
+
+  try {
+    const res = await api('/provider/profile', {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: provider.providerName,
+        phone: provider.providerPhone,
+        businessName: provider.businessName,
+        description: $('mDescription').value.trim(),
+        experienceYears: parseInt($('mExperienceYears').value, 10),
+        approxPrice: approxVal,
+        serviceIds: provider.services ? provider.services.map(s => s.id) : [],
+        areas: provider.areas,
+        formattedAddress: provider.formattedAddress,
+        latitude: provider.latitude,
+        longitude: provider.longitude,
+        serviceRadiusKm: provider.serviceRadiusKm,
+        workingHours: provider.workingHours,
+        profileImage: provider.profileImage,
+        subServices: provider.subServices,
+        portfolioItems: provider.portfolioItems,
+        workVideos: provider.workVideos
+      })
+    });
+    provider = res;
+    renderAboutInfo();
+    renderServicesAndPricing();
+    bsModalAbout.hide();
+    showGlobalAlert('Overview and experience updated!');
+  } catch (err) {
+    alert('Error saving overview: ' + err.message);
+  } finally {
+    spin.classList.add('d-none'); btn.disabled = false;
+  }
+});
+
+// Quick Edit scrolls to About or Business
+$('btnQuickEdit').addEventListener('click', () => {
+  $('btnEditBusiness').click();
+});
+
+// 4. Sub-Services Management (Requirement 4)
+$('btnAddSubService').addEventListener('click', () => {
+  $('mSubIdx').value = -1;
+  $('modalSubTitle').innerHTML = '<i class="bi bi-plus-circle text-primary me-2"></i>Add Sub-Service Package';
+  $('mSubName').value = '';
+  $('mSubCategory').value = provider.services && provider.services.length ? provider.services[0].name : '';
+  $('mSubPrice').value = '';
+  $('mSubDuration').value = '45 mins';
+  $('mSubDesc').value = '';
+  $('mSubEnabled').checked = true;
+  bsModalSubService.show();
+});
+
+window.editSubService = function(idx) {
+  const s = provider.subServices[idx];
+  if (!s) return;
+  $('mSubIdx').value = idx;
+  $('modalSubTitle').innerHTML = '<i class="bi bi-pencil-square text-primary me-2"></i>Edit Service Package';
+  $('mSubName').value = s.name || '';
+  $('mSubCategory').value = s.category || '';
+  $('mSubPrice').value = s.price || '';
+  $('mSubDuration').value = s.duration || '';
+  $('mSubDesc').value = s.description || '';
+  $('mSubEnabled').checked = s.enabled !== false;
+  bsModalSubService.show();
+};
+
+window.deleteSubService = async function(idx) {
+  if (!confirm(`Are you sure you want to remove "${provider.subServices[idx].name}"?`)) return;
+  const updated = [...(provider.subServices || [])];
+  updated.splice(idx, 1);
+  await saveSubServices(updated, 'Service removed.');
+};
+
+$('formSubService').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const spin = $('spinSubService'), btn = $('btnSaveSubService');
+  const priceVal = parseFloat($('mSubPrice').value);
+
+  if (isNaN(priceVal) || priceVal <= 0) {
+    alert('Price must be greater than zero.');
+    return;
+  }
+
+  spin.classList.remove('d-none'); btn.disabled = true;
+
+  const idx = parseInt($('mSubIdx').value, 10);
+  const updated = [...(provider.subServices || [])];
+  const serviceObj = {
+    name: $('mSubName').value.trim(),
+    category: $('mSubCategory').value.trim() || 'General',
+    price: priceVal,
+    duration: $('mSubDuration').value.trim() || '45 mins',
+    description: $('mSubDesc').value.trim(),
+    enabled: $('mSubEnabled').checked
+  };
+
+  if (idx >= 0 && idx < updated.length) {
+    serviceObj.id = updated[idx].id;
+    updated[idx] = serviceObj;
+  } else {
+    updated.push(serviceObj);
+  }
+
+  try {
+    await saveSubServices(updated, idx >= 0 ? 'Service updated successfully!' : 'New service added successfully!');
+    bsModalSubService.hide();
+  } catch (err) {
+    alert('Could not save service: ' + err.message);
+  } finally {
+    spin.classList.add('d-none'); btn.disabled = false;
+  }
+});
+
+async function saveSubServices(subList, successMsg) {
+  const res = await api('/provider/profile', {
+    method: 'PUT',
+    body: JSON.stringify({
+      name: provider.providerName,
+      phone: provider.providerPhone,
+      businessName: provider.businessName,
+      description: provider.description,
+      experienceYears: provider.experienceYears,
+      approxPrice: provider.approxPrice,
+      serviceIds: provider.services ? provider.services.map(s => s.id) : [],
+      areas: provider.areas,
+      formattedAddress: provider.formattedAddress,
+      latitude: provider.latitude,
+      longitude: provider.longitude,
+      serviceRadiusKm: provider.serviceRadiusKm,
+      workingHours: provider.workingHours,
+      profileImage: provider.profileImage,
+      subServices: subList,
+      portfolioItems: provider.portfolioItems,
+      workVideos: provider.workVideos
+    })
+  });
+  provider = res;
+  renderServicesAndPricing();
+  showGlobalAlert(successMsg);
+}
+
+// 5. Service Areas Add & Remove (Requirement 5)
+$('formAddArea').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const areaName = $('inputNewArea').value.trim();
+  const cityName = $('inputNewCity').value.trim() || 'Ranchi';
+  if (!areaName) return;
+
+  const currentAreas = [...(provider.areas || [])];
+  if (currentAreas.length >= 10) {
+    alert('You have reached the maximum limit of 10 service areas.');
+    return;
+  }
+
+  // Prevent duplicate
+  if (currentAreas.some(a => a.area.toLowerCase() === areaName.toLowerCase())) {
+    alert('This area is already in your coverage list.');
+    return;
+  }
+
+  currentAreas.push({ area: areaName, city: cityName });
+  try {
+    const res = await api('/provider/profile', {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: provider.providerName,
+        phone: provider.providerPhone,
+        businessName: provider.businessName,
+        description: provider.description,
+        experienceYears: provider.experienceYears,
+        approxPrice: provider.approxPrice,
+        serviceIds: provider.services ? provider.services.map(s => s.id) : [],
+        areas: currentAreas,
+        formattedAddress: provider.formattedAddress,
+        latitude: provider.latitude,
+        longitude: provider.longitude,
+        serviceRadiusKm: provider.serviceRadiusKm,
+        workingHours: provider.workingHours,
+        profileImage: provider.profileImage,
+        subServices: provider.subServices,
+        portfolioItems: provider.portfolioItems,
+        workVideos: provider.workVideos
+      })
+    });
+    provider = res;
+    $('inputNewArea').value = '';
+    renderHeader();
+    renderServiceAreas();
+    showGlobalAlert(`Added "${areaName}" to your service areas!`);
+  } catch (err) {
+    alert('Could not add area: ' + err.message);
+  }
+});
+
+document.querySelectorAll('.quick-area-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $('inputNewArea').value = btn.dataset.area;
+    $('formAddArea').dispatchEvent(new Event('submit'));
+  });
+});
+
+window.removeArea = async function(idx) {
+  const currentAreas = [...(provider.areas || [])];
+  const removedName = currentAreas[idx].area;
+  currentAreas.splice(idx, 1);
+
+  try {
+    const res = await api('/provider/profile', {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: provider.providerName,
+        phone: provider.providerPhone,
+        businessName: provider.businessName,
+        description: provider.description,
+        experienceYears: provider.experienceYears,
+        approxPrice: provider.approxPrice,
+        serviceIds: provider.services ? provider.services.map(s => s.id) : [],
+        areas: currentAreas,
+        formattedAddress: provider.formattedAddress,
+        latitude: provider.latitude,
+        longitude: provider.longitude,
+        serviceRadiusKm: provider.serviceRadiusKm,
+        workingHours: provider.workingHours,
+        profileImage: provider.profileImage,
+        subServices: provider.subServices,
+        portfolioItems: provider.portfolioItems,
+        workVideos: provider.workVideos
+      })
+    });
+    provider = res;
+    renderHeader();
+    renderServiceAreas();
+    showGlobalAlert(`Removed "${removedName}" from coverage.`);
+  } catch (err) {
+    alert('Could not remove area: ' + err.message);
+  }
+};
+
+// 6. Working Hours Edit
+$('btnEditHours').addEventListener('click', () => {
+  $('mWorkingHours').value = provider.workingHours || 'Mon - Sun: 8:00 AM - 8:00 PM';
+  $('selectHoursPreset').value = 'Mon - Sun: 8:00 AM - 8:00 PM';
+  bsModalHours.show();
+});
+
+$('selectHoursPreset').addEventListener('change', (e) => {
+  if (e.target.value !== 'custom') {
+    $('mWorkingHours').value = e.target.value;
+  }
+});
+
+$('formHours').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const spin = $('spinHours'), btn = $('btnSaveHours');
+  spin.classList.remove('d-none'); btn.disabled = true;
+
+  try {
+    const res = await api('/provider/profile', {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: provider.providerName,
+        phone: provider.providerPhone,
+        businessName: provider.businessName,
+        description: provider.description,
+        experienceYears: provider.experienceYears,
+        approxPrice: provider.approxPrice,
+        serviceIds: provider.services ? provider.services.map(s => s.id) : [],
+        areas: provider.areas,
+        formattedAddress: provider.formattedAddress,
+        latitude: provider.latitude,
+        longitude: provider.longitude,
+        serviceRadiusKm: provider.serviceRadiusKm,
+        workingHours: $('mWorkingHours').value.trim(),
+        profileImage: provider.profileImage,
+        subServices: provider.subServices,
+        portfolioItems: provider.portfolioItems,
+        workVideos: provider.workVideos
+      })
+    });
+    provider = res;
+    renderWorkingHours();
+    bsModalHours.hide();
+    showGlobalAlert('Working hours schedule saved!');
+  } catch (err) {
+    alert('Could not update working hours: ' + err.message);
+  } finally {
+    spin.classList.add('d-none'); btn.disabled = false;
+  }
+});
+
+// 7. Profile Photo / Logo Edit
+function showPhotoModalError(msg) {
+  const el = $('photoModalAlert');
+  if (el) {
+    el.textContent = msg;
+    el.classList.remove('d-none');
+  } else {
+    showGlobalAlert(msg, 'danger');
+  }
+}
+
+function clearPhotoModalError() {
+  const el = $('photoModalAlert');
+  if (el) {
+    el.textContent = '';
+    el.classList.add('d-none');
+  }
+}
+
+$('btnChangePhoto').addEventListener('click', () => {
+  $('mPhotoUrl').value = provider.profileImage || '';
+  $('mPhotoFile').value = '';
+  clearPhotoModalError();
+  if (provider.profileImage) {
+    $('photoPreviewImg').src = provider.profileImage;
+    $('photoPreviewContainer').classList.remove('d-none');
+  } else {
+    $('photoPreviewContainer').classList.add('d-none');
+  }
+  bsModalPhoto.show();
+});
+
+$('mPhotoFile').addEventListener('change', (e) => {
+  clearPhotoModalError();
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Validate supported image MIME types: JPEG, PNG, WebP
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  if (!allowedTypes.includes(file.type.toLowerCase())) {
+    showPhotoModalError('Unsupported file format. Please upload a JPEG, PNG, or WebP image.');
+    e.target.value = '';
+    $('photoPreviewContainer').classList.add('d-none');
+    return;
+  }
+
+  // Validate maximum file size: 5 MB (5 * 1024 * 1024 = 5,242,880 bytes)
+  if (file.size > 5 * 1024 * 1024) {
+    const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+    showPhotoModalError(`Image file size (${sizeMb} MB) exceeds maximum allowed size of 5 MB.`);
+    e.target.value = '';
+    $('photoPreviewContainer').classList.add('d-none');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    $('mPhotoUrl').value = evt.target.result;
+    $('photoPreviewImg').src = evt.target.result;
+    $('photoPreviewContainer').classList.remove('d-none');
+  };
+  reader.onerror = () => {
+    showPhotoModalError('Failed to read the selected image file. Please try again.');
+    e.target.value = '';
+  };
+  reader.readAsDataURL(file);
+});
+
+$('mPhotoUrl').addEventListener('input', (e) => {
+  clearPhotoModalError();
+  const val = e.target.value.trim();
+  if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:image/')) {
+    $('photoPreviewImg').src = val;
+    $('photoPreviewContainer').classList.remove('d-none');
+  } else if (!val) {
+    $('photoPreviewContainer').classList.add('d-none');
+  }
+});
+
+$('formPhoto').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearPhotoModalError();
+
+  const spin = $('spinPhoto'), btn = $('btnSavePhoto');
+  if (btn.disabled) return; // Prevent duplicate submissions
+
+  const imgData = $('mPhotoUrl').value.trim();
+
+  if (!imgData) {
+    showPhotoModalError('Please enter an image URL or choose a valid image file.');
+    return;
+  }
+
+  if (!imgData.startsWith('http://') && !imgData.startsWith('https://') && !imgData.startsWith('data:image/')) {
+    showPhotoModalError('Please provide a valid web URL (http/https) or upload a JPEG, PNG, or WebP image.');
+    return;
+  }
+
+  spin.classList.remove('d-none');
+  btn.disabled = true;
+
+  try {
+    let res;
+    // Prefer dedicated lightweight photo endpoint PUT /api/provider/photo
+    try {
+      res = await api('/provider/photo', {
+        method: 'PUT',
+        body: { profileImage: imgData }
+      });
+    } catch (photoErr) {
+      // If photo endpoint returns 404, fallback to full profile PUT
+      if (photoErr.message && photoErr.message.includes('404')) {
+        res = await api('/provider/profile', {
+          method: 'PUT',
+          body: {
+            name: provider.providerName,
+            phone: provider.providerPhone,
+            businessName: provider.businessName,
+            description: provider.description,
+            experienceYears: provider.experienceYears,
+            approxPrice: provider.approxPrice,
+            serviceIds: provider.services ? provider.services.map(s => s.id) : [],
+            areas: provider.areas,
+            formattedAddress: provider.formattedAddress,
+            latitude: provider.latitude,
+            longitude: provider.longitude,
+            serviceRadiusKm: provider.serviceRadiusKm,
+            workingHours: provider.workingHours,
+            profileImage: imgData,
+            subServices: provider.subServices,
+            portfolioItems: provider.portfolioItems,
+            workVideos: provider.workVideos
+          }
+        });
+      } else {
+        throw photoErr;
+      }
+    }
+
+    // Success confirmed by backend
+    provider = res;
+    const finalPhoto = res.profileImage || imgData;
+    localStorage.setItem('lsc_avatar_' + currentUser.id, finalPhoto);
+    localStorage.setItem('lsc_profile_photo', finalPhoto);
+
+    // Update UI
+    renderHeader();
+
+    // Also update any live avatar elements on page or navbar
+    document.querySelectorAll('.user-avatar-img').forEach(el => { el.src = finalPhoto; });
+    window.dispatchEvent(new CustomEvent('lsc:avatar-updated', { detail: { profileImage: finalPhoto } }));
+
+    bsModalPhoto.hide();
+    showGlobalAlert('Profile photo updated successfully!', 'success');
+  } catch (err) {
+    showPhotoModalError(err.message || 'Could not update photo. Please check your network and try again.');
+  } finally {
+    spin.classList.add('d-none');
+    btn.disabled = false;
+  }
+});
+
+// 8. Portfolio Add & Delete
+$('btnAddPortfolio').addEventListener('click', () => {
+  $('mPfTitle').value = '';
+  $('mPfSubService').value = provider.services && provider.services.length ? provider.services[0].name : '';
+  $('mPfDate').value = 'Oct 2026';
+  $('mPfBefore').value = '';
+  $('mPfAfter').value = '';
+  $('mPfDesc').value = '';
+  bsModalAddPortfolio.show();
+});
+
+$('formAddPortfolio').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const spin = $('spinPf'), btn = $('btnSavePf');
+  spin.classList.remove('d-none'); btn.disabled = true;
+
+  const currentPf = [...(provider.portfolioItems || [])];
+  currentPf.push({
+    title: $('mPfTitle').value.trim(),
+    subService: $('mPfSubService').value.trim() || 'General',
+    completedDate: $('mPfDate').value.trim(),
+    beforeImageUrl: $('mPfBefore').value.trim(),
+    afterImageUrl: $('mPfAfter').value.trim(),
+    description: $('mPfDesc').value.trim()
+  });
+
+  try {
+    const res = await api('/provider/profile', {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: provider.providerName,
+        phone: provider.providerPhone,
+        businessName: provider.businessName,
+        description: provider.description,
+        experienceYears: provider.experienceYears,
+        approxPrice: provider.approxPrice,
+        serviceIds: provider.services ? provider.services.map(s => s.id) : [],
+        areas: provider.areas,
+        formattedAddress: provider.formattedAddress,
+        latitude: provider.latitude,
+        longitude: provider.longitude,
+        serviceRadiusKm: provider.serviceRadiusKm,
+        workingHours: provider.workingHours,
+        profileImage: provider.profileImage,
+        subServices: provider.subServices,
+        portfolioItems: currentPf,
+        workVideos: provider.workVideos
+      })
+    });
+    provider = res;
+    renderPortfolio();
+    bsModalAddPortfolio.hide();
+    showGlobalAlert('Portfolio transformation added!');
+  } catch (err) {
+    alert('Could not save portfolio item: ' + err.message);
+  } finally {
+    spin.classList.add('d-none'); btn.disabled = false;
+  }
+});
+
+window.deletePortfolio = async function(idx) {
+  if (!confirm('Are you sure you want to delete this portfolio project?')) return;
+  const currentPf = [...(provider.portfolioItems || [])];
+  currentPf.splice(idx, 1);
+
+  try {
+    const res = await api('/provider/profile', {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: provider.providerName,
+        phone: provider.providerPhone,
+        businessName: provider.businessName,
+        description: provider.description,
+        experienceYears: provider.experienceYears,
+        approxPrice: provider.approxPrice,
+        serviceIds: provider.services ? provider.services.map(s => s.id) : [],
+        areas: provider.areas,
+        formattedAddress: provider.formattedAddress,
+        latitude: provider.latitude,
+        longitude: provider.longitude,
+        serviceRadiusKm: provider.serviceRadiusKm,
+        workingHours: provider.workingHours,
+        profileImage: provider.profileImage,
+        subServices: provider.subServices,
+        portfolioItems: currentPf,
+        workVideos: provider.workVideos
+      })
+    });
+    provider = res;
+    renderPortfolio();
+    showGlobalAlert('Portfolio project removed.');
+  } catch (err) {
+    alert('Could not remove portfolio: ' + err.message);
+  }
+};
+
+// 9. Catalog Service Categories Multi-select Modal
+$('btnEditCatalogServices').addEventListener('click', () => {
+  const container = $('catalogServicesCheckboxes');
+  const currentIds = (provider.services || []).map(s => s.id);
+
+  container.innerHTML = allCatalogServices.map(s => `
+    <div class="form-check p-2 rounded-2 border bg-light mb-1">
+      <input class="form-check-input ms-0 me-2" type="checkbox" value="${s.id}" id="chkCat-${s.id}" ${currentIds.includes(s.id) ? 'checked' : ''}>
+      <label class="form-check-label fw-semibold text-dark" for="chkCat-${s.id}">
+        <i class="bi ${esc(s.icon || 'bi-gear')} text-primary me-1"></i> ${esc(s.name)}
+      </label>
+      <div class="small text-muted ps-4">${esc(s.description || '')}</div>
+    </div>
+  `).join('');
+
+  bsModalCategories.show();
+});
+
+$('formCategories').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const spin = $('spinCategories'), btn = $('btnSaveCategories');
+  spin.classList.remove('d-none'); btn.disabled = true;
+
+  const checkedBoxes = Array.from(document.querySelectorAll('#catalogServicesCheckboxes input:checked'));
+  const selectedIds = checkedBoxes.map(cb => parseInt(cb.value, 10));
+
+  if (selectedIds.length === 0) {
+    alert('Please select at least one service category.');
+    spin.classList.add('d-none'); btn.disabled = false;
+    return;
+  }
+
+  try {
+    const res = await api('/provider/profile', {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: provider.providerName,
+        phone: provider.providerPhone,
+        businessName: provider.businessName,
+        description: provider.description,
+        experienceYears: provider.experienceYears,
+        approxPrice: provider.approxPrice,
+        serviceIds: selectedIds,
+        areas: provider.areas,
+        formattedAddress: provider.formattedAddress,
+        latitude: provider.latitude,
+        longitude: provider.longitude,
+        serviceRadiusKm: provider.serviceRadiusKm,
+        workingHours: provider.workingHours,
+        profileImage: provider.profileImage,
+        subServices: provider.subServices,
+        portfolioItems: provider.portfolioItems,
+        workVideos: provider.workVideos
+      })
+    });
+    provider = res;
+    renderServicesAndPricing();
+    bsModalCategories.hide();
+    showGlobalAlert('Service categories updated successfully!');
+  } catch (err) {
+    alert('Could not update categories: ' + err.message);
+  } finally {
+    spin.classList.add('d-none'); btn.disabled = false;
+  }
+});
+
+// 10. Change Password Form Handler (Requirement 4)
+const bsModalChangePassword = new bootstrap.Modal($('modalChangePassword'));
+$('btnOpenChangePassword').addEventListener('click', () => {
+  $('mCurrentPassword').value = '';
+  $('mNewPassword').value = '';
+  $('mConfirmPassword').value = '';
+  const alertEl = $('pwdAlert');
+  alertEl.classList.add('d-none');
+  bsModalChangePassword.show();
+});
+
+$('formChangePassword').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const alertEl = $('pwdAlert');
+  const spin = $('spinPassword'), btn = $('btnSavePassword');
+  const curr = $('mCurrentPassword').value;
+  const newP = $('mNewPassword').value;
+  const conf = $('mConfirmPassword').value;
+
+  if (newP !== conf) {
+    alertEl.className = 'alert alert-danger small mb-3';
+    alertEl.textContent = 'New password and confirmation do not match.';
+    alertEl.classList.remove('d-none');
+    return;
+  }
+
+  spin.classList.remove('d-none'); btn.disabled = true;
+
+  try {
+    const res = await api('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify({
+        currentPassword: curr,
+        newPassword: newP
+      })
+    });
+    bsModalChangePassword.hide();
+    showGlobalAlert(res.message || 'Password changed successfully!');
+  } catch (err) {
+    alertEl.className = 'alert alert-danger small mb-3';
+    alertEl.textContent = err.message || 'Could not change password. Verify your current password.';
+    alertEl.classList.remove('d-none');
+  } finally {
+    spin.classList.add('d-none'); btn.disabled = false;
+  }
+});
+
+// Smooth anchor navigation from dropdown menu items
+function handleHashNavigation() {
+  const hash = window.location.hash;
+  if (hash) {
+    const el = document.querySelector(hash);
+    if (el) {
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.style.transition = 'box-shadow 0.3s ease, border-color 0.3s ease';
+        el.style.borderColor = 'var(--primary)';
+        el.style.boxShadow = '0 0 0 4px rgba(79, 70, 229, 0.2)';
+        setTimeout(() => {
+          el.style.borderColor = '';
+          el.style.boxShadow = '';
+        }, 2200);
+      }, 200);
+    }
+  }
+}
+window.addEventListener('hashchange', handleHashNavigation);
+
+// Kick off initial load and smooth scroll
+loadMyProfile().then(() => {
+  if ($('valSecEmail')) {
+    $('valSecEmail').textContent = provider.providerEmail || currentUser.email || '--';
+  }
+  handleHashNavigation();
+});
+</script>
+</body>
+</html>

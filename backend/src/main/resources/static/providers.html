@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Find Verified Service Providers · Local Service Connect</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <style>
+    #mapOverview {
+      height: 520px;
+      width: 100%;
+      border-radius: 12px;
+    }
+    #pickerMap {
+      height: 380px;
+      width: 100%;
+      border-radius: 8px;
+    }
+    .pac-container {
+      z-index: 1060 !important;
+    }
+  </style>
+</head>
+<body>
+<div id="nav"></div>
+
+<div class="container py-4 py-lg-5">
+  <!-- Header Bar with View Toggle -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 pt-2">
+    <div>
+      <h1 class="h3 mb-1 fw-bold text-dark" id="pageMainHeading">Find Verified Providers Near You</h1>
+      <p class="text-muted small mb-0" id="pageSubHeading">Discover background-checked specialists by service category, distance, and reviews.</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <div class="btn-group" role="group" aria-label="View toggle">
+        <button type="button" id="btnListView" class="btn btn-sm btn-primary active">
+          <i class="bi bi-list-ul me-1"></i> List View
+        </button>
+        <button type="button" id="btnMapView" class="btn btn-sm btn-outline-primary">
+          <i class="bi bi-map me-1"></i> Map View
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Category Selection Ribbon -->
+  <div class="mb-3">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <span class="small fw-bold text-muted text-uppercase tracking-wider">
+        <i class="bi bi-grid-fill text-primary me-1"></i> Browse by Service Category
+      </span>
+      <span class="small text-muted" id="categorySubtext">Select a category to filter verified providers</span>
+    </div>
+    <div class="provider-category-ribbon" id="categoryRibbon">
+      <!-- Injected dynamically -->
+    </div>
+  </div>
+
+  <!-- API info banner if Google Maps is unconfigured -->
+  <div id="mapsBanner" class="alert alert-warning py-2 px-3 small d-none d-flex flex-wrap align-items-center justify-content-between gap-2 shadow-sm border-warning">
+    <div class="d-flex align-items-center">
+      <i class="bi bi-exclamation-triangle-fill text-warning fs-5 me-2"></i>
+      <div>
+        <strong>Google Maps is not configured.</strong>
+        <span class="text-muted d-block d-md-inline ms-md-1">Add your Google Maps API key to activate interactive maps, place autocomplete, and live distance calculations.</span>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#apiKeyModal">
+        <i class="bi bi-key-fill me-1"></i> Configure API Key
+      </button>
+      <button type="button" class="btn-close btn-sm" onclick="this.parentElement.parentElement.classList.add('d-none')"></button>
+    </div>
+  </div>
+
+  <!-- Advanced Search & Filter Form -->
+  <form id="searchForm" class="bg-white p-3 p-md-4 rounded-3 shadow-sm border mb-4">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold mb-1" for="svc">Service Type</label>
+        <select id="svc" class="form-select">
+          <option value="">All Service Categories</option>
+        </select>
+      </div>
+      <div class="col-md-5">
+        <label class="form-label small fw-semibold mb-1" for="addressInput">Your Location / Address</label>
+        <div class="input-group">
+          <input id="addressInput" class="form-control" placeholder="Search address, landmark or area (e.g. Lalpur, Ranchi)...">
+          <button type="button" id="btnCurrentLoc" class="btn btn-outline-secondary" title="Use my current GPS location">
+            <i class="bi bi-crosshair" id="locIcon"></i>
+            <span class="spinner-border spinner-border-sm d-none" id="locSpinner" role="status"></span>
+          </button>
+          <button type="button" id="btnMapPick" class="btn btn-outline-secondary" title="Pick on map" data-bs-toggle="modal" data-bs-target="#locationModal">
+            <i class="bi bi-geo-alt"></i>
+          </button>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold mb-1" for="radiusFilter">Max Distance</label>
+        <select id="radiusFilter" class="form-select">
+          <option value="">Any distance</option>
+          <option value="5">Within 5 km</option>
+          <option value="10" selected>Within 10 km</option>
+          <option value="15">Within 15 km</option>
+          <option value="25">Within 25 km</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100 fw-semibold">
+          <i class="bi bi-search me-1"></i> Search
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Location Indicator -->
+    <div id="selectedLocInfo" class="mt-2 small text-muted d-none">
+      <i class="bi bi-check-circle-fill text-success me-1"></i>
+      Active Location: <strong id="selectedAddressText" class="text-dark"></strong>
+      <button type="button" class="btn btn-link btn-sm p-0 ms-2 text-decoration-none text-danger" id="btnClearLoc">Clear location</button>
+    </div>
+
+    <!-- Quick Filters & Sorting Toolbar -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 pt-3 border-top">
+      <div class="d-flex flex-wrap align-items-center gap-2" id="filterChipsContainer">
+        <span class="small fw-semibold text-muted me-1"><i class="bi bi-funnel-fill me-1"></i>Filter:</span>
+        <button type="button" class="filter-chip" id="chipVerified" data-filter="verified">
+          <i class="bi bi-patch-check-fill text-success"></i> Verified Only
+        </button>
+        <button type="button" class="filter-chip" id="chipAvailable" data-filter="available">
+          <span class="pulse-dot"></span> Online &amp; Ready
+        </button>
+        <button type="button" class="filter-chip" id="chipRating" data-filter="rating45">
+          <i class="bi bi-star-fill text-warning"></i> 4.5+ Rating
+        </button>
+        <button type="button" class="filter-chip" id="chipQuick" data-filter="quick">
+          <i class="bi bi-lightning-charge-fill text-danger"></i> Quick Service Ready
+        </button>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <label class="small fw-semibold text-muted mb-0" for="sortSelect">Sort By:</label>
+        <select id="sortSelect" class="form-select form-select-sm" style="width: auto;">
+          <option value="recommended">Recommended</option>
+          <option value="rating_desc">Highest Rating</option>
+          <option value="price_asc">Lowest Starting Price</option>
+          <option value="distance_asc">Distance (Nearest)</option>
+          <option value="reviews_desc">Most Reviews</option>
+          <option value="exp_desc">Most Experience</option>
+        </select>
+      </div>
+    </div>
+  </form>
+
+  <div id="err" class="alert alert-danger d-none"></div>
+
+  <!-- Map View Container -->
+  <div id="mapViewContainer" class="card border-0 shadow-sm mb-4 d-none">
+    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+      <h2 class="h6 fw-bold mb-0 text-primary"><i class="bi bi-map-fill me-2"></i>Nearby Providers Map</h2>
+      <span class="badge bg-light text-dark border" id="mapProviderCount">0 providers</span>
+    </div>
+    <div class="card-body p-2">
+      <div id="mapOverview"></div>
+    </div>
+  </div>
+
+  <!-- List View Container -->
+  <div id="listViewContainer">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="h6 text-muted mb-0"><span id="resultCount" class="fw-bold text-dark">0</span> verified providers available</h2>
+      <span class="small text-muted" id="activeFilterSummary">Showing all matching verified specialists</span>
+    </div>
+    <div id="list" class="row g-3">
+      <!-- Populated dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- Location Picker Modal -->
+<div class="modal fade" id="locationModal" tabindex="-1" aria-labelledby="locationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-light border-bottom">
+        <h5 class="modal-title fw-bold" id="locationModalLabel"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Select Location on Map</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="small text-muted mb-2">Drag the marker or click on the map to accurately pinpoint your service location.</p>
+        <div id="pickerMap"></div>
+        <div class="mt-3 p-2 bg-light rounded small border">
+          <strong>Selected Address:</strong> <span id="modalSelectedAddr" class="text-muted">Move marker to update</span>
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm px-4 fw-semibold" id="btnConfirmModalLoc" data-bs-dismiss="modal">Set Location</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Google Maps API Key Configuration Modal -->
+<div class="modal fade" id="apiKeyModal" tabindex="-1" aria-labelledby="apiKeyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title h6 fw-bold" id="apiKeyModalLabel"><i class="bi bi-geo-alt-fill me-2"></i>Configure Google Maps API Key</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="small text-muted mb-3">
+          Paste your Google Maps Platform API key below. The key will activate Google Maps, Places autocomplete, and geocoding immediately.
+        </p>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="inputApiKey">Google Maps API Key</label>
+          <input type="text" id="inputApiKey" class="form-control font-monospace" placeholder="AIzaSy..." autocomplete="off">
+        </div>
+        <div class="alert alert-light border small text-muted p-3 mb-0">
+          <div class="fw-bold text-dark mb-1"><i class="bi bi-shield-check text-primary me-1"></i>Required Google Cloud APIs:</div>
+          <ul class="mb-0 ps-3">
+            <li><strong>Maps JavaScript API</strong> (interactive maps &amp; markers)</li>
+            <li><strong>Places API</strong> (address autocomplete)</li>
+            <li><strong>Geocoding API</strong> (coordinate lookups)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm px-3 fw-semibold" id="btnSaveApiKey">
+          <i class="bi bi-check-lg me-1"></i> Save &amp; Activate Maps
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="site py-4 mt-5">
+  <div class="container d-flex flex-wrap justify-content-between gap-3">
+    <div>
+      <strong class="text-white">Local Service Connect</strong>
+      <div class="small">Local services, booked directly &amp; simply.</div>
+    </div>
+    <div class="small d-flex gap-3 flex-wrap">
+      <a href="/services.html">Services Catalog</a>
+      <a href="/providers.html">Find Providers</a>
+      <a href="/register.html?role=provider">Become a Provider</a>
+      <a href="/login.html">Log in</a>
+    </div>
+    <div class="small">&copy; <span id="yr"></span> Local Service Connect</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/maps.js"></script>
+<script>
+navbar();
+const $ = id => document.getElementById(id);
+$('yr').textContent = new Date().getFullYear();
+
+// State
+let allServices = [];
+let rawProviders = [];
+let currentCoords = null;
+let currentFormattedAddress = '';
+let currentArea = '';
+let modalCoords = null;
+let overviewMapObj = null;
+let pickerMapObj = null;
+let mapsApiLoaded = false;
+
+// Filter & Sort State
+const activeFilters = {
+  verified: false,
+  available: false,
+  rating45: false,
+  quick: false
+};
+let currentSort = 'recommended';
+let selectedCategoryKey = '';
+
+// Check URL Params
+const q = new URLSearchParams(location.search);
+
+/**
+ * Initialize Google Maps (if API key available)
+ */
+async function initMaps() {
+  try {
+    const config = await LSC_MAPS.loadGoogleMapsApi();
+    if (config && config.configured) {
+      mapsApiLoaded = true;
+      $('mapsBanner').classList.add('d-none');
+      LSC_MAPS.attachPlacesAutocomplete('addressInput', {
+        onPlaceSelected: (place) => {
+          currentCoords = { lat: place.lat, lng: place.lng };
+          currentFormattedAddress = place.formattedAddress;
+          currentArea = place.area || place.city || '';
+          updateLocationDisplay();
+          search();
+        }
+      });
+    } else {
+      mapsApiLoaded = false;
+      $('mapsBanner').classList.remove('d-none');
+    }
+  } catch (err) {
+    mapsApiLoaded = false;
+    $('mapsBanner').classList.remove('d-none');
+  }
+}
+
+function updateLocationDisplay() {
+  const infoEl = $('selectedLocInfo');
+  const textEl = $('selectedAddressText');
+  if (currentCoords) {
+    infoEl.classList.remove('d-none');
+    textEl.textContent = currentFormattedAddress || `${currentCoords.lat.toFixed(4)}, ${currentCoords.lng.toFixed(4)}`;
+  } else {
+    infoEl.classList.add('d-none');
+  }
+}
+
+$('btnClearLoc').addEventListener('click', () => {
+  currentCoords = null;
+  currentFormattedAddress = '';
+  currentArea = '';
+  $('addressInput').value = '';
+  updateLocationDisplay();
+  search();
+});
+
+// Current GPS Location Button
+$('btnCurrentLoc').addEventListener('click', async () => {
+  const icon = $('locIcon');
+  const spinner = $('locSpinner');
+  icon.classList.add('d-none');
+  spinner.classList.remove('d-none');
+  $('err').classList.add('d-none');
+
+  try {
+    const loc = await LSC_MAPS.getCurrentLocation();
+    currentCoords = { lat: loc.lat, lng: loc.lng };
+    currentFormattedAddress = loc.formattedAddress || 'Current GPS Location';
+    currentArea = loc.area || loc.city || '';
+    updateLocationDisplay();
+    search();
+  } catch (err) {
+    showError($('err'), err.message);
+  } finally {
+    icon.classList.remove('d-none');
+    spinner.classList.add('d-none');
+  }
+});
+
+// Location Picker Modal setup
+const locationModalEl = document.getElementById('locationModal');
+locationModalEl.addEventListener('shown.bs.modal', () => {
+  if (!mapsApiLoaded) {
+    $('modalSelectedAddr').textContent = 'Google Maps is not configured. Please enter your address manually.';
+    return;
+  }
+  const initLat = currentCoords ? currentCoords.lat : 23.3441;
+  const initLng = currentCoords ? currentCoords.lng : 85.3096;
+
+  if (!pickerMapObj) {
+    pickerMapObj = LSC_MAPS.createLocationPickerMap('pickerMap', {
+      initialLat: initLat,
+      initialLng: initLng,
+      draggable: true,
+      onLocationChange: (loc) => {
+        modalCoords = { lat: loc.lat, lng: loc.lng };
+        $('modalSelectedAddr').textContent = loc.formattedAddress || `${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`;
+      }
+    });
+  } else {
+    pickerMapObj.setLocation(initLat, initLng);
+    if (window.google && google.maps) {
+      google.maps.event.trigger(pickerMapObj.map, 'resize');
+      pickerMapObj.map.setCenter({ lat: initLat, lng: initLng });
+    }
+  }
+});
+
+$('btnConfirmModalLoc').addEventListener('click', () => {
+  if (modalCoords) {
+    currentCoords = modalCoords;
+    currentFormattedAddress = $('modalSelectedAddr').textContent;
+    updateLocationDisplay();
+    search();
+  }
+});
+
+/**
+ * Render Category Ribbon on Top
+ */
+function renderCategoryRibbon(services) {
+  const ribbon = $('categoryRibbon');
+  const catItems = [
+    { id: '', name: 'All Services', icon: 'bi-grid' },
+    ...services
+  ];
+
+  ribbon.innerHTML = catItems.map(c => `
+    <button type="button" class="cat-filter-btn ${String(c.id) === String(selectedCategoryKey) ? 'active' : ''}" data-id="${c.id}" data-name="${esc(c.name)}">
+      <i class="bi ${esc(c.icon || 'bi-tools')}"></i>
+      <span>${esc(c.name)}</span>
+    </button>
+  `).join('');
+
+  document.querySelectorAll('.cat-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.cat-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedCategoryKey = btn.dataset.id;
+      $('svc').value = selectedCategoryKey;
+      updateHeadings(btn.dataset.name);
+      search();
+    });
+  });
+}
+
+function updateHeadings(categoryName) {
+  if (categoryName && categoryName !== 'All Services') {
+    $('pageMainHeading').textContent = `Verified ${categoryName} Specialists in Ranchi`;
+    $('pageSubHeading').textContent = `Browse background-checked professionals offering ${categoryName.toLowerCase()} with doorstep service.`;
+  } else {
+    $('pageMainHeading').textContent = 'Find Verified Providers Near You';
+    $('pageSubHeading').textContent = 'Discover background-checked specialists by service category, distance, and reviews.';
+  }
+}
+
+/**
+ * Filter Chips Toggle Handler
+ */
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const filterKey = chip.dataset.filter;
+    activeFilters[filterKey] = !activeFilters[filterKey];
+    chip.classList.toggle('active', activeFilters[filterKey]);
+    applyFiltersAndSort();
+  });
+});
+
+/**
+ * Sort Dropdown Change
+ */
+$('sortSelect').addEventListener('change', e => {
+  currentSort = e.target.value;
+  applyFiltersAndSort();
+});
+
+// Category Dropdown Change inside form
+$('svc').addEventListener('change', e => {
+  selectedCategoryKey = e.target.value;
+  document.querySelectorAll('.cat-filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.id === selectedCategoryKey);
+  });
+  const svcObj = allServices.find(s => String(s.id) === String(selectedCategoryKey));
+  updateHeadings(svcObj ? svcObj.name : 'All Services');
+});
+
+/**
+ * Search API Call
+ */
+async function search() {
+  $('err').classList.add('d-none');
+  const svcId = $('svc').value;
+  const radiusKm = $('radiusFilter').value;
+  const areaQuery = $('addressInput').value.trim();
+
+  // Render shimmer skeletons while loading
+  $('list').innerHTML = [1, 2, 3].map(() => `
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 provider-card p-4">
+        <div class="d-flex gap-3 mb-3">
+          <div class="skeleton-shimmer" style="width: 58px; height: 58px; border-radius: 16px;"></div>
+          <div class="flex-grow-1">
+            <div class="skeleton-shimmer mb-2" style="height: 20px; width: 65%;"></div>
+            <div class="skeleton-shimmer" style="height: 14px; width: 40%;"></div>
+          </div>
+        </div>
+        <div class="skeleton-shimmer mb-3" style="height: 38px; width: 100%;"></div>
+        <div class="skeleton-shimmer mt-auto" style="height: 38px; width: 100%; border-radius: 8px;"></div>
+      </div>
+    </div>
+  `).join('');
+
+  try {
+    let list = [];
+    if (currentCoords) {
+      // Geolocation nearby match
+      const params = new URLSearchParams();
+      if (svcId) params.set('serviceId', svcId);
+      params.set('latitude', currentCoords.lat);
+      params.set('longitude', currentCoords.lng);
+      if (radiusKm) params.set('radiusKm', radiusKm);
+      list = await api('/providers/nearby?' + params);
+    } else {
+      // Standard search
+      const params = new URLSearchParams();
+      if (svcId) params.set('serviceId', svcId);
+      if (areaQuery) params.set('area', areaQuery);
+      list = await api('/providers?' + params);
+    }
+
+    rawProviders = list;
+    await Favorites.loadCache();
+    applyFiltersAndSort();
+  } catch (e) {
+    showError($('err'), e.message);
+  }
+}
+
+/**
+ * Filter & Sort on Client Side
+ */
+function applyFiltersAndSort() {
+  let list = [...rawProviders];
+
+  // Apply Quick Filters
+  if (activeFilters.verified) {
+    list = list.filter(p => p.verificationStatus === 'VERIFIED');
+  }
+  if (activeFilters.available) {
+    list = list.filter(p => p.availability);
+  }
+  if (activeFilters.rating45) {
+    list = list.filter(p => p.rating && parseFloat(p.rating) >= 4.5);
+  }
+  if (activeFilters.quick) {
+    list = list.filter(p => p.availability);
+  }
+
+  // Apply Sorting
+  if (currentSort === 'rating_desc') {
+    list.sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0));
+  } else if (currentSort === 'price_asc') {
+    list.sort((a, b) => (parseFloat(a.approxPrice) || 9999) - (parseFloat(b.approxPrice) || 9999));
+  } else if (currentSort === 'distance_asc') {
+    list.sort((a, b) => (a.distanceKm != null ? a.distanceKm : 9999) - (b.distanceKm != null ? b.distanceKm : 9999));
+  } else if (currentSort === 'reviews_desc') {
+    list.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0));
+  } else if (currentSort === 'exp_desc') {
+    list.sort((a, b) => (b.experienceYears || 0) - (a.experienceYears || 0));
+  } else {
+    // Recommended: verified first, then highest rating, then distance
+    list.sort((a, b) => {
+      if (a.verificationStatus === 'VERIFIED' && b.verificationStatus !== 'VERIFIED') return -1;
+      if (b.verificationStatus === 'VERIFIED' && a.verificationStatus !== 'VERIFIED') return 1;
+      return (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0);
+    });
+  }
+
+  $('resultCount').textContent = list.length;
+  $('mapProviderCount').textContent = `${list.length} provider${list.length === 1 ? '' : 's'}`;
+
+  renderListView(list);
+  renderMapView(list);
+}
+
+/**
+ * Render Providers in Grid Cards
+ */
+function renderListView(list) {
+  const container = $('list');
+  if (!list || !list.length) {
+    container.innerHTML = `
+      <div class="col-12 py-5 text-center bg-white rounded-4 border shadow-sm my-3">
+        <div class="mb-3">
+          <span class="d-inline-flex align-items-center justify-content-center bg-light text-muted rounded-circle" style="width: 64px; height: 64px; font-size: 2rem;">
+            <i class="bi bi-person-x"></i>
+          </span>
+        </div>
+        <h5 class="fw-bold text-dark">No verified providers found matching these filters</h5>
+        <p class="text-muted small mb-3 max-w-md mx-auto">
+          Try expanding your distance radius, resetting filters, or selecting another nearby locality in Ranchi.
+        </p>
+        <button type="button" class="btn btn-outline-primary btn-sm px-4 fw-semibold" onclick="resetAllFilters()">
+          <i class="bi bi-arrow-counterclockwise me-1"></i> Reset All Filters
+        </button>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(pr => {
+    const initial = (pr.businessName ? pr.businessName.charAt(0) : 'P').toUpperCase();
+    const primaryService = pr.services && pr.services.length ? pr.services[0].name : 'Local Service';
+
+    return `
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 provider-card shadow-sm border-0">
+        <div class="card-body p-4 d-flex flex-column">
+          <!-- Header: Avatar, Name, Verification, Availability, Favorite & Share -->
+          <div class="d-flex align-items-start gap-3 mb-3 position-relative">
+            ${pr.profileImage ? `
+              <img src="${esc(pr.profileImage)}" alt="${esc(pr.businessName)}" class="provider-img-avatar" loading="lazy" onerror="this.onerror=null;this.src='/img/default-provider.svg';">
+            ` : `
+              <div class="provider-avatar">
+                ${esc(initial)}
+              </div>
+            `}
+            <div class="flex-grow-1 min-w-0" style="padding-right: 80px;">
+              <div class="d-flex align-items-center gap-1 mb-1 flex-wrap">
+                <a href="/provider-profile.html?id=${pr.id}" class="text-decoration-none text-dark">
+                  <h3 class="h6 mb-0 fw-bold text-truncate hover-primary">${esc(pr.businessName)}</h3>
+                </a>
+                <span class="verified-badge" title="Identity & Background Verified Specialist">
+                  <i class="bi bi-patch-check-fill text-success"></i> Verified
+                </span>
+              </div>
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                ${pr.availability 
+                  ? '<span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold" style="font-size:0.75rem;"><span class="pulse-dot me-1"></span>Online &amp; Ready</span>' 
+                  : '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fw-normal" style="font-size:0.75rem;">Currently Busy</span>'}
+                
+                ${pr.availability ? `
+                  <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-semibold" style="font-size:0.72rem;" title="Target Quick Service arrival time">
+                    <i class="bi bi-lightning-fill"></i> ~10-15 min arrival
+                  </span>
+                ` : ''}
+              </div>
+            </div>
+            <!-- Top Right Action Controls: Share and Favorite -->
+            <div class="position-absolute top-0 end-0 d-flex align-items-center gap-1">
+              <button type="button" class="btn-share-action" onclick='ShareProvider.openShareModal(${JSON.stringify({id: pr.id, businessName: pr.businessName, formattedAddress: pr.formattedAddress, profileImage: pr.profileImage})})' title="Share Provider" aria-label="Share provider">
+                <i class="bi bi-share-fill"></i>
+              </button>
+              <button type="button" class="btn-fav-action ${Favorites.isFavorite(pr.id) ? 'active' : ''}" data-fav-provider="${pr.id}" onclick="Favorites.toggle(${pr.id}, this)" title="${Favorites.isFavorite(pr.id) ? 'Remove from favorites' : 'Add to favorites'}" aria-label="${Favorites.isFavorite(pr.id) ? 'Remove from favorites' : 'Add to favorites'}">
+                <i class="bi ${Favorites.isFavorite(pr.id) ? 'bi-heart-fill text-danger' : 'bi-heart'}"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Rating & Distance Row -->
+          <div class="mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>${stars(pr.rating, pr.reviewCount)}</div>
+            ${pr.distanceKm != null ? `
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle fw-semibold" style="font-size:0.75rem;">
+                <i class="bi bi-geo-alt-fill me-1"></i>${pr.distanceKm} km away
+              </span>` : ''}
+          </div>
+
+          <!-- Description -->
+          <p class="text-muted small mb-3 flex-grow-1" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:0.83rem;">
+            ${esc(pr.description || 'Experienced local professional providing guaranteed doorstep service.')}
+          </p>
+
+          <!-- Service Tags -->
+          <div class="mb-3 d-flex flex-wrap gap-1">
+            ${pr.services.map(s => `<span class="badge bg-light text-dark border fw-normal" style="font-size:0.72rem;">${esc(s.name)}</span>`).join('')}
+          </div>
+
+          <!-- Price & Location Footer -->
+          <div class="pt-3 border-top small text-muted d-flex justify-content-between align-items-center mb-3">
+            <span class="text-truncate" style="max-width: 60%;" title="${esc(pr.formattedAddress || 'Ranchi')}">
+              <i class="bi bi-geo-alt text-danger me-1"></i>${esc(pr.formattedAddress || pr.areas.map(a => a.area).join(', ') || 'Ranchi')}
+            </span>
+            ${pr.approxPrice != null ? `
+              <span class="fw-bold text-dark fs-6">Starts at ₹${esc(pr.approxPrice)}</span>
+            ` : '<span class="text-muted">On Request</span>'}
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-2 mt-auto">
+            <a href="/provider-profile.html?id=${pr.id}" class="btn btn-outline-primary btn-sm flex-fill fw-semibold py-2">
+              <i class="bi bi-person-badge me-1"></i> View Profile
+            </a>
+            <a href="/?serviceId=${$('svc').value || (pr.services[0] ? pr.services[0].id : '')}&providerId=${pr.id}#bookingHub" class="btn btn-primary btn-sm flex-fill fw-semibold py-2">
+              <i class="bi bi-calendar2-check-fill me-1"></i> Book Now
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function resetAllFilters() {
+  Object.keys(activeFilters).forEach(k => activeFilters[k] = false);
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  $('sortSelect').value = 'recommended';
+  currentSort = 'recommended';
+  $('radiusFilter').value = '10';
+  applyFiltersAndSort();
+}
+
+/**
+ * Render Map View
+ */
+function renderMapView(list) {
+  if (!mapsApiLoaded) return;
+  if (!overviewMapObj) {
+    overviewMapObj = LSC_MAPS.createProvidersOverviewMap('mapOverview', {
+      customerCoords: currentCoords,
+      providers: list
+    });
+  } else {
+    if (currentCoords) overviewMapObj.setCustomerLocation(currentCoords.lat, currentCoords.lng);
+    overviewMapObj.setProviders(list);
+  }
+}
+
+// Toggle List vs Map views
+$('btnListView').addEventListener('click', () => {
+  $('btnListView').classList.add('active', 'btn-primary');
+  $('btnListView').classList.remove('btn-outline-primary');
+  $('btnMapView').classList.remove('active', 'btn-primary');
+  $('btnMapView').classList.add('btn-outline-primary');
+  $('listViewContainer').classList.remove('d-none');
+  $('mapViewContainer').classList.add('d-none');
+});
+
+$('btnMapView').addEventListener('click', () => {
+  $('btnMapView').classList.add('active', 'btn-primary');
+  $('btnMapView').classList.remove('btn-outline-primary');
+  $('btnListView').classList.remove('active', 'btn-primary');
+  $('btnListView').classList.add('btn-outline-primary');
+  $('mapViewContainer').classList.remove('d-none');
+  $('listViewContainer').classList.add('d-none');
+
+  if (overviewMapObj && overviewMapObj.map && window.google && google.maps) {
+    google.maps.event.trigger(overviewMapObj.map, 'resize');
+  }
+});
+
+// Initialization
+(async () => {
+  await initMaps();
+  const svcs = await api('/services').catch(() => []);
+  allServices = svcs;
+
+  // Render top Category Ribbon
+  renderCategoryRibbon(svcs);
+
+  // Populate Service Dropdown inside search form
+  $('svc').innerHTML += svcs.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+
+  if (q.get('serviceId')) {
+    selectedCategoryKey = q.get('serviceId');
+    $('svc').value = selectedCategoryKey;
+    const matchedSvc = svcs.find(s => String(s.id) === String(selectedCategoryKey));
+    if (matchedSvc) updateHeadings(matchedSvc.name);
+  } else if (q.get('category')) {
+    const matchedSvc = svcs.find(s => s.name.toLowerCase().includes(q.get('category').toLowerCase()));
+    if (matchedSvc) {
+      selectedCategoryKey = String(matchedSvc.id);
+      $('svc').value = selectedCategoryKey;
+      updateHeadings(matchedSvc.name);
+    }
+  }
+
+  if (q.get('area')) $('addressInput').value = q.get('area');
+
+  // If customer is logged in, attempt to preload their saved address & coordinates
+  const u = Auth.get();
+  if (u.token && u.role === 'CUSTOMER') {
+    try {
+      const prof = await api('/customer/profile');
+      if (prof.latitude && prof.longitude) {
+        currentCoords = { lat: prof.latitude, lng: prof.longitude };
+        currentFormattedAddress = prof.formattedAddress || prof.address || '';
+        currentArea = prof.area || '';
+        updateLocationDisplay();
+      } else if (prof.address || prof.area) {
+        $('addressInput').value = prof.formattedAddress || prof.address || prof.area || '';
+      }
+    } catch (e) {
+      console.warn('Could not load customer profile location:', e);
+    }
+  }
+
+  search();
+})();
+
+$('searchForm').addEventListener('submit', e => {
+  e.preventDefault();
+  search();
+});
+
+$('btnSaveApiKey').addEventListener('click', async () => {
+  const key = $('inputApiKey').value.trim();
+  if (!key) return alert('Please enter your Google Maps API key.');
+  try {
+    localStorage.setItem('lsc_maps_key', key);
+    await api('/config/maps', { method: 'POST', body: { apiKey: key } });
+    location.reload();
+  } catch (err) {
+    alert('Failed to save API key: ' + err.message);
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,2769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Provider Verification &amp; Partner Operations · Local Service Connect Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <style>
+    :root {
+      --lsc-primary: #7c3aed;
+      --lsc-primary-dark: #6d28d9;
+      --lsc-primary-light: #f5f3ff;
+    }
+    body { background-color: #f8fafc; color: #1e293b; font-family: system-ui, -apple-system, sans-serif; }
+    .admin-container { max-width: 1380px; }
+    .stat-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1.25rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(124, 58, 237, 0.08); }
+    .filter-tab-btn {
+      border: none;
+      background: transparent;
+      padding: 0.65rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #64748b;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .filter-tab-btn:hover { color: #7c3aed; }
+    .filter-tab-btn.active {
+      color: #7c3aed;
+      border-bottom-color: #7c3aed;
+    }
+    .filter-tab-btn .badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-left: 0.35rem;
+    }
+    .app-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      transition: all 0.18s ease;
+    }
+    .app-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+    }
+    .status-badge-SUBMITTED { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .status-badge-UNDER_REVIEW { background: #f3e8ff; color: #7c3aed; border: 1px solid #e9d5ff; }
+    .status-badge-ACTION_REQUIRED { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .status-badge-VERIFIED { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .status-badge-REJECTED { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .status-badge-DRAFT { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+
+    .checklist-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+    }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px dashed #e2e8f0;
+    }
+    .checklist-item:last-child { border-bottom: none; }
+    .checklist-item .form-check-input {
+      margin-top: 0.2rem;
+      cursor: pointer;
+    }
+    .doc-preview-thumb {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #f1f5f9;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .doc-preview-thumb:hover { transform: scale(1.02); }
+    .doc-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 0.75rem;
+      transition: all 0.15s ease;
+    }
+    .doc-card:hover { border-color: #cbd5e1; }
+    .modal-xl-custom { max-width: 1140px; }
+    .audit-node {
+      position: relative;
+      padding-left: 28px;
+    }
+    .audit-node::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 14px;
+      bottom: -16px;
+      width: 2px;
+      background: #e2e8f0;
+    }
+    .audit-node:last-child::before { display: none; }
+    .audit-dot {
+      position: absolute;
+      left: 0;
+      top: 4px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #7c3aed;
+      border: 3px solid #ede9fe;
+    }
+  </style>
+</head>
+<body>
+<div id="nav"></div>
+
+<div class="container-fluid admin-container py-4">
+  
+  <!-- Page Header & Action Bar -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2">
+        <h1 class="h3 fw-bold text-dark mb-0"><i class="bi bi-shield-check text-primary me-2"></i>Provider Verification Center</h1>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 fw-bold">Admin Console</span>
+      </div>
+      <p class="text-muted small mb-0 mt-1">Review partner identity proofs, inspect shop locations, manage verification checklists, and audit onboarding decisions.</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-xs" onclick="loadApplications(true)">
+        <i class="bi bi-arrow-clockwise me-1" id="btnRefreshSpin"></i> Refresh
+      </button>
+      <a href="/admin/dashboard" class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-xs">
+        <i class="bi bi-speedometer2 me-1"></i> Admin Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- Notification Banner -->
+  <div id="pageAlert" class="alert d-none shadow-sm rounded-3"></div>
+
+  <!-- Summary Metric Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card cursor-pointer" onclick="switchFilterTab('SUBMITTED')">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="small text-muted fw-semibold">Pending Review</span>
+          <span class="badge bg-info-subtle text-info rounded-circle p-2"><i class="bi bi-inbox-fill"></i></span>
+        </div>
+        <div class="h3 fw-bold text-dark mb-0" id="cntSubmitted">0</div>
+        <div class="text-muted" style="font-size: 0.72rem;">Awaiting first inspection</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card cursor-pointer" onclick="switchFilterTab('UNDER_REVIEW')">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="small text-muted fw-semibold">Under Review</span>
+          <span class="badge bg-primary-subtle text-primary rounded-circle p-2"><i class="bi bi-search"></i></span>
+        </div>
+        <div class="h3 fw-bold text-primary mb-0" id="cntUnderReview">0</div>
+        <div class="text-muted" style="font-size: 0.72rem;">Review in progress</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card cursor-pointer" onclick="switchFilterTab('ACTION_REQUIRED')">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="small text-muted fw-semibold">Action Required</span>
+          <span class="badge bg-warning-subtle text-warning rounded-circle p-2"><i class="bi bi-exclamation-octagon-fill"></i></span>
+        </div>
+        <div class="h3 fw-bold text-warning mb-0" id="cntActionReq">0</div>
+        <div class="text-muted" style="font-size: 0.72rem;">Requested corrections</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card cursor-pointer" onclick="switchFilterTab('VERIFIED')">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="small text-muted fw-semibold">Verified Partners</span>
+          <span class="badge bg-success-subtle text-success rounded-circle p-2"><i class="bi bi-patch-check-fill"></i></span>
+        </div>
+        <div class="h3 fw-bold text-success mb-0" id="cntVerified">0</div>
+        <div class="text-muted" style="font-size: 0.72rem;">Eligible for bookings</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card cursor-pointer" onclick="switchFilterTab('REJECTED')">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="small text-muted fw-semibold">Rejected</span>
+          <span class="badge bg-danger-subtle text-danger rounded-circle p-2"><i class="bi bi-x-circle-fill"></i></span>
+        </div>
+        <div class="h3 fw-bold text-danger mb-0" id="cntRejected">0</div>
+        <div class="text-muted" style="font-size: 0.72rem;">Failed verification</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card cursor-pointer" onclick="switchFilterTab('ALL')">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="small text-muted fw-semibold">Total Applications</span>
+          <span class="badge bg-secondary-subtle text-secondary rounded-circle p-2"><i class="bi bi-files"></i></span>
+        </div>
+        <div class="h3 fw-bold text-dark mb-0" id="cntTotal">0</div>
+        <div class="text-muted" style="font-size: 0.72rem;">All recorded submissions</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Card with Filter Tabs & Search -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <!-- Filter Tabs Header -->
+    <div class="border-bottom px-3 pt-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <div class="d-flex flex-wrap gap-1" id="filterTabs">
+        <button type="button" class="filter-tab-btn active" data-status="ALL">All Applications <span class="badge bg-secondary rounded-pill" id="tabBadgeAll">0</span></button>
+        <button type="button" class="filter-tab-btn" data-status="SUBMITTED">Pending Review <span class="badge bg-info text-dark rounded-pill" id="tabBadgeSubmitted">0</span></button>
+        <button type="button" class="filter-tab-btn" data-status="UNDER_REVIEW">Under Review <span class="badge bg-primary rounded-pill" id="tabBadgeUnderReview">0</span></button>
+        <button type="button" class="filter-tab-btn" data-status="ACTION_REQUIRED">Action Required <span class="badge bg-warning text-dark rounded-pill" id="tabBadgeAction">0</span></button>
+        <button type="button" class="filter-tab-btn" data-status="VERIFIED">Verified <span class="badge bg-success rounded-pill" id="tabBadgeVerified">0</span></button>
+        <button type="button" class="filter-tab-btn" data-status="REJECTED">Rejected <span class="badge bg-danger rounded-pill" id="tabBadgeRejected">0</span></button>
+        <button type="button" class="filter-tab-btn" data-status="DIRECTORY"><i class="bi bi-people-fill me-1"></i>Provider Directory</button>
+        <button type="button" class="filter-tab-btn" data-status="QUICK_MONITOR"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Quick Service Monitor</button>
+      </div>
+    </div>
+
+    <!-- Search & Control Toolbar -->
+    <div class="p-3 bg-light border-bottom" id="appFilterToolbar">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-5">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Search by provider name, business name, reference (APP-XXXX), phone, email...">
+            <button class="btn btn-outline-secondary" type="button" id="btnClearSearch" title="Clear search"><i class="bi bi-x"></i></button>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <select id="typeFilter" class="form-select form-select-sm">
+            <option value="">All Provider Types</option>
+            <option value="INDIVIDUAL">Individual Professional</option>
+            <option value="BUSINESS">Shop or Registered Business</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <select id="sortFilter" class="form-select form-select-sm">
+            <option value="submittedAt:desc">Newest First</option>
+            <option value="submittedAt:asc">Oldest First</option>
+            <option value="legalName:asc">Name (A-Z)</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-2 text-md-end">
+          <span class="small text-muted" id="resultsCountText">Showing 0 applications</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Applications Table / Cards Body -->
+    <div class="card-body p-0">
+      <!-- Standard Verification Applications View -->
+      <div id="viewApplications">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-secondary small text-uppercase fw-bold">
+              <tr>
+                <th class="ps-4">Application &amp; Provider</th>
+                <th>Category</th>
+                <th>Contact &amp; Location</th>
+                <th>Services</th>
+                <th>Documents Status</th>
+                <th>Verification Status</th>
+                <th class="text-end pe-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="appTableBody">
+              <tr>
+                <td colspan="7" class="text-center py-5 text-muted">
+                  <div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading verification applications...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 p-3 border-top bg-light" id="paginationBar">
+          <div class="small text-muted" id="pageInfoText">Page 1 of 1</div>
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-secondary rounded-pill-start px-3" id="btnPrevPage" disabled onclick="changePage(-1)">
+              <i class="bi bi-chevron-left me-1"></i>Previous
+            </button>
+            <button type="button" class="btn btn-outline-secondary rounded-pill-end px-3" id="btnNextPage" disabled onclick="changePage(1)">
+              Next<i class="bi bi-chevron-right ms-1"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Directory Tab (Enhanced Provider Directory & Account Management) -->
+      <div id="viewDirectory" class="d-none">
+        <!-- Directory KPI Stats Cards -->
+        <div class="row g-3 p-3 bg-light border-bottom">
+          <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+              <div class="small text-muted fw-semibold">Total Providers</div>
+              <div class="fs-4 fw-bold text-dark" id="dirStatTotal">-</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+              <div class="small text-muted fw-semibold">Verified Partners</div>
+              <div class="fs-4 fw-bold text-success" id="dirStatVerified">-</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+              <div class="small text-muted fw-semibold">Online &amp; Available</div>
+              <div class="fs-4 fw-bold text-primary" id="dirStatOnline">-</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+              <div class="small text-muted fw-semibold">Suspended Accounts</div>
+              <div class="fs-4 fw-bold text-danger" id="dirStatSuspended">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Directory Filter Bar -->
+        <div class="p-3 bg-white border-bottom">
+          <div class="row g-2 align-items-center mb-2">
+            <div class="col-md-4">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" id="dirSearch" class="form-control border-start-0" placeholder="Search provider, business, phone, email...">
+                <button class="btn btn-outline-secondary" type="button" id="btnDirClearSearch"><i class="bi bi-x"></i></button>
+              </div>
+            </div>
+            <div class="col-6 col-md-2">
+              <select id="dirStatusFilter" class="form-select form-select-sm">
+                <option value="">All Verification</option>
+                <option value="VERIFIED">Verified</option>
+                <option value="PENDING">Pending</option>
+                <option value="REJECTED">Rejected</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <select id="dirServiceFilter" class="form-select form-select-sm">
+                <option value="">All Service Categories</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <input type="text" id="dirSubServiceFilter" class="form-control form-control-sm" placeholder="Filter subservice...">
+            </div>
+          </div>
+          <div class="row g-2 align-items-center">
+            <div class="col-6 col-md-3">
+              <input type="text" id="dirAreaFilter" class="form-control form-control-sm" placeholder="Filter area / city e.g. Koramangala...">
+            </div>
+            <div class="col-6 col-md-2">
+              <select id="dirRatingFilter" class="form-select form-select-sm">
+                <option value="">All Ratings</option>
+                <option value="4.5">4.5+ Stars</option>
+                <option value="4.0">4.0+ Stars</option>
+                <option value="3.0">3.0+ Stars</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <select id="dirAvailFilter" class="form-select form-select-sm">
+                <option value="">All Availability</option>
+                <option value="true">Online (Available)</option>
+                <option value="false">Offline</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <select id="dirEnabledFilter" class="form-select form-select-sm">
+                <option value="">All Accounts</option>
+                <option value="true">Active Only</option>
+                <option value="false">Suspended Only</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <select id="dirSortFilter" class="form-select form-select-sm">
+                <option value="createdAt:desc">Newest First</option>
+                <option value="createdAt:asc">Oldest First</option>
+                <option value="rating:desc">Rating (High-Low)</option>
+                <option value="businessName:asc">Business (A-Z)</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-1 text-end">
+              <button type="button" class="btn btn-outline-secondary btn-sm w-100" id="btnDirReset" title="Reset all directory filters">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Directory Table -->
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-secondary small text-uppercase fw-bold">
+              <tr>
+                <th class="ps-4">Provider / Business</th>
+                <th>Contact</th>
+                <th>Services &amp; Coverage</th>
+                <th>Performance</th>
+                <th>Status &amp; Availability</th>
+                <th class="text-end pe-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="dirTableBody">
+              <tr><td colspan="6" class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading provider directory...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Directory Pagination Bar -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 p-3 border-top bg-light" id="dirPaginationBar">
+          <div class="small text-muted" id="dirPageInfoText">Showing 0 providers</div>
+          <div class="d-flex align-items-center gap-2">
+            <select id="dirPageSizeSelect" class="form-select form-select-sm w-auto">
+              <option value="10">10 / page</option>
+              <option value="15" selected>15 / page</option>
+              <option value="25">25 / page</option>
+              <option value="50">50 / page</option>
+            </select>
+            <div class="btn-group btn-group-sm">
+              <button type="button" class="btn btn-outline-secondary px-3" id="btnDirPrevPage" disabled onclick="changeDirPage(-1)">
+                <i class="bi bi-chevron-left me-1"></i>Prev
+              </button>
+              <button type="button" class="btn btn-outline-secondary px-3" id="btnDirNextPage" disabled onclick="changeDirPage(1)">
+                Next<i class="bi bi-chevron-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Service Live Monitor Tab -->
+      <div id="viewQuickMonitor" class="d-none">
+        <div class="p-3 bg-white border-bottom d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Quick Service Real-Time Platform Monitor</h6>
+            <div class="small text-muted">Monitor on-demand requests, track assignment delays, and inspect eligible matching providers.</div>
+          </div>
+          <button type="button" class="btn btn-outline-primary btn-sm rounded-pill" onclick="loadQuickMonitor()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+        </div>
+
+        <!-- Monitor KPI Stat Bar -->
+        <div class="row g-3 p-3 bg-light border-bottom">
+          <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+              <div class="small text-muted fw-semibold">Active Quick Requests</div>
+              <div class="fs-4 fw-bold text-dark" id="qmStatTotal">-</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+              <div class="small text-muted fw-semibold">Pending Assignment</div>
+              <div class="fs-4 fw-bold text-warning" id="qmStatPending">-</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+              <div class="small text-muted fw-semibold">In Progress (Active)</div>
+              <div class="fs-4 fw-bold text-info" id="qmStatInProgress">-</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+              <div class="small text-muted fw-semibold">Delayed Requests</div>
+              <div class="fs-4 fw-bold text-danger" id="qmStatDelayed">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monitor Requests Table -->
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-secondary small text-uppercase fw-bold">
+              <tr>
+                <th class="ps-4">Request #</th>
+                <th>Service &amp; Subservice</th>
+                <th>Customer &amp; Area</th>
+                <th>Status &amp; Elapsed Time</th>
+                <th>Assigned Provider / Matching Available</th>
+                <th class="text-end pe-4">Action</th>
+              </tr>
+            </thead>
+            <tbody id="qmTableBody">
+              <tr><td colspan="6" class="text-center py-5 text-muted">Loading Quick Service status...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ================================================================= -->
+<!-- MODAL: APPLICATION DETAIL REVIEW CONSOLE (8 SECTIONS) -->
+<!-- ================================================================= -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl modal-xl-custom">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="modal-header bg-light border-bottom py-3 px-4">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <h2 class="h5 fw-bold text-dark mb-0" id="mAppTitle">Review Application</h2>
+              <span id="mAppRefPill" class="badge bg-white text-dark border font-monospace px-2.5 py-1">APP-REF</span>
+              <span id="mAppStatusBadge" class="badge status-badge-SUBMITTED px-2.5 py-1 fw-bold">SUBMITTED</span>
+            </div>
+            <div class="small text-muted" id="mAppSubhead">Submitted by Provider on Date</div>
+          </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Modal Body (8 Sections) -->
+      <div class="modal-body p-4" id="mModalBody">
+        <div class="row g-4">
+          
+          <!-- LEFT COLUMN: Sections 1-6 Data & Documents -->
+          <div class="col-lg-7">
+            
+            <!-- SECTION 1: Personal Information -->
+            <div class="card border rounded-3 p-3 mb-3">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold small text-dark"><i class="bi bi-person-lines-fill text-primary me-1"></i>1. Personal Information</span>
+                <span class="badge bg-light text-secondary border font-monospace" id="mProviderIdBadge">Provider #0</span>
+              </div>
+              <div class="row g-2 small">
+                <div class="col-sm-6"><span class="text-muted">Legal Name:</span> <strong id="mLegalName" class="text-dark">-</strong></div>
+                <div class="col-sm-6"><span class="text-muted">Date of Birth:</span> <span id="mDob">-</span></div>
+                <div class="col-sm-6"><span class="text-muted">Mobile Number:</span> <span id="mPhone" class="fw-semibold">-</span></div>
+                <div class="col-sm-6"><span class="text-muted">Email:</span> <span id="mEmail">-</span></div>
+                <div class="col-12"><span class="text-muted">Residential / Service Address:</span> <span id="mAddress">-</span></div>
+              </div>
+            </div>
+
+            <!-- SECTION 2: Identity Verification & Government ID -->
+            <div class="card border rounded-3 p-3 mb-3">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold small text-dark"><i class="bi bi-person-badge-fill text-primary me-1"></i>2. Identity Verification</span>
+                <span id="mIdDocStatusBadge" class="badge bg-light text-dark border">Pending Check</span>
+              </div>
+              <div class="row g-2 small mb-3">
+                <div class="col-sm-6"><span class="text-muted">Government ID Type:</span> <strong id="mIdType">-</strong></div>
+                <div class="col-sm-6"><span class="text-muted">Document Number:</span> <span id="mIdNumber" class="font-monospace fw-semibold">-</span></div>
+                <div class="col-12">
+                  <span class="text-muted">Applicant Privacy Consent:</span> 
+                  <span id="mPrivacyConsent" class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-circle me-1"></i>Consented to Verification</span>
+                </div>
+              </div>
+              <!-- Uploaded ID Document Card -->
+              <div class="small fw-semibold text-secondary mb-1">Uploaded ID Proof Document:</div>
+              <div id="mIdDocContainer">
+                <div class="text-muted small">No identity document uploaded.</div>
+              </div>
+            </div>
+
+            <!-- SECTION 3: Business Information (adapts for Individual vs Business) -->
+            <div class="card border rounded-3 p-3 mb-3" id="mBizCard">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold small text-dark"><i class="bi bi-shop text-primary me-1"></i>3. Business Information</span>
+                <span id="mProviderTypeBadge" class="badge bg-primary-subtle text-primary border border-primary-subtle">BUSINESS</span>
+              </div>
+              <div id="mBizDetailsContent" class="row g-2 small">
+                <!-- Injected based on type -->
+              </div>
+            </div>
+
+            <!-- SECTION 4: Shop Photographs (for Business) -->
+            <div class="card border rounded-3 p-3 mb-3" id="mShopPhotosCard">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold small text-dark"><i class="bi bi-images text-primary me-1"></i>4. Shop &amp; Commercial Premises Photographs</span>
+                <span class="small text-muted" id="mPhotoCountText">0 Photos</span>
+              </div>
+              <div class="row g-2" id="mShopPhotosGrid">
+                <div class="col-12 text-muted small">No shop photographs submitted.</div>
+              </div>
+            </div>
+
+            <!-- SECTION 5: Business-Location Proof -->
+            <div class="card border rounded-3 p-3 mb-3" id="mLocationProofCard">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold small text-dark"><i class="bi bi-file-earmark-check-fill text-primary me-1"></i>5. Business-Location Proof</span>
+                <span id="mProofTypeBadge" class="badge bg-light text-dark border">Location Proof</span>
+              </div>
+              <div class="small text-muted mb-2" id="mLocationProofHelp">Valid rent agreement OR property deed OR approved commercial proof.</div>
+              <div id="mLocationProofContainer">
+                <div class="text-muted small">No premises location proof submitted.</div>
+              </div>
+            </div>
+
+            <!-- SECTION 6: Services and Service Areas -->
+            <div class="card border rounded-3 p-3 mb-3">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold small text-dark"><i class="bi bi-geo-alt-fill text-primary me-1"></i>6. Services &amp; Service Areas</span>
+              </div>
+              <div class="small mb-2">
+                <span class="text-muted">Services Offered:</span>
+                <div id="mServicesList" class="mt-1 d-flex flex-wrap gap-1"></div>
+              </div>
+              <div class="small">
+                <span class="text-muted">Service Locations / Coverage:</span>
+                <div id="mAreasList" class="mt-1 d-flex flex-wrap gap-1"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN: Section 7 Verification Checklist & Section 8 Audit History -->
+          <div class="col-lg-5">
+            
+            <!-- SECTION 7: Adaptive Verification Checklist -->
+            <div class="checklist-card mb-4 shadow-xs">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <h3 class="h6 fw-bold text-dark mb-0"><i class="bi bi-ui-checks text-primary me-1"></i>7. Verification Checklist</h3>
+                <span class="badge bg-light text-secondary border" id="mChecklistScore">0 / 0</span>
+              </div>
+              <p class="small text-muted mb-3" style="font-size: 0.78rem;">
+                Each checklist tick represents a real review action. All applicable checks must be verified before approval.
+              </p>
+
+              <!-- IDENTITY CHECKS -->
+              <div class="fw-bold text-dark small text-uppercase mb-1" style="font-size: 0.72rem; letter-spacing: 0.5px;">Identity Review</div>
+              <div class="checklist-item">
+                <input class="form-check-input" type="checkbox" id="chkIdDocReceived" onchange="syncChecklist()">
+                <label class="form-check-label small" for="chkIdDocReceived">
+                  <strong>Identity document received</strong>
+                  <div class="text-muted" style="font-size:0.72rem;">Legitimate government-issued ID image/PDF on file.</div>
+                </label>
+              </div>
+              <div class="checklist-item">
+                <input class="form-check-input" type="checkbox" id="chkIdDocReadable" onchange="syncChecklist()">
+                <label class="form-check-label small" for="chkIdDocReadable">
+                  <strong>Document is clear &amp; readable</strong>
+                  <div class="text-muted" style="font-size:0.72rem;">Text, photograph, and ID number are legible.</div>
+                </label>
+              </div>
+              <div class="checklist-item">
+                <input class="form-check-input" type="checkbox" id="chkIdDetailsReviewed" onchange="syncChecklist()">
+                <label class="form-check-label small" for="chkIdDetailsReviewed">
+                  <strong>Legal name &amp; details reviewed</strong>
+                  <div class="text-muted" style="font-size:0.72rem;">Matches provider profile and account information.</div>
+                </label>
+              </div>
+              <div class="checklist-item mb-2">
+                <input class="form-check-input" type="checkbox" id="chkIdCheckCompleted" onchange="syncChecklist()">
+                <label class="form-check-label small" for="chkIdCheckCompleted">
+                  <strong>Identity check completed</strong>
+                  <div class="text-muted" style="font-size:0.72rem;">Verified via authorized method (distinguished from mere visual viewing).</div>
+                </label>
+              </div>
+
+              <!-- BUSINESS CHECKS (Adapts for Business type) -->
+              <div id="checklistBusinessSection">
+                <div class="fw-bold text-dark small text-uppercase mb-1 mt-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Commercial Establishment Review</div>
+                <div class="checklist-item">
+                  <input class="form-check-input" type="checkbox" id="chkBizInfoReviewed" onchange="syncChecklist()">
+                  <label class="form-check-label small" for="chkBizInfoReviewed">
+                    <strong>Business information reviewed</strong>
+                    <div class="text-muted" style="font-size:0.72rem;">Business name, category, and operating hours confirmed.</div>
+                  </label>
+                </div>
+                <div class="checklist-item">
+                  <input class="form-check-input" type="checkbox" id="chkShopPhotosReviewed" onchange="syncChecklist()">
+                  <label class="form-check-label small" for="chkShopPhotosReviewed">
+                    <strong>Shop photographs verified</strong>
+                    <div class="text-muted" style="font-size:0.72rem;">Exterior premises and signboard match establishment.</div>
+                  </label>
+                </div>
+                <div class="checklist-item">
+                  <input class="form-check-input" type="checkbox" id="chkBizAddressReviewed" onchange="syncChecklist()">
+                  <label class="form-check-label small" for="chkBizAddressReviewed">
+                    <strong>Commercial address reviewed</strong>
+                    <div class="text-muted" style="font-size:0.72rem;">Locality, building, and PIN code inspected.</div>
+                  </label>
+                </div>
+                <div class="checklist-item mb-2">
+                  <input class="form-check-input" type="checkbox" id="chkLocationProofReviewed" onchange="syncChecklist()">
+                  <label class="form-check-label small" for="chkLocationProofReviewed">
+                    <strong>Location proof verified (ONE applicable)</strong>
+                    <div class="text-muted" style="font-size:0.72rem;">Valid lease deed OR ownership paper OR approved alternative.</div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- CONTACT CHECKS -->
+              <div class="fw-bold text-dark small text-uppercase mb-1 mt-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Contact Verification</div>
+              <div class="checklist-item">
+                <input class="form-check-input" type="checkbox" id="chkContactChecksCompleted" onchange="syncChecklist()">
+                <label class="form-check-label small" for="chkContactChecksCompleted">
+                  <strong>Mobile &amp; contact checks completed</strong>
+                  <div class="text-muted" style="font-size:0.72rem;">Registered phone and email verified for communication.</div>
+                </label>
+              </div>
+
+              <!-- Reviewer Notes Field -->
+              <div class="mt-3 pt-2 border-top">
+                <label class="form-label small fw-semibold text-secondary" for="mReviewerNotes">Internal Reviewer Notes</label>
+                <textarea id="mReviewerNotes" class="form-control form-control-sm" rows="2" placeholder="Optional audit notes regarding document quality or verification comments..."></textarea>
+              </div>
+            </div>
+
+            <!-- SECTION 8: Application History & Audit Timeline -->
+            <div class="card border rounded-3 p-3">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold small text-dark"><i class="bi bi-clock-history text-primary me-1"></i>8. Application History &amp; Audit Log</span>
+                <span class="badge bg-light text-secondary border font-monospace" id="mHistoryCount">0 events</span>
+              </div>
+              <div id="mAuditTimeline" class="mt-3">
+                <div class="text-muted small">No audit log available.</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer with Admin Actions -->
+      <div class="modal-footer bg-light border-top py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+          <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="promptDeleteAppProvider()">
+            <i class="bi bi-trash me-1"></i>Delete Provider
+          </button>
+          <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" id="btnStartReview" onclick="startReviewAction()">
+            <i class="bi bi-play-circle me-1"></i>Start Review
+          </button>
+        </div>
+        
+        <div class="d-flex align-items-center gap-2">
+          <button type="button" class="btn btn-outline-warning btn-sm rounded-pill px-3.5 fw-semibold" id="btnRequestInfo" onclick="openRequestInfoModal()">
+            <i class="bi bi-question-circle me-1"></i>Request More Information
+          </button>
+          <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3.5 fw-semibold" id="btnRejectApp" onclick="openRejectModal()">
+            <i class="bi bi-x-circle me-1"></i>Reject Application
+          </button>
+          <button type="button" class="btn btn-success btn-sm rounded-pill px-4 fw-bold shadow-sm" id="btnApproveApp" onclick="confirmApprovalAction()">
+            <i class="bi bi-patch-check-fill me-1"></i>Approve &amp; Verify Partner
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- MODAL: REQUEST MORE INFORMATION -->
+<!-- ================================================================= -->
+<div class="modal fade" id="requestInfoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-warning-subtle border-bottom">
+        <h5 class="modal-title fw-bold text-dark"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Request Additional Information</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="small text-muted mb-3">
+          Specify the clear explanation and identify which documents or fields need correction. The application status will move to <strong>ACTION_REQUIRED</strong>, and the provider will receive an instant notification with these instructions.
+        </p>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="mReqReason">Explanation for Provider <span class="text-danger">*</span></label>
+          <textarea id="mReqReason" class="form-control" rows="3" placeholder="e.g. Identity document is blurry and the document number cannot be read. Please upload a clear, high-resolution scan of your PAN or Voter ID." required></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="mReqNotes">Internal Audit Notes (Optional)</label>
+          <input type="text" id="mReqNotes" class="form-control" placeholder="Optional notes for other review administrators...">
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-warning btn-sm rounded-pill px-4 fw-bold shadow-xs text-dark" id="btnConfirmRequestInfo" onclick="submitRequestInfoAction()">
+          <i class="bi bi-send me-1"></i>Send Request to Provider
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- MODAL: REJECT APPLICATION -->
+<!-- ================================================================= -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-danger-subtle border-bottom">
+        <h5 class="modal-title fw-bold text-danger"><i class="bi bi-x-circle-fill text-danger me-2"></i>Reject Verification Application</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="alert alert-danger border-danger-subtle small mb-3">
+          <i class="bi bi-exclamation-octagon-fill me-1"></i>
+          <strong>Warning:</strong> Rejecting this application will revoke or withhold verified partner privileges and remove the provider from verified search rankings.
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="mRejectionReason">Rejection Reason <span class="text-danger">*</span></label>
+          <textarea id="mRejectionReason" class="form-control" rows="3" placeholder="Provide a recorded justification for rejecting this provider's verification application..." required></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="mRejectionNotes">Internal Audit Notes (Optional)</label>
+          <input type="text" id="mRejectionNotes" class="form-control" placeholder="Internal remarks recorded in audit history...">
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger btn-sm rounded-pill px-4 fw-bold shadow-xs" id="btnConfirmReject" onclick="submitRejectAction()">
+          <i class="bi bi-x-octagon me-1"></i>Confirm Rejection
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- MODAL: SECURE DOCUMENT VIEWER -->
+<!-- ================================================================= -->
+<div class="modal fade" id="docViewerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-light border-bottom py-2.5 px-3">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-shield-lock-fill text-primary"></i>
+          <span class="fw-bold small text-dark" id="mDocViewerTitle">Secure Document Inspection</span>
+          <span class="badge bg-secondary-subtle text-secondary" style="font-size:0.7rem;" id="mDocViewerSize">0 KB</span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-2 text-center bg-dark" style="min-height: 400px; display: flex; align-items: center; justify-content: center;">
+        <div id="mDocViewerContent" class="w-100 h-100"></div>
+      </div>
+      <div class="modal-footer bg-light py-2 px-3 d-flex justify-content-between">
+        <span class="text-muted" style="font-size: 0.72rem;"><i class="bi bi-lock me-1"></i>Streamed via authenticated backend channel. Not publicly accessible.</span>
+        <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- MODAL: EDIT PROVIDER (DIRECTORY PRESERVATION) -->
+<!-- ================================================================= -->
+<div class="modal fade" id="editProviderModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-light border-bottom">
+        <h5 class="modal-title fw-bold">Edit Provider Profile</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="eName">Business / Display Name</label>
+          <input id="eName" class="form-control" required maxlength="150">
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="form-label small fw-bold" for="eExp">Experience (Years)</label>
+            <input id="eExp" type="number" min="0" max="60" class="form-control">
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-bold" for="ePrice">Approx. Price (₹)</label>
+            <input id="ePrice" type="number" min="0" class="form-control">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="eDesc">Description</label>
+          <textarea id="eDesc" class="form-control" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm rounded-pill px-4 fw-semibold" id="btnSaveProviderEdit">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DETAILED PROVIDER PROFILE VIEW -->
+<div class="modal fade" id="providerDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <!-- Header -->
+      <div class="modal-header bg-light border-bottom py-3 px-4">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <div id="pdmAvatar" class="rounded-circle bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; font-size: 1.25rem;">
+            P
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              <h2 class="h5 fw-bold text-dark mb-0" id="pdmBusinessName">Provider Business</h2>
+              <span class="badge bg-white text-dark border font-monospace" id="pdmIdBadge">Provider #0</span>
+              <span id="pdmStatusBadge" class="badge bg-success-subtle text-success border">VERIFIED</span>
+              <span id="pdmAvailBadge" class="badge bg-success-subtle text-success border">ONLINE</span>
+              <span id="pdmEnabledBadge" class="badge bg-success text-white">ACTIVE</span>
+              <span id="pdmQuickBadge" class="badge bg-warning-subtle text-warning border">QUICK ELIGIBLE</span>
+            </div>
+            <div class="small text-muted" id="pdmSubhead">Owner: John Doe · Registered: 2026-10-01</div>
+          </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Body with Nav Tabs -->
+      <div class="modal-body p-4">
+        <!-- Tabs Header -->
+        <ul class="nav nav-pills mb-3 border-bottom pb-2" id="pdmTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active btn-sm" id="pdmTabOverview-btn" data-bs-toggle="pill" data-bs-target="#pdmTabOverview" type="button" role="tab">Overview &amp; Profile</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link btn-sm" id="pdmTabServices-btn" data-bs-toggle="pill" data-bs-target="#pdmTabServices" type="button" role="tab">Services &amp; Subservices</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link btn-sm" id="pdmTabAreas-btn" data-bs-toggle="pill" data-bs-target="#pdmTabAreas" type="button" role="tab">Coverage &amp; Location</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link btn-sm" id="pdmTabBookings-btn" data-bs-toggle="pill" data-bs-target="#pdmTabBookings" type="button" role="tab">Bookings &amp; Performance</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link btn-sm" id="pdmTabAudit-btn" data-bs-toggle="pill" data-bs-target="#pdmTabAudit" type="button" role="tab">Audit &amp; Action History</button>
+          </li>
+        </ul>
+
+        <!-- Tabs Content -->
+        <div class="tab-content">
+          <!-- 1. Overview Tab -->
+          <div class="tab-pane fade show active" id="pdmTabOverview" role="tabpanel">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="card border rounded-3 p-3 h-100">
+                  <h6 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle text-primary me-2"></i>Business Details</h6>
+                  <div class="mb-2"><span class="text-muted small">Description:</span> <p class="small text-dark mb-2" id="pdmDesc">-</p></div>
+                  <div class="row g-2 small">
+                    <div class="col-6"><span class="text-muted">Experience:</span> <strong id="pdmExp">0 yrs</strong></div>
+                    <div class="col-6"><span class="text-muted">Approx Price:</span> <strong id="pdmPrice">₹499</strong></div>
+                    <div class="col-12"><span class="text-muted">Working Hours:</span> <span id="pdmHours">Mon - Sun</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card border rounded-3 p-3 h-100">
+                  <h6 class="fw-bold text-dark mb-3"><i class="bi bi-person-lines-fill text-primary me-2"></i>Contact &amp; Account</h6>
+                  <div class="row g-2 small">
+                    <div class="col-12"><span class="text-muted">Owner Name:</span> <strong id="pdmOwner" class="text-dark">-</strong></div>
+                    <div class="col-sm-6"><span class="text-muted">Phone:</span> <span id="pdmPhone" class="fw-semibold">-</span></div>
+                    <div class="col-sm-6"><span class="text-muted">Email:</span> <span id="pdmEmail">-</span></div>
+                    <div class="col-12"><span class="text-muted">Registration Date:</span> <span id="pdmRegDate">-</span></div>
+                    <div class="col-12"><span class="text-muted">Account Status:</span> <span id="pdmAccountStatusBadge">-</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Services & Subservices Tab -->
+          <div class="tab-pane fade" id="pdmTabServices" role="tabpanel">
+            <div class="card border rounded-3 p-3 mb-3">
+              <h6 class="fw-bold text-dark mb-2"><i class="bi bi-tools text-primary me-2"></i>Offered Canonical Services</h6>
+              <div id="pdmServicesContainer" class="d-flex flex-wrap gap-2">
+                <span class="text-muted small">No services listed</span>
+              </div>
+            </div>
+            <div class="card border rounded-3 p-3">
+              <h6 class="fw-bold text-dark mb-2"><i class="bi bi-list-nested text-primary me-2"></i>Detailed Subservices &amp; Pricing</h6>
+              <div id="pdmSubServicesContainer" class="table-responsive">
+                <table class="table table-sm align-middle small mb-0">
+                  <thead><tr><th>Subservice Name</th><th>Category</th><th>Price</th><th>Duration</th><th>Status</th></tr></thead>
+                  <tbody id="pdmSubServicesBody"><tr><td colspan="5" class="text-muted text-center py-2">No custom subservices listed</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Coverage & Location Tab -->
+          <div class="tab-pane fade" id="pdmTabAreas" role="tabpanel">
+            <div class="card border rounded-3 p-3 mb-3">
+              <h6 class="fw-bold text-dark mb-2"><i class="bi bi-geo-alt text-primary me-2"></i>Service Coverage Areas</h6>
+              <div id="pdmAreasContainer" class="d-flex flex-wrap gap-2 mb-3">
+                <span class="text-muted small">No areas configured</span>
+              </div>
+              <div class="row g-2 small border-top pt-2">
+                <div class="col-md-6"><span class="text-muted">Operating Address:</span> <span id="pdmAddress">-</span></div>
+                <div class="col-md-3"><span class="text-muted">Coverage Radius:</span> <strong id="pdmRadius">10 km</strong></div>
+                <div class="col-md-3"><span class="text-muted">GPS Coordinates:</span> <span id="pdmCoords" class="font-monospace">-</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Bookings & Performance Tab -->
+          <div class="tab-pane fade" id="pdmTabBookings" role="tabpanel">
+            <!-- Stats Counters -->
+            <div class="row g-2 mb-3">
+              <div class="col-3">
+                <div class="p-2 bg-light rounded text-center">
+                  <div class="small text-muted">Total Bookings</div>
+                  <div class="fs-5 fw-bold text-dark" id="pdmTotalBookings">0</div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="p-2 bg-light rounded text-center">
+                  <div class="small text-muted">Completed Jobs</div>
+                  <div class="fs-5 fw-bold text-success" id="pdmCompletedJobs">0</div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="p-2 bg-light rounded text-center">
+                  <div class="small text-muted">Cancelled Jobs</div>
+                  <div class="fs-5 fw-bold text-danger" id="pdmCancelledJobs">0</div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="p-2 bg-light rounded text-center">
+                  <div class="small text-muted">Rating &amp; Reviews</div>
+                  <div class="fs-5 fw-bold text-warning" id="pdmRating">-</div>
+                </div>
+              </div>
+            </div>
+            <!-- Active Bookings List -->
+            <h6 class="fw-bold text-dark mb-2"><i class="bi bi-clock-history text-primary me-2"></i>Current Active Bookings</h6>
+            <div class="table-responsive">
+              <table class="table table-sm table-hover align-middle small mb-0">
+                <thead><tr><th>Booking #</th><th>Service</th><th>Customer</th><th>Area</th><th>Type</th><th>Status</th></tr></thead>
+                <tbody id="pdmActiveBookingsBody"><tr><td colspan="6" class="text-muted text-center py-3">No active bookings in progress</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 5. Audit & Action History Tab -->
+          <div class="tab-pane fade" id="pdmTabAudit" role="tabpanel">
+            <!-- Admin Account Action Audit Log -->
+            <h6 class="fw-bold text-dark mb-2"><i class="bi bi-shield-check text-primary me-2"></i>Account Management Actions &amp; Audit Log</h6>
+            <div class="table-responsive mb-4">
+              <table class="table table-sm table-bordered align-middle small mb-0">
+                <thead class="bg-light"><tr><th>Timestamp</th><th>Action</th><th>Reason / Notes</th><th>Administrator</th></tr></thead>
+                <tbody id="pdmActionLogBody"><tr><td colspan="4" class="text-muted text-center py-2">No account actions recorded yet</td></tr></tbody>
+              </table>
+            </div>
+
+            <!-- Verification Timeline -->
+            <h6 class="fw-bold text-dark mb-2"><i class="bi bi-patch-check text-success me-2"></i>Verification Application Timeline</h6>
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered align-middle small mb-0">
+                <thead class="bg-light"><tr><th>Timestamp</th><th>From Status</th><th>To Status</th><th>Action</th><th>Notes</th><th>Actor</th></tr></thead>
+                <tbody id="pdmVerHistoryBody"><tr><td colspan="6" class="text-muted text-center py-2">No application history found</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer bg-light d-flex justify-content-between align-items-center">
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-sm rounded-pill btn-outline-danger" id="pdmBtnToggleEnabled">
+            <i class="bi bi-slash-circle me-1"></i>Suspend Account
+          </button>
+          <button type="button" class="btn btn-sm rounded-pill btn-danger" onclick="promptDeleteCurrentProvider()">
+            <i class="bi bi-trash me-1"></i>Delete Provider
+          </button>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-sm rounded-pill btn-outline-primary" id="pdmBtnEditProfile">Edit Profile</button>
+          <button type="button" class="btn btn-sm rounded-pill btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: SUSPEND / REINSTATE ACCOUNT WITH REASON -->
+<div class="modal fade" id="suspendModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-light border-bottom py-3 px-4">
+        <h5 class="modal-title fw-bold" id="suspendModalTitle">Account Management</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="small text-muted mb-3" id="suspendModalPrompt">
+          Provide an administrative reason for updating this provider account's status. The reason will be recorded in the audit history.
+        </p>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-dark" for="suspendReason">Action Reason / Explanation</label>
+          <textarea id="suspendReason" class="form-control" rows="3" placeholder="e.g. Customer dispute regarding no-show, identity re-verified, routine audit..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger btn-sm rounded-pill px-4 fw-semibold" id="btnConfirmSuspendAction">Confirm Action</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script>
+const me = Auth.require('ADMIN');
+adminNav('providers');
+
+const $ = id => document.getElementById(id);
+
+// State
+let currentStatusFilter = 'ALL';
+let currentTypeFilter = '';
+let currentSearch = '';
+let currentSort = 'submittedAt:desc';
+let currentPage = 0;
+const pageSize = 15;
+let currentActiveApp = null;
+let legacyProvidersCache = [];
+let editLegacyId = null;
+
+// Bootstrap Modals
+let reviewModalInstance = null;
+let reqInfoModalInstance = null;
+let rejectModalInstance = null;
+let docViewerModalInstance = null;
+let editProviderModalInstance = null;
+let providerDetailModalInstance = null;
+let suspendModalInstance = null;
+
+// Directory State
+let dirSearch = '';
+let dirStatus = '';
+let dirServiceId = '';
+let dirSubService = '';
+let dirArea = '';
+let dirRating = '';
+let dirAvail = '';
+let dirEnabled = '';
+let dirSort = 'createdAt:desc';
+let dirCurrentPage = 0;
+let dirPageSize = 15;
+let dirProvidersCache = [];
+let currentDetailProviderId = null;
+let suspendTargetProviderId = null;
+let suspendTargetWillEnable = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+  reviewModalInstance = new bootstrap.Modal($('reviewModal'));
+  reqInfoModalInstance = new bootstrap.Modal($('requestInfoModal'));
+  rejectModalInstance = new bootstrap.Modal($('rejectModal'));
+  docViewerModalInstance = new bootstrap.Modal($('docViewerModal'));
+  editProviderModalInstance = new bootstrap.Modal($('editProviderModal'));
+  providerDetailModalInstance = new bootstrap.Modal($('providerDetailModal'));
+  suspendModalInstance = new bootstrap.Modal($('suspendModal'));
+
+  // Search input with debounce for applications
+  let searchTimer;
+  $('searchInput').addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      currentSearch = $('searchInput').value.trim();
+      currentPage = 0;
+      loadApplications();
+    }, 300);
+  });
+
+  $('btnClearSearch').addEventListener('click', () => {
+    $('searchInput').value = '';
+    currentSearch = '';
+    currentPage = 0;
+    loadApplications();
+  });
+
+  $('typeFilter').addEventListener('change', () => {
+    currentTypeFilter = $('typeFilter').value;
+    currentPage = 0;
+    loadApplications();
+  });
+
+  $('sortFilter').addEventListener('change', () => {
+    currentSort = $('sortFilter').value;
+    currentPage = 0;
+    loadApplications();
+  });
+
+  // Directory Filter Listeners
+  let dirSearchTimer;
+  $('dirSearch').addEventListener('input', () => {
+    clearTimeout(dirSearchTimer);
+    dirSearchTimer = setTimeout(() => {
+      dirSearch = $('dirSearch').value.trim();
+      dirCurrentPage = 0;
+      loadDirectory();
+    }, 300);
+  });
+
+  $('btnDirClearSearch').addEventListener('click', () => {
+    $('dirSearch').value = '';
+    dirSearch = '';
+    dirCurrentPage = 0;
+    loadDirectory();
+  });
+
+  $('dirStatusFilter').addEventListener('change', () => {
+    dirStatus = $('dirStatusFilter').value;
+    dirCurrentPage = 0;
+    loadDirectory();
+  });
+
+  $('dirServiceFilter').addEventListener('change', () => {
+    dirServiceId = $('dirServiceFilter').value;
+    dirCurrentPage = 0;
+    loadDirectory();
+  });
+
+  let dirSubTimer;
+  $('dirSubServiceFilter').addEventListener('input', () => {
+    clearTimeout(dirSubTimer);
+    dirSubTimer = setTimeout(() => {
+      dirSubService = $('dirSubServiceFilter').value.trim();
+      dirCurrentPage = 0;
+      loadDirectory();
+    }, 300);
+  });
+
+  let dirAreaTimer;
+  $('dirAreaFilter').addEventListener('input', () => {
+    clearTimeout(dirAreaTimer);
+    dirAreaTimer = setTimeout(() => {
+      dirArea = $('dirAreaFilter').value.trim();
+      dirCurrentPage = 0;
+      loadDirectory();
+    }, 300);
+  });
+
+  $('dirRatingFilter').addEventListener('change', () => {
+    dirRating = $('dirRatingFilter').value;
+    dirCurrentPage = 0;
+    loadDirectory();
+  });
+
+  $('dirAvailFilter').addEventListener('change', () => {
+    dirAvail = $('dirAvailFilter').value;
+    dirCurrentPage = 0;
+    loadDirectory();
+  });
+
+  $('dirEnabledFilter').addEventListener('change', () => {
+    dirEnabled = $('dirEnabledFilter').value;
+    dirCurrentPage = 0;
+    loadDirectory();
+  });
+
+  $('dirSortFilter').addEventListener('change', () => {
+    dirSort = $('dirSortFilter').value;
+    dirCurrentPage = 0;
+    loadDirectory();
+  });
+
+  $('dirPageSizeSelect').addEventListener('change', () => {
+    dirPageSize = Number($('dirPageSizeSelect').value) || 15;
+    dirCurrentPage = 0;
+    loadDirectory();
+  });
+
+  $('btnDirReset').addEventListener('click', () => {
+    $('dirSearch').value = '';
+    $('dirStatusFilter').value = '';
+    $('dirServiceFilter').value = '';
+    $('dirSubServiceFilter').value = '';
+    $('dirAreaFilter').value = '';
+    $('dirRatingFilter').value = '';
+    $('dirAvailFilter').value = '';
+    $('dirEnabledFilter').value = '';
+    $('dirSortFilter').value = 'createdAt:desc';
+    $('dirPageSizeSelect').value = '15';
+    dirSearch = '';
+    dirStatus = '';
+    dirServiceId = '';
+    dirSubService = '';
+    dirArea = '';
+    dirRating = '';
+    dirAvail = '';
+    dirEnabled = '';
+    dirSort = 'createdAt:desc';
+    dirPageSize = 15;
+    dirCurrentPage = 0;
+    loadDirectory();
+  });
+
+  // Modal actions
+  $('btnConfirmSuspendAction').addEventListener('click', confirmSuspendAction);
+  $('pdmBtnEditProfile').addEventListener('click', () => {
+    if (currentDetailProviderId) openLegacyEdit(currentDetailProviderId);
+  });
+  $('pdmBtnToggleEnabled').addEventListener('click', () => {
+    if (currentDetailProviderId) {
+      const isCurrentlyEnabled = $('pdmEnabledBadge').textContent.includes('ACTIVE');
+      promptSuspendProvider(currentDetailProviderId, !isCurrentlyEnabled, $('pdmBusinessName').textContent);
+    }
+  });
+
+  // Tab Switching
+  document.querySelectorAll('.filter-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      switchFilterTab(btn.dataset.status);
+    });
+  });
+
+  // Edit provider save handler
+  $('btnSaveProviderEdit').addEventListener('click', saveLegacyProviderEdit);
+
+  // Populate services filter dropdown
+  loadDirectoryServices();
+
+  // Check URL query parameters (e.g. ?status=SUBMITTED)
+  const urlStatus = new URLSearchParams(location.search).get('status');
+  if (urlStatus) {
+    switchFilterTab(urlStatus);
+  } else {
+    loadApplications();
+  }
+  loadSummaryCounts();
+});
+
+function showAlert(text, ok = false) {
+  const el = $('pageAlert');
+  if (!el) return;
+  el.className = `alert alert-${ok ? 'success' : 'danger'} alert-dismissible fade show shadow-sm rounded-3`;
+  el.innerHTML = `
+    <div class="d-flex align-items-center justify-content-between">
+      <div><i class="bi bi-${ok ? 'check-circle-fill text-success' : 'exclamation-octagon-fill text-danger'} me-2"></i>${esc(text)}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>`;
+  el.classList.remove('d-none');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function switchFilterTab(statusKey) {
+  if (statusKey === 'PENDING') statusKey = 'SUBMITTED';
+  currentStatusFilter = statusKey;
+
+  document.querySelectorAll('.filter-tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.status === statusKey);
+  });
+
+  const appToolbar = $('appFilterToolbar');
+
+  if (statusKey === 'DIRECTORY') {
+    if (appToolbar) appToolbar.classList.add('d-none');
+    $('viewApplications').classList.add('d-none');
+    $('viewQuickMonitor').classList.add('d-none');
+    $('viewDirectory').classList.remove('d-none');
+    dirCurrentPage = 0;
+    loadDirectory();
+  } else if (statusKey === 'QUICK_MONITOR') {
+    if (appToolbar) appToolbar.classList.add('d-none');
+    $('viewApplications').classList.add('d-none');
+    $('viewDirectory').classList.add('d-none');
+    $('viewQuickMonitor').classList.remove('d-none');
+    loadQuickMonitor();
+  } else {
+    if (appToolbar) appToolbar.classList.remove('d-none');
+    $('viewDirectory').classList.add('d-none');
+    $('viewQuickMonitor').classList.add('d-none');
+    $('viewApplications').classList.remove('d-none');
+    currentPage = 0;
+    loadApplications();
+  }
+}
+
+// Load verification applications
+async function loadApplications(showSpin = false) {
+  const spin = $('btnRefreshSpin');
+  if (showSpin && spin) spin.classList.add('spin-animation');
+
+  const [sortBy, sortDir] = currentSort.split(':');
+  let url = `/admin/verification/applications?page=${currentPage}&size=${pageSize}&sortBy=${sortBy}&sortDir=${sortDir}`;
+
+  if (currentStatusFilter !== 'ALL' && currentStatusFilter !== 'DIRECTORY') {
+    url += `&status=${currentStatusFilter}`;
+  }
+  if (currentTypeFilter) {
+    url += `&type=${currentTypeFilter}`;
+  }
+  if (currentSearch) {
+    url += `&search=${encodeURIComponent(currentSearch)}`;
+  }
+
+  try {
+    const res = await api(url);
+    const isPage = res && typeof res === 'object' && !Array.isArray(res) && Array.isArray(res.content);
+    let fullList = Array.isArray(res) ? res : (res?.content || []);
+    let displayList = fullList;
+
+    if (!isPage) {
+      // Client-side sort if raw array returned
+      const [sb, sd] = currentSort.split(':');
+      fullList = [...fullList].sort((a, b) => {
+        let valA = a[sb] ?? '';
+        let valB = b[sb] ?? '';
+        if (sb === 'submittedAt') {
+          valA = new Date(a.submittedAt || a.createdAt || 0).getTime();
+          valB = new Date(b.submittedAt || b.createdAt || 0).getTime();
+          return sd === 'asc' ? valA - valB : valB - valA;
+        }
+        if (typeof valA === 'string') valA = valA.toLowerCase();
+        if (typeof valB === 'string') valB = valB.toLowerCase();
+        if (valA < valB) return sd === 'asc' ? -1 : 1;
+        if (valA > valB) return sd === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      const totalPages = Math.max(1, Math.ceil(fullList.length / pageSize));
+      if (currentPage >= totalPages && totalPages > 0) {
+        currentPage = Math.max(0, totalPages - 1);
+      }
+      const start = currentPage * pageSize;
+      displayList = fullList.slice(start, start + pageSize);
+    }
+
+    renderApplicationsTable(displayList);
+    updateMetricsAndCounts(displayList, isPage ? res : {
+      content: displayList,
+      totalElements: fullList.length,
+      totalPages: Math.max(1, Math.ceil(fullList.length / pageSize)),
+      number: currentPage,
+      size: pageSize
+    });
+  } catch (err) {
+    showAlert(err.message || 'Could not load applications', false);
+    $('appTableBody').innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center py-5 text-danger">
+          <i class="bi bi-exclamation-triangle-fill fs-3 d-block mb-2"></i>
+          Failed to load applications: ${esc(err.message)}
+        </td>
+      </tr>`;
+  } finally {
+    if (showSpin && spin) spin.classList.remove('spin-animation');
+  }
+}
+
+function updateMetricsAndCounts(list, rawRes) {
+  const isPage = rawRes && typeof rawRes === 'object' && !Array.isArray(rawRes);
+  const total = isPage ? (rawRes.totalElements ?? list.length) : (Array.isArray(rawRes) ? rawRes.length : list.length);
+  const totalPages = isPage ? (rawRes.totalPages ?? Math.max(1, Math.ceil(total / pageSize))) : Math.max(1, Math.ceil(total / pageSize));
+  const pageNum = isPage ? (rawRes.number ?? rawRes.pageNumber ?? currentPage) : currentPage;
+
+  if ($('resultsCountText')) {
+    $('resultsCountText').textContent = `Showing ${list.length} of ${total} applications`;
+  }
+  if ($('pageInfoText')) {
+    $('pageInfoText').textContent = `Page ${pageNum + 1} of ${totalPages}`;
+  }
+
+  if ($('btnPrevPage')) $('btnPrevPage').disabled = (pageNum <= 0);
+  if ($('btnNextPage')) $('btnNextPage').disabled = (pageNum + 1 >= totalPages || list.length === 0);
+
+  loadSummaryCounts();
+}
+
+async function loadSummaryCounts() {
+  try {
+    let sub = 0, rev = 0, act = 0, ver = 0, rej = 0, all = 0;
+    try {
+      const counts = await api('/admin/verification/applications/summary-counts');
+      if (counts && typeof counts === 'object') {
+        sub = counts.SUBMITTED ?? 0;
+        rev = counts.UNDER_REVIEW ?? 0;
+        act = counts.ACTION_REQUIRED ?? 0;
+        ver = counts.VERIFIED ?? 0;
+        rej = counts.REJECTED ?? 0;
+        all = counts.TOTAL ?? (sub + rev + act + ver + rej);
+      }
+    } catch {
+      const [rSub, rRev, rAct, rVer, rRej, rAll] = await Promise.all([
+        api('/admin/verification/applications?status=SUBMITTED').catch(() => []),
+        api('/admin/verification/applications?status=UNDER_REVIEW').catch(() => []),
+        api('/admin/verification/applications?status=ACTION_REQUIRED').catch(() => []),
+        api('/admin/verification/applications?status=VERIFIED').catch(() => []),
+        api('/admin/verification/applications?status=REJECTED').catch(() => []),
+        api('/admin/verification/applications').catch(() => [])
+      ]);
+      const countOf = r => Array.isArray(r) ? r.length : (r?.totalElements ?? (r?.content ? r.content.length : 0));
+      sub = countOf(rSub); rev = countOf(rRev); act = countOf(rAct);
+      ver = countOf(rVer); rej = countOf(rRej); all = countOf(rAll);
+    }
+
+    if ($('cntSubmitted')) $('cntSubmitted').textContent = sub;
+    if ($('cntUnderReview')) $('cntUnderReview').textContent = rev;
+    if ($('cntActionReq')) $('cntActionReq').textContent = act;
+    if ($('cntVerified')) $('cntVerified').textContent = ver;
+    if ($('cntRejected')) $('cntRejected').textContent = rej;
+    if ($('cntTotal')) $('cntTotal').textContent = all;
+
+    if ($('tabBadgeSubmitted')) $('tabBadgeSubmitted').textContent = sub;
+    if ($('tabBadgeUnderReview')) $('tabBadgeUnderReview').textContent = rev;
+    if ($('tabBadgeAction')) $('tabBadgeAction').textContent = act;
+    if ($('tabBadgeVerified')) $('tabBadgeVerified').textContent = ver;
+    if ($('tabBadgeRejected')) $('tabBadgeRejected').textContent = rej;
+    if ($('tabBadgeAll')) $('tabBadgeAll').textContent = all;
+  } catch (ex) {
+    console.warn('Could not update badge counts:', ex);
+  }
+}
+
+function changePage(delta) {
+  currentPage += delta;
+  if (currentPage < 0) currentPage = 0;
+  loadApplications();
+}
+
+function renderApplicationsTable(items) {
+  const list = Array.isArray(items) ? items : (items?.content || items?.pageData?.content || []);
+  const tbody = $('appTableBody');
+  if (!list || list.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center py-5 text-muted">
+          <i class="bi bi-folder2-open fs-2 d-block text-secondary mb-2"></i>
+          <strong>No verification applications found</strong>
+          <div class="small">No applications match the current filter or search criteria.</div>
+        </td>
+      </tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(app => {
+    const isBiz = app.providerType === 'BUSINESS';
+    const docs = app.documents || [];
+    const hasId = docs.some(d => d.documentType === 'IDENTITY_PROOF');
+    const hasExterior = docs.some(d => d.documentType === 'SHOP_EXTERIOR');
+    const hasProof = docs.some(d => d.documentType === 'LOCATION_PROOF');
+    const docCount = docs.length;
+
+    const st = app.status;
+    const stBadgeClass = `status-badge-${st}`;
+    const stLabel = st.replace('_', ' ');
+
+    const subDate = app.submittedAt ? new Date(app.submittedAt).toLocaleDateString() : (app.createdAt ? new Date(app.createdAt).toLocaleDateString() : 'Draft');
+
+    return `
+      <tr>
+        <td class="ps-4">
+          <div class="d-flex align-items-center gap-2">
+            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" 
+                 style="width: 38px; height: 38px; font-size: 1rem; background: ${isBiz ? 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)' : 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)'}; flex-shrink: 0;">
+              ${esc((app.legalName || app.providerName || 'P').charAt(0).toUpperCase())}
+            </div>
+            <div>
+              <div class="fw-bold text-dark d-flex align-items-center gap-1.5">
+                ${esc(app.legalName || app.providerName || 'Provider')}
+                ${app.businessName ? `<span class="text-muted fw-normal">(${esc(app.businessName)})</span>` : ''}
+              </div>
+              <div class="d-flex align-items-center gap-2 mt-0.5" style="font-size: 0.73rem;">
+                <span class="badge bg-light text-secondary border font-monospace">${esc(app.referenceNumber || 'APP-DRAFT')}</span>
+                <span class="text-muted"><i class="bi bi-calendar3 me-1"></i>${subDate}</span>
+              </div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span class="badge ${isBiz ? 'bg-purple-subtle text-purple border border-purple-subtle' : 'bg-primary-subtle text-primary border border-primary-subtle'} fw-bold" style="font-size: 0.72rem; ${isBiz ? 'background:#f3e8ff; color:#7c3aed;' : ''}">
+            <i class="bi bi-${isBiz ? 'shop' : 'person-workspace'} me-1"></i>${esc(app.providerType || 'INDIVIDUAL')}
+          </span>
+        </td>
+        <td class="small">
+          <div class="text-dark fw-semibold"><i class="bi bi-telephone text-muted me-1"></i>${esc(app.providerPhone || '-')}</div>
+          <div class="text-muted" style="font-size: 0.72rem;"><i class="bi bi-geo-alt text-muted me-1"></i>${esc([app.locality, app.city].filter(Boolean).join(', ') || 'Coverage listed')}</div>
+        </td>
+        <td class="small">
+          <div class="text-truncate" style="max-width: 180px;" title="${esc(app.servicesOffered || 'General Services')}">
+            ${esc(app.servicesOffered || 'General Services')}
+          </div>
+        </td>
+        <td>
+          <div class="d-flex align-items-center gap-1">
+            <span class="badge ${hasId ? 'bg-success-subtle text-success' : 'bg-light text-danger border'}" title="Identity ID Proof">
+              <i class="bi bi-${hasId ? 'check' : 'x'}"></i> ID
+            </span>
+            ${isBiz ? `
+              <span class="badge ${hasExterior ? 'bg-success-subtle text-success' : 'bg-light text-danger border'}" title="Shop Exterior">
+                <i class="bi bi-${hasExterior ? 'check' : 'x'}"></i> Shop
+              </span>
+              <span class="badge ${hasProof ? 'bg-success-subtle text-success' : 'bg-light text-danger border'}" title="Premises Location Proof">
+                <i class="bi bi-${hasProof ? 'check' : 'x'}"></i> Proof
+              </span>
+            ` : ''}
+            <span class="badge bg-light text-secondary border" style="font-size: 0.7rem;">${docCount} files</span>
+          </div>
+        </td>
+        <td>
+          <span class="badge ${stBadgeClass} px-2.5 py-1 rounded-pill fw-bold" style="font-size: 0.75rem;">
+            ${esc(stLabel)}
+          </span>
+        </td>
+        <td class="text-end pe-4 text-nowrap">
+          <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 shadow-xs fw-semibold" onclick="openApplicationReview(${app.id})">
+            <i class="bi bi-eye-fill me-1"></i>Review
+          </button>
+          <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-2.5 shadow-xs ms-1" title="${app.providerId ? 'Delete Provider Record' : 'Delete Application'}" onclick="${app.providerId ? `deleteProviderPrompt(${app.providerId}, '${esc(app.businessName || app.legalName || '')}')` : `deleteApplicationPrompt(${app.id}, '${esc(app.referenceNumber || '')}')`}">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// Open Application Review Modal
+async function openApplicationReview(appId) {
+  try {
+    const app = await api('/admin/verification/applications/' + appId);
+    currentActiveApp = app;
+    populateReviewModal(app);
+    reviewModalInstance.show();
+  } catch (err) {
+    showAlert(err.message || 'Could not load application details', false);
+  }
+}
+
+function populateReviewModal(app) {
+  if (!app) return;
+  const isBiz = app.providerType === 'BUSINESS';
+
+  // Header
+  $('mAppTitle').textContent = `Review ${app.legalName || app.providerName || 'Provider'}`;
+  $('mAppRefPill').textContent = app.referenceNumber || 'APP-DRAFT';
+  $('mAppStatusBadge').className = `badge status-badge-${app.status} px-2.5 py-1 fw-bold`;
+  $('mAppStatusBadge').textContent = app.status.replace('_', ' ');
+  $('mAppSubhead').textContent = `Submitted on ${app.submittedAt ? new Date(app.submittedAt).toLocaleString() : 'Draft'} · ID #${app.id}`;
+
+  // Section 1: Personal Info
+  $('mProviderIdBadge').textContent = `Provider Account #${app.providerId}`;
+  $('mLegalName').textContent = app.legalName || '-';
+  $('mDob').textContent = app.dob || 'Not provided';
+  $('mPhone').textContent = app.providerPhone || '-';
+  $('mEmail').textContent = app.providerEmail || '-';
+  $('mAddress').textContent = [app.serviceAddress, app.locality, app.city, app.pincode].filter(Boolean).join(', ') || '-';
+
+  // Section 2: Identity Verification
+  $('mIdType').textContent = (app.idType || '-').replace('_', ' ');
+  $('mIdNumber').textContent = app.idNumber || '-';
+
+  // ID Document container
+  const idDoc = (app.documents || []).find(d => d.documentType === 'IDENTITY_PROOF');
+  const mIdDocContainer = $('mIdDocContainer');
+  if (idDoc) {
+    mIdDocContainer.innerHTML = renderDocCardHtml(idDoc);
+    $('mIdDocStatusBadge').className = 'badge bg-success-subtle text-success border border-success-subtle';
+    $('mIdDocStatusBadge').innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Uploaded & Verified Format';
+  } else {
+    mIdDocContainer.innerHTML = '<div class="alert alert-warning py-2 px-3 small mb-0"><i class="bi bi-exclamation-triangle me-1"></i>No government ID uploaded yet.</div>';
+    $('mIdDocStatusBadge').className = 'badge bg-danger-subtle text-danger border border-danger-subtle';
+    $('mIdDocStatusBadge').textContent = 'Missing ID';
+  }
+
+  // Section 3: Business Information
+  $('mProviderTypeBadge').textContent = app.providerType;
+  $('mProviderTypeBadge').className = isBiz
+    ? 'badge bg-purple-subtle text-purple border border-purple-subtle'
+    : 'badge bg-primary-subtle text-primary border border-primary-subtle';
+
+  const mBizDetailsContent = $('mBizDetailsContent');
+  if (isBiz) {
+    mBizDetailsContent.innerHTML = `
+      <div class="col-sm-6"><span class="text-muted">Business / Shop Name:</span> <strong class="text-dark">${esc(app.businessName || '-')}</strong></div>
+      <div class="col-sm-6"><span class="text-muted">Business Category:</span> <span>${esc(app.businessType || '-')}</span></div>
+      <div class="col-sm-6"><span class="text-muted">Business Phone:</span> <span>${esc(app.businessPhone || app.providerPhone || '-')}</span></div>
+      <div class="col-sm-6"><span class="text-muted">Operating Hours:</span> <span>${esc(app.operatingHours || 'Standard')}</span></div>
+      <div class="col-12"><span class="text-muted">Shop Commercial Address:</span> <span class="fw-semibold text-dark">${esc(app.shopAddress || '-')}</span></div>
+      <div class="col-12"><span class="text-muted">Business Description:</span> <div class="text-muted mt-0.5">${esc(app.businessDescription || 'No description provided.')}</div></div>
+    `;
+    $('mShopPhotosCard').classList.remove('d-none');
+    $('mLocationProofCard').classList.remove('d-none');
+    $('checklistBusinessSection').classList.remove('d-none');
+  } else {
+    mBizDetailsContent.innerHTML = `
+      <div class="col-12 text-muted fst-italic">
+        <i class="bi bi-info-circle text-primary me-1"></i>Individual Service Professional operating independently without a physical commercial workshop. Shop photographs and commercial premises lease deeds are not required.
+      </div>
+    `;
+    $('mShopPhotosCard').classList.add('d-none');
+    $('mLocationProofCard').classList.add('d-none');
+    $('checklistBusinessSection').classList.add('d-none');
+  }
+
+  // Section 4: Shop Photos (for Business)
+  if (isBiz) {
+    const shopPhotos = (app.documents || []).filter(d => ['SHOP_EXTERIOR', 'SHOP_SIGNBOARD', 'SHOP_INTERIOR'].includes(d.documentType));
+    $('mPhotoCountText').textContent = `${shopPhotos.length} Photos`;
+    const mShopPhotosGrid = $('mShopPhotosGrid');
+    if (shopPhotos.length > 0) {
+      mShopPhotosGrid.innerHTML = shopPhotos.map(p => `
+        <div class="col-sm-6 col-md-4">
+          <div class="doc-card">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="badge bg-light text-dark border" style="font-size:0.68rem;">${esc(p.documentType.replace('SHOP_', ''))}</span>
+              <span class="text-muted" style="font-size:0.68rem;">${(p.fileSize/1024).toFixed(0)} KB</span>
+            </div>
+            ${renderDocThumbnail(p)}
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <div class="small text-truncate" style="font-size:0.72rem;">${esc(p.fileName)}</div>
+              <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" onclick="openDocViewer(${p.id}, '${esc(p.fileName)}', ${p.fileSize}, '${p.contentType}')">View</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      mShopPhotosGrid.innerHTML = '<div class="col-12 text-muted small">No shop photographs submitted.</div>';
+    }
+
+    // Section 5: Location Proof
+    const locDoc = (app.documents || []).find(d => d.documentType === 'LOCATION_PROOF');
+    $('mProofTypeBadge').textContent = (app.locationProofType || 'PREMISES PROOF').replace('_', ' ');
+    const mLocationProofContainer = $('mLocationProofContainer');
+    if (locDoc) {
+      mLocationProofContainer.innerHTML = renderDocCardHtml(locDoc);
+    } else {
+      mLocationProofContainer.innerHTML = '<div class="alert alert-warning py-2 px-3 small mb-0"><i class="bi bi-exclamation-triangle me-1"></i>No premises location proof uploaded.</div>';
+    }
+  }
+
+  // Section 6: Services and Areas
+  const mServicesList = $('mServicesList');
+  const services = (app.servicesOffered || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (services.length > 0) {
+    mServicesList.innerHTML = services.map(s => `<span class="badge bg-light text-dark border"><i class="bi bi-tools text-primary me-1"></i>${esc(s)}</span>`).join('');
+  } else {
+    mServicesList.innerHTML = '<span class="text-muted small">No services listed</span>';
+  }
+
+  const mAreasList = $('mAreasList');
+  const areas = (app.serviceAreas || '').split(',').map(a => a.trim()).filter(Boolean);
+  if (areas.length > 0) {
+    mAreasList.innerHTML = areas.map(a => `<span class="badge bg-light text-secondary border"><i class="bi bi-geo-alt me-1"></i>${esc(a)}</span>`).join('');
+  } else {
+    mAreasList.innerHTML = '<span class="text-muted small">No specific coverage areas listed</span>';
+  }
+
+  // Section 7: Checklist
+  populateChecklist(app.checklist || {}, isBiz);
+
+  // Section 8: Audit Timeline
+  renderModalAuditTimeline(app.history || []);
+
+  // Update Action Buttons based on status
+  updateActionButtons(app.status);
+}
+
+function getAdminToken() {
+  return (typeof Auth !== 'undefined' && typeof Auth.token === 'function')
+    ? Auth.token()
+    : ((typeof Auth !== 'undefined' && typeof Auth.getToken === 'function')
+      ? Auth.getToken()
+      : (localStorage.getItem('lsc_token') || ''));
+}
+
+function renderDocCardHtml(doc) {
+  const token = getAdminToken();
+  const fileUrl = `/api/verification/documents/${doc.id}/file?token=${encodeURIComponent(token)}`;
+  const isImg = ['IMAGE_JPEG', 'IMAGE_PNG', 'IMAGE_WEBP'].includes(doc.contentType) || /\.(jpe?g|png|webp)$/i.test(doc.fileName);
+
+  return `
+    <div class="doc-card d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2 overflow-hidden">
+        ${isImg 
+          ? `<img src="${fileUrl}" class="rounded object-fit-cover cursor-pointer" style="width: 48px; height: 48px; flex-shrink: 0;" alt="${esc(doc.fileName)}" onclick="openDocViewer(${doc.id}, '${esc(doc.fileName)}', ${doc.fileSize}, '${doc.contentType}')">` 
+          : `<div class="rounded bg-danger-subtle text-danger d-flex align-items-center justify-content-center cursor-pointer" style="width: 48px; height: 48px; flex-shrink: 0;" onclick="openDocViewer(${doc.id}, '${esc(doc.fileName)}', ${doc.fileSize}, '${doc.contentType}')"><i class="bi bi-file-earmark-pdf fs-4"></i></div>`}
+        <div class="overflow-hidden">
+          <div class="small fw-bold text-dark text-truncate">${esc(doc.fileName)}</div>
+          <div class="text-muted" style="font-size: 0.72rem;">${(doc.fileSize / 1024).toFixed(0)} KB · ${esc(doc.contentType || 'Verified File')}</div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2 flex-shrink-0">
+        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1" onclick="openDocViewer(${doc.id}, '${esc(doc.fileName)}', ${doc.fileSize}, '${doc.contentType}')">
+          <i class="bi bi-search me-1"></i>Inspect
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderDocThumbnail(doc) {
+  const token = getAdminToken();
+  const fileUrl = `/api/verification/documents/${doc.id}/file?token=${encodeURIComponent(token)}`;
+  const isImg = ['IMAGE_JPEG', 'IMAGE_PNG', 'IMAGE_WEBP'].includes(doc.contentType) || /\.(jpe?g|png|webp)$/i.test(doc.fileName);
+
+  if (isImg) {
+    return `<img src="${fileUrl}" class="doc-preview-thumb mb-1" alt="${esc(doc.fileName)}" onclick="openDocViewer(${doc.id}, '${esc(doc.fileName)}', ${doc.fileSize}, '${doc.contentType}')">`;
+  } else {
+    return `<div class="doc-preview-thumb mb-1 d-flex align-items-center justify-content-center text-danger bg-danger-subtle" onclick="openDocViewer(${doc.id}, '${esc(doc.fileName)}', ${doc.fileSize}, '${doc.contentType}')"><i class="bi bi-file-earmark-pdf fs-1"></i></div>`;
+  }
+}
+
+function openDocViewer(docId, fileName, fileSize, contentType) {
+  const token = getAdminToken();
+  const fileUrl = `/api/verification/documents/${docId}/file?token=${encodeURIComponent(token)}`;
+  $('mDocViewerTitle').textContent = fileName;
+  $('mDocViewerSize').textContent = `${(fileSize / 1024).toFixed(0)} KB`;
+
+  const container = $('mDocViewerContent');
+  const isPdf = contentType === 'APPLICATION_PDF' || /\.pdf$/i.test(fileName);
+
+  if (isPdf) {
+    container.innerHTML = `<iframe src="${fileUrl}" class="w-100 rounded" style="height: 550px; border: none;"></iframe>`;
+  } else {
+    container.innerHTML = `<img src="${fileUrl}" class="img-fluid rounded shadow-sm" style="max-height: 550px; object-fit: contain;" alt="${esc(fileName)}">`;
+  }
+
+  docViewerModalInstance.show();
+}
+
+function populateChecklist(cl, isBiz) {
+  $('chkIdDocReceived').checked = !!cl.identityDocReceived;
+  $('chkIdDocReadable').checked = !!cl.identityDocReadable;
+  $('chkIdDetailsReviewed').checked = !!cl.nameAndDetailsReviewed;
+  $('chkIdCheckCompleted').checked = !!cl.identityCheckAuthorized;
+
+  if (isBiz) {
+    $('chkBizInfoReviewed').checked = !!cl.businessInfoReviewed;
+    $('chkShopPhotosReviewed').checked = !!cl.shopPhotosReviewed;
+    $('chkBizAddressReviewed').checked = !!cl.businessAddressReviewed;
+    $('chkLocationProofReviewed').checked = !!cl.locationProofReviewed;
+  }
+
+  $('chkContactChecksCompleted').checked = !!cl.contactVerified;
+
+  updateChecklistScore(isBiz);
+}
+
+function updateChecklistScore(isBiz) {
+  let total = 5;
+  let checked = 0;
+  if ($('chkIdDocReceived').checked) checked++;
+  if ($('chkIdDocReadable').checked) checked++;
+  if ($('chkIdDetailsReviewed').checked) checked++;
+  if ($('chkIdCheckCompleted').checked) checked++;
+  if ($('chkContactChecksCompleted').checked) checked++;
+
+  if (isBiz) {
+    total += 4;
+    if ($('chkBizInfoReviewed').checked) checked++;
+    if ($('chkShopPhotosReviewed').checked) checked++;
+    if ($('chkBizAddressReviewed').checked) checked++;
+    if ($('chkLocationProofReviewed').checked) checked++;
+  }
+
+  const badge = $('mChecklistScore');
+  if (badge) {
+    badge.textContent = `${checked} / ${total} Checks Passed`;
+    badge.className = (checked === total)
+      ? 'badge bg-success-subtle text-success border border-success-subtle'
+      : 'badge bg-warning-subtle text-warning border border-warning-subtle';
+  }
+}
+
+async function syncChecklist() {
+  if (!currentActiveApp) return;
+  const isBiz = currentActiveApp.providerType === 'BUSINESS';
+  updateChecklistScore(isBiz);
+
+  const payload = {
+    identityDocReceived: $('chkIdDocReceived').checked,
+    identityDocReadable: $('chkIdDocReadable').checked,
+    nameAndDetailsReviewed: $('chkIdDetailsReviewed').checked,
+    identityCheckAuthorized: $('chkIdCheckCompleted').checked,
+    businessInfoReviewed: isBiz ? $('chkBizInfoReviewed').checked : false,
+    shopPhotosReviewed: isBiz ? $('chkShopPhotosReviewed').checked : false,
+    businessAddressReviewed: isBiz ? $('chkBizAddressReviewed').checked : false,
+    locationProofReviewed: isBiz ? $('chkLocationProofReviewed').checked : false,
+    contactVerified: $('chkContactChecksCompleted').checked
+  };
+
+  try {
+    const updated = await api(`/admin/verification/applications/${currentActiveApp.id}/checklist`, {
+      method: 'PUT',
+      body: payload
+    });
+    currentActiveApp.checklist = updated;
+  } catch (ex) {
+    console.warn('Could not save checklist state:', ex);
+  }
+}
+
+function renderModalAuditTimeline(history) {
+  const container = $('mAuditTimeline');
+  if (!history || history.length === 0) {
+    container.innerHTML = '<div class="text-muted small">No audit history recorded yet.</div>';
+    $('mHistoryCount').textContent = '0 events';
+    return;
+  }
+
+  $('mHistoryCount').textContent = `${history.length} events`;
+
+  const badgeStyles = {
+    DRAFT_SAVED: 'bg-light text-secondary border',
+    SUBMITTED: 'bg-info-subtle text-info border border-info-subtle',
+    START_REVIEW: 'bg-primary-subtle text-primary border border-primary-subtle',
+    REQUEST_INFO: 'bg-warning-subtle text-warning border border-warning-subtle',
+    APPROVE: 'bg-success-subtle text-success border border-success-subtle',
+    REJECT: 'bg-danger-subtle text-danger border border-danger-subtle',
+    DOC_UPLOADED: 'bg-light text-dark border',
+    DOC_DELETED: 'bg-light text-danger border'
+  };
+
+  container.innerHTML = history.map(item => `
+    <div class="audit-node pb-3">
+      <div class="audit-dot"></div>
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-1 mb-1">
+        <div class="d-flex align-items-center gap-1.5">
+          <span class="badge ${badgeStyles[item.action] || 'bg-light text-dark'} fw-bold" style="font-size:0.7rem;">${esc(item.action)}</span>
+          <span class="small fw-semibold text-dark">${esc(item.actorName || 'Admin')}</span>
+          <span class="badge bg-light text-secondary" style="font-size:0.65rem;">${esc(item.actorRole || 'ADMIN')}</span>
+        </div>
+        <span class="text-muted" style="font-size:0.7rem;">${item.timestamp ? new Date(item.timestamp).toLocaleString() : ''}</span>
+      </div>
+      ${item.reason ? `<div class="small text-danger fw-semibold"><i class="bi bi-chat-left-text me-1"></i>${esc(item.reason)}</div>` : ''}
+      ${item.notes ? `<div class="small text-muted mt-0.5" style="font-size:0.75rem;">${esc(item.notes)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function updateActionButtons(status) {
+  const btnStart = $('btnStartReview');
+  const btnReq = $('btnRequestInfo');
+  const btnRej = $('btnRejectApp');
+  const btnApp = $('btnApproveApp');
+
+  if (status === 'SUBMITTED') {
+    btnStart.style.display = 'inline-block';
+    btnReq.style.display = 'inline-block';
+    btnRej.style.display = 'inline-block';
+    btnApp.style.display = 'inline-block';
+  } else if (status === 'UNDER_REVIEW') {
+    btnStart.style.display = 'none';
+    btnReq.style.display = 'inline-block';
+    btnRej.style.display = 'inline-block';
+    btnApp.style.display = 'inline-block';
+  } else if (status === 'ACTION_REQUIRED') {
+    btnStart.style.display = 'none';
+    btnReq.style.display = 'inline-block';
+    btnRej.style.display = 'inline-block';
+    btnApp.style.display = 'inline-block';
+  } else if (status === 'VERIFIED') {
+    btnStart.style.display = 'none';
+    btnReq.style.display = 'none';
+    btnRej.style.display = 'inline-block';
+    btnApp.style.display = 'none';
+  } else if (status === 'REJECTED') {
+    btnStart.style.display = 'inline-block';
+    btnReq.style.display = 'none';
+    btnRej.style.display = 'none';
+    btnApp.style.display = 'inline-block';
+  } else {
+    btnStart.style.display = 'inline-block';
+    btnReq.style.display = 'inline-block';
+    btnRej.style.display = 'inline-block';
+    btnApp.style.display = 'inline-block';
+  }
+}
+
+// Action A: Start Review
+async function startReviewAction() {
+  if (!currentActiveApp) return;
+  try {
+    const res = await api(`/admin/verification/applications/${currentActiveApp.id}/action`, {
+      method: 'POST',
+      body: {
+        action: 'START_REVIEW',
+        notes: 'Administrator initiated application review.'
+      }
+    });
+    currentActiveApp = res;
+    populateReviewModal(res);
+    showAlert(`Application moved to UNDER_REVIEW. Review in progress.`, true);
+    loadApplications();
+  } catch (err) {
+    showAlert(err.message || 'Could not start review', false);
+  }
+}
+
+// Action B: Request More Info Modal
+function openRequestInfoModal() {
+  $('mReqReason').value = '';
+  $('mReqNotes').value = '';
+  reqInfoModalInstance.show();
+}
+
+async function submitRequestInfoAction() {
+  const reason = $('mReqReason').value.trim();
+  if (!reason) {
+    alert('Please enter a clear explanation for the provider.');
+    $('mReqReason').focus();
+    return;
+  }
+  const notes = $('mReqNotes').value.trim();
+
+  try {
+    const res = await api(`/admin/verification/applications/${currentActiveApp.id}/action`, {
+      method: 'POST',
+      body: {
+        action: 'REQUEST_INFO',
+        reason: reason,
+        notes: notes
+      }
+    });
+    reqInfoModalInstance.hide();
+    currentActiveApp = res;
+    populateReviewModal(res);
+    showAlert('Information requested from provider. Status set to ACTION_REQUIRED.', true);
+    loadApplications();
+  } catch (err) {
+    alert(err.message || 'Could not request information');
+  }
+}
+
+// Action C: Reject Modal
+function openRejectModal() {
+  $('mRejectionReason').value = '';
+  $('mRejectionNotes').value = '';
+  rejectModalInstance.show();
+}
+
+async function submitRejectAction() {
+  const reason = $('mRejectionReason').value.trim();
+  if (!reason) {
+    alert('Please provide a recorded rejection reason.');
+    $('mRejectionReason').focus();
+    return;
+  }
+  const notes = $('mRejectionNotes').value.trim();
+
+  try {
+    const res = await api(`/admin/verification/applications/${currentActiveApp.id}/action`, {
+      method: 'POST',
+      body: {
+        action: 'REJECT',
+        reason: reason,
+        notes: notes
+      }
+    });
+    rejectModalInstance.hide();
+    currentActiveApp = res;
+    populateReviewModal(res);
+    showAlert('Application rejected. Verification privileges revoked.', true);
+    loadApplications();
+  } catch (err) {
+    alert(err.message || 'Could not reject application');
+  }
+}
+
+// Action D: Approve & Verify Provider
+async function confirmApprovalAction() {
+  if (!currentActiveApp) return;
+  const isBiz = currentActiveApp.providerType === 'BUSINESS';
+
+  // Check checklist validation
+  const idReceived = $('chkIdDocReceived').checked;
+  const idReadable = $('chkIdDocReadable').checked;
+  const idDetails = $('chkIdDetailsReviewed').checked;
+  const idCompleted = $('chkIdCheckCompleted').checked;
+  const contactCompleted = $('chkContactChecksCompleted').checked;
+
+  if (!idReceived || !idReadable || !idDetails || !idCompleted) {
+    alert('Cannot approve provider: All required Identity checklist items must be reviewed and passed.');
+    return;
+  }
+
+  if (isBiz) {
+    const bizInfo = $('chkBizInfoReviewed').checked;
+    const photos = $('chkShopPhotosReviewed').checked;
+    const address = $('chkBizAddressReviewed').checked;
+    const proof = $('chkLocationProofReviewed').checked;
+    if (!bizInfo || !photos || !address || !proof) {
+      alert('Cannot approve commercial shop/business: All Business establishment checklist items must be reviewed and verified.');
+      return;
+    }
+  }
+
+  if (!contactCompleted) {
+    alert('Cannot approve provider: Contact verification check must be confirmed.');
+    return;
+  }
+
+  if (!confirm(`Are you sure you want to approve "${currentActiveApp.legalName || currentActiveApp.providerName}" as a VERIFIED PARTNER? This grants verified-provider status and booking eligibility.`)) {
+    return;
+  }
+
+  const checklistPayload = {
+    identityDocReceived: idReceived,
+    identityDocReadable: idReadable,
+    nameAndDetailsReviewed: idDetails,
+    identityCheckAuthorized: idCompleted,
+    businessInfoReviewed: isBiz ? $('chkBizInfoReviewed').checked : false,
+    shopPhotosReviewed: isBiz ? $('chkShopPhotosReviewed').checked : false,
+    businessAddressReviewed: isBiz ? $('chkBizAddressReviewed').checked : false,
+    locationProofReviewed: isBiz ? $('chkLocationProofReviewed').checked : false,
+    contactVerified: contactCompleted
+  };
+
+  try {
+    // 1. Update checklist on backend first
+    await api(`/admin/verification/applications/${currentActiveApp.id}/checklist`, {
+      method: 'PUT',
+      body: checklistPayload
+    });
+
+    // 2. Perform approve action
+    const res = await api(`/admin/verification/applications/${currentActiveApp.id}/action`, {
+      method: 'POST',
+      body: {
+        action: 'APPROVE',
+        adminNotes: 'All required checklist items verified and approved by admin.'
+      }
+    });
+    currentActiveApp = res;
+    populateReviewModal(res);
+    showAlert(`Provider ${res.legalName || ''} successfully approved and verified!`, true);
+    loadApplications();
+  } catch (err) {
+    alert(err.message || 'Could not approve application');
+  }
+}
+
+// =================================================================
+// ENHANCED PROVIDER DIRECTORY
+// =================================================================
+async function loadDirectoryServices() {
+  try {
+    const services = await api('/admin/services');
+    const select = $('dirServiceFilter');
+    if (!select) return;
+    const currentVal = select.value;
+    select.innerHTML = '<option value="">All Service Categories</option>' + 
+      (services || []).map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+    if (currentVal) select.value = currentVal;
+  } catch (err) {
+    console.warn('Could not load services for filter:', err);
+  }
+}
+
+async function loadDirectory() {
+  const tbody = $('dirTableBody');
+  tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading provider directory...</td></tr>`;
+
+  const [sortBy, sortDir] = dirSort.split(':');
+  let url = `/admin/providers?page=${dirCurrentPage}&size=${dirPageSize}&sortBy=${sortBy}&sortDir=${sortDir}`;
+
+  if (dirSearch) url += `&search=${encodeURIComponent(dirSearch)}`;
+  if (dirStatus) url += `&status=${encodeURIComponent(dirStatus)}`;
+  if (dirServiceId) url += `&serviceId=${encodeURIComponent(dirServiceId)}`;
+  if (dirSubService) url += `&subService=${encodeURIComponent(dirSubService)}`;
+  if (dirArea) url += `&area=${encodeURIComponent(dirArea)}`;
+  if (dirRating) url += `&minRating=${encodeURIComponent(dirRating)}`;
+  if (dirAvail !== '') url += `&available=${encodeURIComponent(dirAvail)}`;
+  if (dirEnabled !== '') url += `&enabled=${encodeURIComponent(dirEnabled)}`;
+
+  try {
+    const res = await api(url);
+    const isPage = res && typeof res === 'object' && !Array.isArray(res) && Array.isArray(res.content);
+    let list = isPage ? res.content : (Array.isArray(res) ? res : []);
+
+    dirProvidersCache = list;
+    legacyProvidersCache = list;
+    renderDirectoryTable(list);
+
+    const totalElements = isPage ? (res.totalElements ?? list.length) : list.length;
+    const totalPages = isPage ? (res.totalPages ?? Math.max(1, Math.ceil(totalElements / dirPageSize))) : Math.max(1, Math.ceil(totalElements / dirPageSize));
+    const pageNum = isPage ? (res.number ?? dirCurrentPage) : dirCurrentPage;
+
+    if ($('dirPageInfoText')) {
+      $('dirPageInfoText').textContent = `Showing ${list.length} of ${totalElements} providers (Page ${pageNum + 1} of ${totalPages})`;
+    }
+    if ($('btnDirPrevPage')) $('btnDirPrevPage').disabled = (pageNum <= 0);
+    if ($('btnDirNextPage')) $('btnDirNextPage').disabled = (pageNum + 1 >= totalPages || list.length === 0);
+
+    updateDirectoryKPIs();
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-danger py-4 text-center"><i class="bi bi-exclamation-triangle-fill me-1"></i>Failed to load providers: ${esc(err.message)}</td></tr>`;
+  }
+}
+
+function changeDirPage(delta) {
+  dirCurrentPage += delta;
+  if (dirCurrentPage < 0) dirCurrentPage = 0;
+  loadDirectory();
+}
+
+async function updateDirectoryKPIs() {
+  try {
+    const dash = await api('/admin/dashboard');
+    if ($('dirStatTotal')) $('dirStatTotal').textContent = dash.totalProviders ?? '-';
+    if ($('dirStatVerified')) $('dirStatVerified').textContent = dash.verifiedProviders ?? '-';
+
+    const [onlineRes, suspendedRes] = await Promise.all([
+      api('/admin/providers?available=true&page=0&size=1').catch(() => null),
+      api('/admin/providers?enabled=false&page=0&size=1').catch(() => null)
+    ]);
+    if ($('dirStatOnline')) $('dirStatOnline').textContent = onlineRes?.totalElements ?? '-';
+    if ($('dirStatSuspended')) $('dirStatSuspended').textContent = suspendedRes?.totalElements ?? '-';
+  } catch (e) {
+    console.warn('Could not update directory KPIs:', e);
+  }
+}
+
+function renderDirectoryTable(items) {
+  const tbody = $('dirTableBody');
+  if (!items || items.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="text-center py-5 text-muted">
+          <i class="bi bi-people fs-2 d-block text-secondary mb-2"></i>
+          <strong>No providers found matching directory criteria</strong>
+          <div class="small">Try clearing search keywords or resetting filters.</div>
+        </td>
+      </tr>`;
+    return;
+  }
+
+  const VS = {
+    PENDING: ['warning', 'Pending'],
+    VERIFIED: ['success', 'Verified Partner'],
+    REJECTED: ['danger', 'Rejected']
+  };
+
+  tbody.innerHTML = items.map(item => {
+    const p = item.provider;
+    const st = p.verificationStatus || 'PENDING';
+    const stStyle = VS[st] || ['secondary', st];
+    const initial = (p.businessName || item.ownerName || 'P').charAt(0).toUpperCase();
+    const regDate = item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '';
+
+    return `
+      <tr>
+        <td class="ps-4">
+          <div class="d-flex align-items-center gap-2">
+            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" 
+                 style="width: 38px; height: 38px; font-size: 1rem; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); flex-shrink: 0;">
+              ${esc(initial)}
+            </div>
+            <div>
+              <div class="fw-bold text-dark d-flex align-items-center gap-1.5">
+                <span class="cursor-pointer text-primary text-decoration-none" onclick="openProviderDetails(${p.id})">
+                  ${esc(p.businessName || 'Business')}
+                </span>
+                <span class="badge bg-light text-secondary border font-monospace" style="font-size:0.68rem;">#${p.id}</span>
+              </div>
+              <div class="small text-muted">Owner: ${esc(item.ownerName || 'Owner')}</div>
+              <div class="text-muted" style="font-size:0.72rem;">
+                ${esc(p.experienceYears || 0)} yrs exp · Approx ₹${esc(p.approxPrice != null ? p.approxPrice : '499')}
+                ${regDate ? ` · Joined ${regDate}` : ''}
+              </div>
+            </div>
+          </div>
+        </td>
+        <td class="small">
+          <div class="text-dark fw-semibold"><i class="bi bi-telephone text-muted me-1"></i>${esc(item.phone || '-')}</div>
+          <div class="text-muted"><i class="bi bi-envelope text-muted me-1"></i>${esc(item.email || '-')}</div>
+        </td>
+        <td class="small">
+          <div class="d-flex flex-wrap gap-1 mb-1">
+            ${(p.services || []).map(s => `<span class="badge bg-light text-dark border">${esc(s.name)}</span>`).join('') || '<span class="text-muted">No services</span>'}
+          </div>
+          <div class="text-muted text-truncate" style="max-width: 200px; font-size:0.72rem;" title="${(p.areas || []).map(x => x.area).join(', ')}">
+            <i class="bi bi-geo-alt me-1"></i>${(p.areas || []).map(x => x.area).join(', ') || 'No areas configured'}
+          </div>
+        </td>
+        <td>
+          <div class="small mb-1">${stars(p.rating, p.reviewCount)}</div>
+          <div class="d-flex align-items-center gap-1">
+            <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:0.7rem;">
+              <i class="bi bi-check2-all me-1"></i>${item.completedBookings || 0} completed
+            </span>
+            <span class="badge bg-light text-secondary border" style="font-size:0.7rem;">
+              ${item.totalBookings || 0} total
+            </span>
+          </div>
+        </td>
+        <td>
+          <div class="d-flex flex-column gap-1 align-items-start">
+            <span class="badge bg-${stStyle[0]}-subtle text-${stStyle[0]} border border-${stStyle[0]}-subtle fw-bold" style="font-size:0.72rem;">
+              ${stStyle[1]}
+            </span>
+            <div class="d-flex align-items-center gap-1 flex-wrap">
+              ${p.availability 
+                ? '<span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:0.68rem;"><i class="bi bi-circle-fill me-1" style="font-size:0.45rem;"></i>Online</span>' 
+                : '<span class="badge bg-light text-muted border" style="font-size:0.68rem;">Offline</span>'}
+              ${item.quickEligible ? '<span class="badge bg-warning-subtle text-warning border border-warning-subtle" style="font-size:0.68rem;" title="Quick Service Dispatch Eligible"><i class="bi bi-lightning-charge-fill me-1"></i>Quick</span>' : ''}
+            </div>
+            ${item.enabled ? '' : '<span class="badge bg-danger text-white fw-bold" style="font-size:0.68rem;"><i class="bi bi-slash-circle me-1"></i>Suspended</span>'}
+          </div>
+        </td>
+        <td class="text-end pe-4 text-nowrap">
+          <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-2.5 py-1 me-1 shadow-xs" onclick="openProviderDetails(${p.id})">
+            <i class="bi bi-person-lines-fill me-1"></i>Profile
+          </button>
+          <button type="button" class="btn btn-outline-${item.enabled ? 'danger' : 'success'} btn-sm rounded-pill px-2.5 py-1 me-1 shadow-xs" 
+                  onclick="promptSuspendProvider(${p.id}, ${item.enabled ? 'false' : 'true'}, '${esc(p.businessName || item.ownerName)}')">
+            <i class="bi bi-${item.enabled ? 'slash-circle' : 'check-circle'} me-1"></i>${item.enabled ? 'Suspend' : 'Reinstate'}
+          </button>
+          <button type="button" class="btn btn-light btn-sm rounded-pill px-2 py-1 text-secondary border shadow-xs me-1" onclick="openLegacyEdit(${p.id})" title="Quick edit">
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-2 py-1 shadow-xs" onclick="deleteProviderPrompt(${p.id})" title="Delete provider permanently">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// =================================================================
+// DETAILED PROVIDER PROFILE VIEW
+// =================================================================
+async function openProviderDetails(providerId) {
+  try {
+    currentDetailProviderId = providerId;
+    const detail = await api(`/admin/providers/${providerId}/details`);
+    populateProviderDetailModal(detail);
+    providerDetailModalInstance.show();
+  } catch (err) {
+    showAlert(err.message || 'Could not load provider profile details', false);
+  }
+}
+
+function populateProviderDetailModal(detail) {
+  if (!detail) return;
+  const p = detail.provider;
+
+  // Header
+  const initial = (p.businessName || detail.ownerName || 'P').charAt(0).toUpperCase();
+  $('pdmAvatar').textContent = initial;
+  $('pdmBusinessName').textContent = p.businessName || 'Business Profile';
+  $('pdmIdBadge').textContent = `Provider #${p.id}`;
+
+  // Status Badges
+  const VS = {
+    PENDING: 'bg-warning-subtle text-warning border border-warning-subtle',
+    VERIFIED: 'bg-success-subtle text-success border border-success-subtle',
+    REJECTED: 'bg-danger-subtle text-danger border border-danger-subtle'
+  };
+  $('pdmStatusBadge').className = `badge ${VS[p.verificationStatus] || 'bg-light text-secondary border'}`;
+  $('pdmStatusBadge').textContent = (p.verificationStatus || 'PENDING').replace('_', ' ');
+
+  $('pdmAvailBadge').className = p.availability ? 'badge bg-success-subtle text-success border border-success-subtle' : 'badge bg-light text-muted border';
+  $('pdmAvailBadge').textContent = p.availability ? 'ONLINE' : 'OFFLINE';
+
+  $('pdmEnabledBadge').className = detail.enabled ? 'badge bg-success text-white' : 'badge bg-danger text-white';
+  $('pdmEnabledBadge').textContent = detail.enabled ? 'ACTIVE' : 'SUSPENDED';
+
+  $('pdmQuickBadge').className = detail.quickEligible ? 'badge bg-warning-subtle text-warning border border-warning-subtle' : 'badge bg-light text-muted border';
+  $('pdmQuickBadge').textContent = detail.quickEligible ? 'QUICK SERVICE READY' : 'NOT QUICK ELIGIBLE';
+
+  const regDate = detail.registeredAt ? new Date(detail.registeredAt).toLocaleDateString() : 'N/A';
+  $('pdmSubhead').textContent = `Owner: ${detail.ownerName || 'Unknown'} · Registered: ${regDate}`;
+
+  // Tab 1: Overview
+  $('pdmDesc').textContent = p.description || 'No business description provided.';
+  $('pdmExp').textContent = `${p.experienceYears || 0} yrs`;
+  $('pdmPrice').textContent = `₹${p.approxPrice != null ? p.approxPrice : '499'}`;
+  $('pdmHours').textContent = p.workingHours || 'Standard Business Hours';
+  $('pdmOwner').textContent = detail.ownerName || '-';
+  $('pdmPhone').textContent = detail.phone || '-';
+  $('pdmEmail').textContent = detail.email || '-';
+  $('pdmRegDate').textContent = detail.registeredAt ? new Date(detail.registeredAt).toLocaleString() : 'N/A';
+  $('pdmAccountStatusBadge').innerHTML = detail.enabled 
+    ? '<span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Active / In Good Standing</span>'
+    : '<span class="text-danger fw-bold"><i class="bi bi-slash-circle me-1"></i>Suspended / Disabled</span>';
+
+  // Tab 2: Services & Subservices
+  const sContainer = $('pdmServicesContainer');
+  if (p.services && p.services.length > 0) {
+    sContainer.innerHTML = p.services.map(s => `
+      <span class="badge bg-light text-dark border p-2">
+        <i class="bi bi-tools text-primary me-1"></i><strong>${esc(s.name)}</strong>
+      </span>
+    `).join('');
+  } else {
+    sContainer.innerHTML = '<span class="text-muted small">No canonical services configured</span>';
+  }
+
+  const subBody = $('pdmSubServicesBody');
+  if (p.subServices && p.subServices.length > 0) {
+    subBody.innerHTML = p.subServices.map(sub => `
+      <tr>
+        <td class="fw-semibold text-dark">${esc(sub.name)}</td>
+        <td><span class="badge bg-light text-secondary border">${esc(sub.categoryName || 'General')}</span></td>
+        <td class="fw-bold text-dark">₹${sub.price != null ? sub.price : '-'}</td>
+        <td class="text-muted">${sub.durationMinutes ? sub.durationMinutes + ' mins' : '-'}</td>
+        <td>
+          <span class="badge ${sub.active ? 'bg-success-subtle text-success' : 'bg-light text-muted border'}">
+            ${sub.active ? 'Active' : 'Inactive'}
+          </span>
+        </td>
+      </tr>
+    `).join('');
+  } else {
+    subBody.innerHTML = '<tr><td colspan="5" class="text-muted text-center py-2">No custom subservices listed</td></tr>';
+  }
+
+  // Tab 3: Coverage & Location
+  const aContainer = $('pdmAreasContainer');
+  if (p.areas && p.areas.length > 0) {
+    aContainer.innerHTML = p.areas.map(a => `
+      <span class="badge bg-light text-secondary border p-2">
+        <i class="bi bi-geo-alt-fill text-danger me-1"></i>${esc(a.area)}
+      </span>
+    `).join('');
+  } else {
+    aContainer.innerHTML = '<span class="text-muted small">No service areas configured</span>';
+  }
+  $('pdmAddress').textContent = p.formattedAddress || 'Not specified';
+  $('pdmRadius').textContent = `${p.serviceRadiusKm || 10} km`;
+  $('pdmCoords').textContent = (p.latitude != null && p.longitude != null) 
+    ? `${p.latitude.toFixed(4)}, ${p.longitude.toFixed(4)}` 
+    : 'Not configured';
+
+  // Tab 4: Bookings & Performance
+  $('pdmTotalBookings').textContent = detail.totalBookings || 0;
+  $('pdmCompletedJobs').textContent = detail.completedBookings || 0;
+  $('pdmCancelledJobs').textContent = detail.cancelledBookings || 0;
+  $('pdmRating').textContent = p.rating ? `${p.rating} ★ (${p.reviewCount || 0})` : 'New';
+
+  const actBody = $('pdmActiveBookingsBody');
+  const actList = detail.activeBookingsList || [];
+  if (actList.length > 0) {
+    actBody.innerHTML = actList.map(b => `
+      <tr>
+        <td class="font-monospace fw-bold">#${b.id}</td>
+        <td>
+          <div class="fw-semibold text-dark">${esc(b.serviceName || 'Service')}</div>
+          <div class="small text-muted">${esc(b.subServiceName || 'General')}</div>
+        </td>
+        <td>
+          <div>${esc(b.customerName || 'Customer')}</div>
+          <div class="small text-muted">${esc(b.customerPhone || '')}</div>
+        </td>
+        <td><i class="bi bi-geo-alt me-1 text-muted"></i>${esc(b.area || b.address || '-')}</td>
+        <td><span class="badge ${b.bookingType === 'QUICK_SERVICE' ? 'bg-warning-subtle text-warning border border-warning-subtle' : 'bg-light text-dark border'}">${esc(b.bookingType)}</span></td>
+        <td><span class="badge status-badge-${b.status}">${esc(b.status)}</span></td>
+      </tr>
+    `).join('');
+  } else {
+    actBody.innerHTML = '<tr><td colspan="6" class="text-muted text-center py-3">No active bookings in progress</td></tr>';
+  }
+
+  // Tab 5: Audit & Action History
+  const actLogBody = $('pdmActionLogBody');
+  const actHistory = detail.actionHistory || [];
+  if (actHistory.length > 0) {
+    actLogBody.innerHTML = actHistory.map(item => `
+      <tr>
+        <td class="text-muted text-nowrap">${item.timestamp ? new Date(item.timestamp).toLocaleString() : ''}</td>
+        <td>
+          <span class="badge ${item.action === 'SUSPEND' ? 'bg-danger text-white' : 'bg-success text-white'} fw-bold">
+            ${esc(item.action)}
+          </span>
+        </td>
+        <td class="text-break">${esc(item.reason || '-')}</td>
+        <td class="fw-semibold text-dark">${esc(item.actorName || 'Admin')} <span class="badge bg-light text-secondary ms-1">${esc(item.actorRole || 'ADMIN')}</span></td>
+      </tr>
+    `).join('');
+  } else {
+    actLogBody.innerHTML = '<tr><td colspan="4" class="text-muted text-center py-2">No account actions recorded yet</td></tr>';
+  }
+
+  const verHistBody = $('pdmVerHistoryBody');
+  const verHistory = detail.verificationHistory || [];
+  if (verHistory.length > 0) {
+    verHistBody.innerHTML = verHistory.map(item => `
+      <tr>
+        <td class="text-muted text-nowrap">${item.timestamp ? new Date(item.timestamp).toLocaleString() : ''}</td>
+        <td><span class="badge bg-light text-secondary border">${esc(item.fromStatus || '-')}</span></td>
+        <td><span class="badge bg-primary-subtle text-primary border">${esc(item.toStatus || '-')}</span></td>
+        <td class="fw-semibold">${esc(item.action || '-')}</td>
+        <td class="text-break">${esc(item.notes || item.reason || '-')}</td>
+        <td>${esc(item.actorName || 'Admin')}</td>
+      </tr>
+    `).join('');
+  } else {
+    verHistBody.innerHTML = '<tr><td colspan="6" class="text-muted text-center py-2">No verification application history found</td></tr>';
+  }
+
+  // Footer Button
+  const btnToggle = $('pdmBtnToggleEnabled');
+  btnToggle.innerHTML = detail.enabled 
+    ? '<i class="bi bi-slash-circle me-1"></i>Suspend Account' 
+    : '<i class="bi bi-check-circle me-1"></i>Reinstate Account';
+  btnToggle.className = detail.enabled ? 'btn btn-sm rounded-pill btn-outline-danger' : 'btn btn-sm rounded-pill btn-outline-success';
+}
+
+// =================================================================
+// SUSPEND / REINSTATE PROVIDER ACCOUNT WITH REASON
+// =================================================================
+function promptSuspendProvider(providerId, willEnable, providerName) {
+  suspendTargetProviderId = providerId;
+  suspendTargetWillEnable = willEnable;
+
+  $('suspendModalTitle').textContent = willEnable ? 'Reinstate Provider Account' : 'Suspend Provider Account';
+  $('suspendModalPrompt').innerHTML = willEnable
+    ? `You are about to <strong>reactivate</strong> provider account <strong>${esc(providerName || '#' + providerId)}</strong>. They will be permitted to log in and receive booking requests.`
+    : `You are about to <strong>suspend</strong> provider account <strong>${esc(providerName || '#' + providerId)}</strong>. Their account will be locked, taking them offline. Existing bookings and history will be preserved.`;
+
+  $('btnConfirmSuspendAction').textContent = willEnable ? 'Confirm Reactivation' : 'Confirm Suspension';
+  $('btnConfirmSuspendAction').className = willEnable ? 'btn btn-success btn-sm rounded-pill px-4 fw-semibold' : 'btn btn-danger btn-sm rounded-pill px-4 fw-semibold';
+  $('suspendReason').value = '';
+
+  suspendModalInstance.show();
+}
+
+async function confirmSuspendAction() {
+  if (!suspendTargetProviderId) return;
+  const reason = $('suspendReason').value.trim();
+  if (!reason) {
+    alert('Please provide a mandatory administrative reason or explanation for this account action.');
+    $('suspendReason').focus();
+    return;
+  }
+
+  try {
+    await api(`/admin/providers/${suspendTargetProviderId}/enabled`, {
+      method: 'PUT',
+      body: {
+        enabled: suspendTargetWillEnable,
+        reason: reason
+      }
+    });
+
+    suspendModalInstance.hide();
+    showAlert(`Provider account ${suspendTargetWillEnable ? 'reinstated' : 'suspended'} successfully. Action logged in audit history.`, true);
+    loadDirectory();
+
+    if (currentDetailProviderId === suspendTargetProviderId) {
+      openProviderDetails(suspendTargetProviderId);
+    }
+  } catch (err) {
+    alert(err.message || 'Could not update account status');
+  }
+}
+
+// =================================================================
+// QUICK SERVICE PLATFORM MONITOR
+// =================================================================
+async function loadQuickMonitor() {
+  const tbody = $('qmTableBody');
+  tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm text-warning me-2"></div>Loading Quick Service status...</td></tr>`;
+
+  try {
+    const data = await api('/admin/quick-service/monitor');
+    if ($('qmStatTotal')) $('qmStatTotal').textContent = data.totalActiveRequests ?? 0;
+    if ($('qmStatPending')) $('qmStatPending').textContent = data.pendingAssignmentCount ?? 0;
+    if ($('qmStatInProgress')) $('qmStatInProgress').textContent = data.inProgressCount ?? 0;
+    if ($('qmStatDelayed')) $('qmStatDelayed').textContent = data.delayedCount ?? 0;
+
+    const list = data.requests || [];
+    if (list.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="text-center py-5 text-muted">
+            <i class="bi bi-check2-circle fs-2 d-block text-success mb-2"></i>
+            <strong>No active Quick Service requests</strong>
+            <div class="small">All on-demand requests have been serviced or no active bookings exist.</div>
+          </td>
+        </tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map(item => {
+      const b = item.booking;
+      const isDelayed = item.delayedAssignment;
+      const mins = item.minutesSinceCreated;
+      const eligible = item.eligibleProviders || [];
+
+      return `
+        <tr class="${isDelayed ? 'table-warning' : ''}">
+          <td class="ps-4">
+            <span class="badge bg-light text-dark border font-monospace fw-bold">#${b.id}</span>
+            <div class="small text-muted mt-1"><i class="bi bi-clock me-1"></i>${mins}m elapsed</div>
+          </td>
+          <td>
+            <div class="fw-bold text-dark">${esc(b.serviceName || 'Service')}</div>
+            <div class="small text-muted">${esc(b.subServiceName || 'General')}</div>
+          </td>
+          <td>
+            <div class="fw-semibold text-dark">${esc(b.customerName || 'Customer')}</div>
+            <div class="small text-muted"><i class="bi bi-geo-alt me-1"></i>${esc(b.area || b.address || '-')}</div>
+          </td>
+          <td>
+            <span class="badge status-badge-${b.status} px-2 py-1">${esc(b.status)}</span>
+            ${isDelayed ? '<div class="badge bg-danger text-white mt-1 d-block" style="font-size:0.7rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Delayed Assignment (&gt;15m)</div>' : ''}
+          </td>
+          <td>
+            ${b.providerBusinessName ? `
+              <div class="fw-bold text-success"><i class="bi bi-person-check-fill me-1"></i>${esc(b.providerBusinessName)}</div>
+              <div class="small text-muted">Provider #${b.providerId}</div>
+            ` : `
+              <div class="small text-warning fw-semibold"><i class="bi bi-hourglass-split me-1"></i>Unassigned</div>
+              <div class="small text-muted mt-0.5">
+                ${eligible.length > 0 
+                  ? `<span class="badge bg-primary-subtle text-primary border border-primary-subtle">${eligible.length} eligible online provider(s) in area</span>`
+                  : '<span class="badge bg-danger-subtle text-danger border border-danger-subtle">No eligible online providers in area</span>'}
+              </div>
+              ${eligible.length > 0 ? `
+                <div class="small text-muted mt-1" style="font-size:0.72rem;">
+                  Matches: ${eligible.slice(0, 3).map(p => esc(p.businessName)).join(', ')}${eligible.length > 3 ? ` +${eligible.length - 3} more` : ''}
+                </div>
+              ` : ''}
+            `}
+          </td>
+          <td class="text-end pe-4 text-nowrap">
+            ${b.providerId ? `
+              <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="openProviderDetails(${b.providerId})">
+                <i class="bi bi-person me-1"></i>Provider
+              </button>
+            ` : ''}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-danger py-4 text-center">Failed to load quick service monitor: ${esc(err.message)}</td></tr>`;
+  }
+}
+
+// =================================================================
+// EDIT PROVIDER PROFILE
+// =================================================================
+function openLegacyEdit(providerId) {
+  const item = (dirProvidersCache || []).find(a => a.provider.id === providerId) || (legacyProvidersCache || []).find(a => a.provider.id === providerId);
+  if (!item) return;
+  const p = item.provider;
+  editLegacyId = p.id;
+
+  $('eName').value = p.businessName || '';
+  $('eDesc').value = p.description || '';
+  $('eExp').value = p.experienceYears ?? '';
+  $('ePrice').value = p.approxPrice ?? '';
+
+  editProviderModalInstance.show();
+}
+
+async function saveLegacyProviderEdit() {
+  if (!editLegacyId) return;
+  const item = (dirProvidersCache || []).find(a => a.provider.id === editLegacyId) || (legacyProvidersCache || []).find(a => a.provider.id === editLegacyId);
+  if (!item) return;
+  const p = item.provider;
+
+  const n = v => v === '' ? null : Number(v);
+  const payload = {
+    businessName: $('eName').value.trim(),
+    description: $('eDesc').value.trim(),
+    experienceYears: n($('eExp').value),
+    approxPrice: n($('ePrice').value),
+    serviceIds: (p.services || []).map(s => s.id),
+    areas: p.areas || []
+  };
+
+  try {
+    await api('/admin/providers/' + editLegacyId, {
+      method: 'PUT',
+      body: payload
+    });
+    editProviderModalInstance.hide();
+    showAlert('Provider profile updated successfully.', true);
+    loadDirectory();
+    if (currentDetailProviderId === editLegacyId) {
+      openProviderDetails(editLegacyId);
+    }
+  } catch (err) {
+    alert(err.message || 'Could not update provider');
+  }
+}
+
+// =================================================================
+// DELETE PROVIDER PERMANENTLY
+// =================================================================
+async function deleteProviderPrompt(providerId, providerName) {
+  if (!providerId) {
+    showAlert('Invalid provider ID for deletion.', false);
+    return;
+  }
+  if (!providerName) {
+    const fromDir = (dirProvidersCache || []).find(a => a.provider && a.provider.id === providerId);
+    if (fromDir) {
+      providerName = fromDir.provider.businessName || fromDir.ownerName;
+    }
+  }
+  const displayName = providerName || ('Provider #' + providerId);
+  const confirmMsg = `Are you sure you want to permanently delete "${displayName}" (ID #${providerId})?\n\nThis will remove their account, profile, verification applications, documents, and reviews.\n\nProviders with active bookings cannot be deleted.\n\nThis action cannot be undone.`;
+  if (!confirm(confirmMsg)) return;
+
+  try {
+    const res = await api('/admin/providers/' + providerId, { method: 'DELETE' });
+    showAlert((res && res.message) || `Provider #${providerId} deleted successfully.`, true);
+    loadApplications();
+    loadDirectory();
+    loadSummaryCounts();
+    loadQuickServiceMonitor();
+  } catch (err) {
+    showAlert(err.message || 'Failed to delete provider', false);
+  }
+}
+
+async function deleteApplicationPrompt(appId, appRef) {
+  if (!appId) {
+    showAlert('Invalid application ID for deletion.', false);
+    return;
+  }
+  const refLabel = appRef ? ` (${appRef})` : '';
+  const confirmMsg = `Are you sure you want to permanently delete application #${appId}${refLabel}?\n\nThis will remove the verification submission and uploaded documents.\n\nThis action cannot be undone.`;
+  if (!confirm(confirmMsg)) return;
+
+  try {
+    const res = await api('/admin/verification/applications/' + appId, { method: 'DELETE' });
+    showAlert((res && res.message) || `Application #${appId} deleted successfully.`, true);
+    loadApplications();
+    loadSummaryCounts();
+  } catch (err) {
+    showAlert(err.message || 'Failed to delete application', false);
+  }
+}
+
+function promptDeleteAppProvider() {
+  if (!currentActiveApp) {
+    showAlert('No application selected.', false);
+    return;
+  }
+  if (!currentActiveApp.providerId) {
+    if (reviewModalInstance) reviewModalInstance.hide();
+    deleteApplicationPrompt(currentActiveApp.id, currentActiveApp.referenceNumber);
+    return;
+  }
+  const pId = currentActiveApp.providerId;
+  const pName = currentActiveApp.businessName || currentActiveApp.legalName || ('Provider #' + pId);
+  if (confirm(`Are you sure you want to permanently delete provider "${pName}" and all associated application data?\n\nThis action cannot be undone.`)) {
+    if (reviewModalInstance) reviewModalInstance.hide();
+    deleteProviderPrompt(pId, pName);
+  }
+}
+
+function promptDeleteCurrentProvider() {
+  if (!currentDetailProviderId) {
+    showAlert('No provider selected.', false);
+    return;
+  }
+  const pId = currentDetailProviderId;
+  const pName = $('pdmBusinessName') ? $('pdmBusinessName').textContent : ('Provider #' + pId);
+  if (confirm(`Are you sure you want to permanently delete provider "${pName}"?\n\nThis action cannot be undone.`)) {
+    if (providerDetailModalInstance) providerDetailModalInstance.hide();
+    deleteProviderPrompt(pId, pName);
+  }
+}
+
+function loadLegacyDirectory() {
+  loadDirectory();
+}
+</script>
+</body>
+</html>

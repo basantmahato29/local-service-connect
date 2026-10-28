@@ -1,0 +1,3515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Provider Operations Console · Local Service Connect</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <style>
+    .provider-container { max-width: 1280px; }
+    .tab-pane-content { display: none; }
+    .tab-pane-content.active { display: block; animation: provFadeIn 0.22s ease-out; }
+    @keyframes provFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .provider-sidebar-sticky { position: sticky; top: 5.5rem; z-index: 10; }
+    
+    .provider-sidebar-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+      overflow: hidden;
+    }
+    
+    .provider-sidebar-header {
+      padding: 1.5rem 1.25rem 1.25rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .provider-nav-menu {
+      padding: 0.6rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    
+    .nav-prov-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0.72rem 0.85rem;
+      border: none;
+      background: transparent;
+      color: #334155;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-align: left;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      position: relative;
+    }
+    .nav-prov-btn .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 0;
+      flex: 1;
+    }
+    .nav-prov-btn .nav-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      background: #f1f5f9;
+      color: #475569;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+    .nav-prov-btn:hover {
+      background: #f8fafc;
+      color: #4f46e5;
+      transform: translateX(2px);
+    }
+    .nav-prov-btn:hover .nav-icon {
+      background: #e0e7ff;
+      color: #4f46e5;
+    }
+    .nav-prov-btn.active {
+      background: #eef2ff;
+      color: #4f46e5;
+      font-weight: 700;
+    }
+    .nav-prov-btn.active .nav-icon {
+      background: #4f46e5;
+      color: #ffffff;
+    }
+    .nav-prov-btn .nav-chevron {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      transition: transform 0.15s ease;
+      flex-shrink: 0;
+    }
+    .nav-prov-btn.active .nav-chevron {
+      color: #4f46e5;
+      transform: translateX(2px);
+    }
+    
+    .pulse-online {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: #10b981;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulseGreen 1.8s infinite;
+    }
+    @keyframes pulseGreen {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    
+    .stat-metric-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1.25rem;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-metric-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px -5px rgba(15, 23, 42, 0.08);
+      border-color: #cbd5e1;
+    }
+    .metric-icon-bubble {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    
+    .booking-row-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.25rem;
+      transition: all 0.2s ease;
+    }
+    .booking-row-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    }
+    .booking-row-card.quick-highlight {
+      border-left: 4px solid #ef4444;
+      background: linear-gradient(90deg, #fff5f5 0%, #ffffff 18%);
+    }
+    
+    .urgent-quick-pill {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      letter-spacing: 0.02em;
+    }
+    
+    #providerMap { height: 320px; width: 100%; border-radius: 12px; }
+    .pac-container { z-index: 1065 !important; }
+    .thumb-preview-sm { width: 50px; height: 50px; object-fit: cover; border-radius: 10px; }
+
+    /* Provider Verification Wizard & Document Styling */
+    .verif-stepper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      margin-bottom: 2rem;
+      padding: 0.5rem 0.5rem;
+    }
+    .verif-stepper::before {
+      content: '';
+      position: absolute;
+      top: 22px;
+      left: 2.5rem;
+      right: 2.5rem;
+      height: 2px;
+      background: #e2e8f0;
+      z-index: 1;
+    }
+    .verif-step-node {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #ffffff;
+      padding: 0 0.5rem;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+    }
+    .verif-step-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: 2px solid #cbd5e1;
+      background: #ffffff;
+      color: #64748b;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .verif-step-node.active .verif-step-circle {
+      border-color: #6366f1;
+      background: #6366f1;
+      color: #ffffff;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
+    }
+    .verif-step-node.completed .verif-step-circle {
+      border-color: #10b981;
+      background: #10b981;
+      color: #ffffff;
+    }
+    .verif-step-label {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-top: 0.4rem;
+      text-align: center;
+    }
+    .verif-step-node.active .verif-step-label {
+      color: #4f46e5;
+      font-weight: 700;
+    }
+    .verif-step-node.completed .verif-step-label {
+      color: #059669;
+    }
+
+    .prov-type-card {
+      border: 2px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 1.6rem;
+      cursor: pointer;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      background: #ffffff;
+      position: relative;
+      height: 100%;
+    }
+    .prov-type-card:hover {
+      border-color: #818cf8;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px -4px rgba(79, 70, 229, 0.1);
+    }
+    .prov-type-card.selected {
+      border-color: #4f46e5;
+      background: #faf5ff;
+      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.25);
+    }
+    .prov-type-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      background: #eef2ff;
+      color: #4f46e5;
+      margin-bottom: 1.1rem;
+      transition: all 0.2s ease;
+    }
+    .prov-type-card.selected .prov-type-icon {
+      background: #4f46e5;
+      color: #ffffff;
+    }
+
+    .verif-dropzone {
+      border: 2px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      background: #f8fafc;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      position: relative;
+    }
+    .verif-dropzone:hover, .verif-dropzone.dragover {
+      border-color: #6366f1;
+      background: #eef2ff;
+    }
+    .verif-doc-preview-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 0.85rem;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.75rem;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
+    .verif-preview-thumb {
+      width: 54px;
+      height: 54px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    .verif-pdf-thumb {
+      width: 54px;
+      height: 54px;
+      border-radius: 8px;
+      background: #fee2e2;
+      color: #dc2626;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .status-pill-draft { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    .status-pill-submitted { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .status-pill-under_review { background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+    .status-pill-action_required { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; animation: pulseAmber 2s infinite; }
+    .status-pill-verified { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; }
+    .status-pill-rejected { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+    @keyframes pulseAmber {
+      0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+  </style>
+</head>
+<body class="bg-light">
+<div id="nav"></div>
+
+<div class="container py-3 py-lg-4 provider-container">
+  
+  <!-- Breadcrumb & Top Bar -->
+  <div class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-1 small">
+          <li class="breadcrumb-item"><a href="/provider/home" class="text-muted text-decoration-none"><i class="bi bi-house-door me-1"></i>Home</a></li>
+          <li class="breadcrumb-item"><a href="/provider-dashboard.html" class="text-muted text-decoration-none"><i class="bi bi-speedometer2 me-1"></i>Operations</a></li>
+          <li class="breadcrumb-item active text-primary fw-semibold" aria-current="page" id="breadcrumbActive">Dashboard Overview</li>
+        </ol>
+      </nav>
+      <h1 class="h3 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+        <span id="headerTitle">Provider Operations Console</span>
+        <span id="liveDispatchPill" class="badge bg-success-subtle text-success border border-success-subtle rounded-pill fs-7 fw-semibold py-1 px-2.5">
+          <span class="pulse-online me-1"></span> Live Dispatch Active
+        </span>
+      </h1>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <a href="/provider/home" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-xs">
+        <i class="bi bi-house-door me-1"></i>Provider Home
+      </a>
+      <a href="#" id="btnViewPublicProfile" class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-xs" target="_blank">
+        <i class="bi bi-box-arrow-up-right me-1"></i>View Live Profile
+      </a>
+      <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 shadow-xs d-flex align-items-center gap-1" onclick="refreshDashboard(true)">
+        <i class="bi bi-arrow-clockwise" id="refreshSpin"></i>
+        <span>Refresh</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Global Alert Banner -->
+  <div id="pageAlert" class="alert d-none shadow-sm rounded-3"></div>
+
+  <!-- Mobile Tab Scroller (Horizontally scrollable on small screens) -->
+  <div class="d-lg-none mb-3">
+    <div class="account-mobile-tab-scroller">
+      <button type="button" class="account-mobile-pill active" data-tab="overview"><i class="bi bi-speedometer2"></i> Overview</button>
+      <button type="button" class="account-mobile-pill" data-tab="requests"><i class="bi bi-bell"></i> Requests <span class="badge bg-danger rounded-pill badge-pend-count d-none" style="font-size:0.65rem;">0</span></button>
+      <button type="button" class="account-mobile-pill" data-tab="active"><i class="bi bi-lightning-charge"></i> Active <span class="badge bg-primary rounded-pill badge-active-count d-none" style="font-size:0.65rem;">0</span></button>
+      <button type="button" class="account-mobile-pill" data-tab="history"><i class="bi bi-calendar2-check"></i> History</button>
+      <button type="button" class="account-mobile-pill" data-tab="quick"><i class="bi bi-stopwatch"></i> Quick Service</button>
+      <button type="button" class="account-mobile-pill" data-tab="earnings"><i class="bi bi-wallet2"></i> Earnings</button>
+      <button type="button" class="account-mobile-pill" data-tab="services"><i class="bi bi-tools"></i> Services</button>
+      <button type="button" class="account-mobile-pill" data-tab="areas"><i class="bi bi-geo-alt"></i> Areas & Map</button>
+      <button type="button" class="account-mobile-pill" data-tab="reviews"><i class="bi bi-star"></i> Reviews</button>
+      <button type="button" class="account-mobile-pill" data-tab="verification" id="mobilePillVerification"><i class="bi bi-patch-check"></i> Verification</button>
+      <button type="button" class="account-mobile-pill" data-tab="profile"><i class="bi bi-person-badge"></i> Profile</button>
+      <button type="button" class="account-mobile-pill" data-tab="settings"><i class="bi bi-gear"></i> Settings</button>
+    </div>
+  </div>
+
+  <div class="row g-4 align-items-start">
+    
+    <!-- LEFT SIDEBAR: Provider Identity & Navigation Menu (Desktop) -->
+    <div class="col-lg-4 col-xl-3">
+      <div class="provider-sidebar-sticky">
+        <div class="provider-sidebar-card mb-3">
+          
+          <!-- Identity Header -->
+          <div class="provider-sidebar-header">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <span id="verifBadge" class="badge bg-warning-subtle text-warning border border-warning-subtle py-1 px-2.5 rounded-pill fw-semibold cursor-pointer" style="font-size: 0.72rem;" onclick="switchTab('verification')" title="View Verification Status">
+                <i class="bi bi-hourglass-split me-1"></i>Checking Status...
+              </span>
+              <a href="javascript:void(0)" onclick="switchTab('profile')" class="small fw-semibold text-primary text-decoration-none">
+                <i class="bi bi-pencil me-1"></i>Edit
+              </a>
+            </div>
+
+            <!-- Avatar / Business Logo -->
+            <div class="text-center mb-2">
+              <div class="position-relative d-inline-block mb-2">
+                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm mx-auto" id="provAvatarBox" style="width: 68px; height: 68px; font-size: 1.6rem; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
+                  <span id="provAvatarInitial">P</span>
+                  <img id="provAvatarImg" class="rounded-circle w-100 h-100 object-fit-cover d-none" alt="Business Logo">
+                </div>
+                <span class="position-absolute bottom-0 end-0 p-1 bg-white rounded-circle shadow-xs">
+                  <span id="availDotIndicator" class="pulse-online"></span>
+                </span>
+              </div>
+              <h2 class="h6 fw-bold text-dark mb-0 text-truncate px-2" id="sidebarBusinessName">Loading...</h2>
+              <div class="small text-muted text-truncate" id="sidebarOwnerName">Service Provider</div>
+              <div class="d-flex align-items-center justify-content-center gap-1 mt-1 small">
+                <span class="text-warning fw-bold"><i class="bi bi-star-fill me-1"></i><span id="sidebarRating">0.0</span></span>
+                <span class="text-muted">(<span id="sidebarReviewCount">0</span> reviews)</span>
+              </div>
+            </div>
+
+            <!-- Instant Online/Offline Toggle -->
+            <div class="p-2.5 mt-3 bg-white rounded-3 border d-flex align-items-center justify-content-between">
+              <div>
+                <div class="small fw-bold text-dark" id="availStatusText">Online for Quick Service</div>
+                <div class="text-muted" style="font-size: 0.72rem;">Ready to receive requests</div>
+              </div>
+              <div class="form-check form-switch fs-4 mb-0">
+                <input class="form-check-input cursor-pointer" type="checkbox" id="switchAvailability" role="switch" aria-label="Toggle Online/Offline Availability">
+              </div>
+            </div>
+          </div>
+
+          <!-- Vertical Navigation Menu -->
+          <div class="provider-nav-menu">
+            <a href="/provider/home" class="nav-prov-btn text-decoration-none">
+              <span class="nav-left">
+                <span class="nav-icon" style="background:#eef2ff;color:#4f46e5;"><i class="bi bi-house-door"></i></span>
+                <span class="nav-text">Provider Homepage</span>
+              </span>
+              <i class="bi bi-arrow-left-short text-muted fs-5"></i>
+            </a>
+
+            <button type="button" class="nav-prov-btn active" data-tab="overview">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-speedometer2"></i></span>
+                <span class="nav-text">Dashboard Overview</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron"></i>
+            </button>
+
+            <button type="button" class="nav-prov-btn" data-tab="requests">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-bell"></i></span>
+                <span class="nav-text">Booking Requests</span>
+              </span>
+              <span class="badge bg-danger rounded-pill badge-pend-count d-none">0</span>
+            </button>
+
+            <button type="button" class="nav-prov-btn" data-tab="active">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-lightning-charge"></i></span>
+                <span class="nav-text">Active Jobs</span>
+              </span>
+              <span class="badge bg-primary rounded-pill badge-active-count d-none">0</span>
+            </button>
+
+            <button type="button" class="nav-prov-btn" data-tab="history">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-calendar2-check"></i></span>
+                <span class="nav-text">Booking History</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron"></i>
+            </button>
+
+            <button type="button" class="nav-prov-btn" data-tab="quick">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-stopwatch"></i></span>
+                <span class="nav-text">Quick Service Dispatch</span>
+              </span>
+              <span class="urgent-quick-pill ms-auto">Urgent</span>
+            </button>
+
+            <button type="button" class="nav-prov-btn" data-tab="earnings">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-wallet2"></i></span>
+                <span class="nav-text">Earnings & Payouts</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron"></i>
+            </button>
+
+            <button type="button" class="nav-prov-btn" data-tab="services">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-tools"></i></span>
+                <span class="nav-text">Services & Packages</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron"></i>
+            </button>
+
+            <button type="button" class="nav-prov-btn" data-tab="areas">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-geo-alt"></i></span>
+                <span class="nav-text">Service Areas & Map</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron"></i>
+            </button>
+
+            <button type="button" class="nav-prov-btn" data-tab="reviews">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-star"></i></span>
+                <span class="nav-text">Customer Reviews</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron"></i>
+            </button>
+
+            <button type="button" class="nav-prov-btn" data-tab="profile">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-person-badge"></i></span>
+                <span class="nav-text">Business Profile</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron"></i>
+            </button>
+
+            <button type="button" class="nav-prov-btn" data-tab="verification" id="navVerificationBtn">
+              <span class="nav-left">
+                <span class="nav-icon" style="background:#f3e8ff;color:#7c3aed;"><i class="bi bi-patch-check"></i></span>
+                <span class="nav-text">Identity &amp; Verification</span>
+              </span>
+              <span class="badge rounded-pill ms-auto" id="navVerificationBadge" style="font-size: 0.72rem; background: #f1f5f9; color: #64748b;">Pending</span>
+            </button>
+
+            <button type="button" class="nav-prov-btn" data-tab="settings">
+              <span class="nav-left">
+                <span class="nav-icon"><i class="bi bi-gear"></i></span>
+                <span class="nav-text">Account Settings</span>
+              </span>
+              <i class="bi bi-chevron-right nav-chevron"></i>
+            </button>
+
+            <button type="button" class="nav-prov-btn text-danger mt-1 pt-2 border-top" onclick="Auth.logout()">
+              <span class="nav-left">
+                <span class="nav-icon text-danger" style="background:#fee2e2;"><i class="bi bi-box-arrow-right"></i></span>
+                <span class="nav-text fw-semibold">Sign Out</span>
+              </span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT CONTENT AREA -->
+    <div class="col-lg-8 col-xl-9">
+      
+      <!-- ================================================================= -->
+      <!-- TAB 1: DASHBOARD OVERVIEW -->
+      <!-- ================================================================= -->
+      <section id="pane-overview" class="tab-pane-content active">
+        
+        <!-- Welcome Hero Banner -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
+          <div class="position-relative z-1">
+            <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-1.5 mb-2 font-monospace" style="font-size: 0.75rem;">
+              <i class="bi bi-clock-history me-1"></i><span id="currentDateDisplay">Today</span>
+            </span>
+            <h2 class="h3 fw-bold mb-1 text-white">Welcome back, <span id="welcomeProviderName">Provider</span>!</h2>
+            <p class="mb-0 text-white text-opacity-75 small" style="max-width: 600px;">
+              Manage incoming customer bookings, verify service start OTPs, track real earnings, and update your business coverage.
+            </p>
+          </div>
+          <div class="position-absolute end-0 bottom-0 text-white opacity-10 me-n3 mb-n3 d-none d-md-block" style="font-size: 9rem; pointer-events: none;">
+            <i class="bi bi-shield-check"></i>
+          </div>
+        </div>
+
+        <!-- Dynamic Verification Status Alert Banners -->
+        <div id="verifAlertContainer" class="mb-4">
+          <!-- Action Required Alert -->
+          <div id="bannerActionRequired" class="alert alert-warning border-warning-subtle shadow-sm rounded-4 p-3 d-none d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+              <div class="rounded-circle bg-warning text-white p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+              </div>
+              <div>
+                <div class="fw-bold text-dark">Action Required on Your Verification Application</div>
+                <div class="small text-muted" id="bannerActionRequiredText">Administrator requested corrections or additional documents.</div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-warning btn-sm rounded-pill px-3.5 py-1.5 fw-bold shadow-xs text-dark" onclick="switchTab('verification')">
+              Resolve Corrections <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+          </div>
+
+          <!-- Draft / Not Started Alert -->
+          <div id="bannerDraft" class="alert bg-primary-subtle border-primary-subtle shadow-sm rounded-4 p-3 d-none d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+              <div class="rounded-circle bg-primary text-white p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                <i class="bi bi-patch-check"></i>
+              </div>
+              <div>
+                <div class="fw-bold text-dark">Get Verified to Unlock Customer Bookings</div>
+                <div class="small text-muted">Complete your provider verification to receive customer bookings and appear in search results.</div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm rounded-pill px-3.5 py-1.5 fw-semibold shadow-xs" onclick="switchTab('verification')">
+              Complete Verification <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+          </div>
+
+          <!-- Under Review / Submitted Alert -->
+          <div id="bannerUnderReview" class="alert bg-info-subtle border-info-subtle shadow-sm rounded-4 p-3 d-none d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+              <div class="rounded-circle bg-info text-white p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                <i class="bi bi-hourglass-split"></i>
+              </div>
+              <div>
+                <div class="fw-bold text-dark">Verification Application Under Review</div>
+                <div class="small text-muted" id="bannerUnderReviewText">Your application is being reviewed by our partner onboarding team.</div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-outline-info btn-sm rounded-pill px-3.5 py-1.5 fw-semibold text-dark" onclick="switchTab('verification')">
+              Track Status <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Key Performance Metric Cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-md-3">
+            <div class="stat-metric-card cursor-pointer" onclick="switchTab('requests')">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="small text-muted fw-semibold">New Requests</span>
+                <span class="metric-icon-bubble bg-warning-subtle text-warning"><i class="bi bi-bell-fill"></i></span>
+              </div>
+              <div class="fs-2 fw-bold text-dark" id="stPending">0</div>
+              <div class="small text-warning fw-semibold mt-1"><i class="bi bi-hourglass-split me-1"></i>Awaiting review</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-metric-card cursor-pointer" onclick="switchTab('active')">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="small text-muted fw-semibold">Active Jobs</span>
+                <span class="metric-icon-bubble bg-primary-subtle text-primary"><i class="bi bi-lightning-charge-fill"></i></span>
+              </div>
+              <div class="fs-2 fw-bold text-dark" id="stActive">0</div>
+              <div class="small text-primary fw-semibold mt-1"><i class="bi bi-gear-wide-connected me-1"></i>In progress</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-metric-card cursor-pointer" onclick="switchTab('history')">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="small text-muted fw-semibold">Completed</span>
+                <span class="metric-icon-bubble bg-success-subtle text-success"><i class="bi bi-check2-circle"></i></span>
+              </div>
+              <div class="fs-2 fw-bold text-dark" id="stDone">0</div>
+              <div class="small text-success fw-semibold mt-1"><i class="bi bi-patch-check-fill me-1"></i>Jobs finished</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-metric-card cursor-pointer" onclick="switchTab('earnings')">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="small text-muted fw-semibold">Total Revenue</span>
+                <span class="metric-icon-bubble bg-info-subtle text-info"><i class="bi bi-wallet2"></i></span>
+              </div>
+              <div class="fs-2 fw-bold text-dark" id="stEarnings">₹0</div>
+              <div class="small text-info fw-semibold mt-1"><i class="bi bi-graph-up-arrow me-1"></i>Earned to date</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Urgent Quick Service Alert (Shown dynamically when quick requests are pending) -->
+        <div id="urgentQuickServiceAlert" class="card border-0 shadow-sm rounded-4 p-3 mb-4 d-none" style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-left: 5px solid #ef4444 !important;">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+              <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                <i class="bi bi-stopwatch-fill"></i>
+              </div>
+              <div>
+                <strong class="text-danger d-block">Urgent Quick Service Request Pending</strong>
+                <span class="small text-muted" id="urgentQuickSummary">Nearby customer needs immediate service assistance (~10 min target).</span>
+              </div>
+            </div>
+            <button type="button" class="btn btn-danger btn-sm rounded-pill px-3 fw-semibold shadow-xs" onclick="switchTab('requests')">
+              View Request &amp; Accept
+            </button>
+          </div>
+        </div>
+
+        <!-- Recent Booking Activity Card -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+              <div>
+                <h3 class="h5 fw-bold text-dark mb-0"><i class="bi bi-activity text-primary me-2"></i>Recent Booking Activity</h3>
+                <span class="small text-muted">Latest service requests and ongoing appointments</span>
+              </div>
+              <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="switchTab('requests')">
+                View All Requests
+              </button>
+            </div>
+            <div id="overviewRecentList" class="d-flex flex-column gap-3">
+              <div class="text-center py-4 text-muted small">Loading recent activity...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Rating & Performance Snapshot -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+              <div>
+                <h3 class="h5 fw-bold text-dark mb-0"><i class="bi bi-star-fill text-warning me-2"></i>Customer Rating Snapshot</h3>
+                <span class="small text-muted">Recent feedback from verified homeowners</span>
+              </div>
+              <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="switchTab('reviews')">
+                View All Reviews
+              </button>
+            </div>
+            <div id="overviewReviewsList" class="d-flex flex-column gap-2">
+              <div class="text-center py-3 text-muted small">Loading reviews...</div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- TAB 2: BOOKING REQUESTS (PENDING) -->
+      <!-- ================================================================= -->
+      <section id="pane-requests" class="tab-pane-content">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+              <div>
+                <h2 class="h5 fw-bold text-dark mb-0"><i class="bi bi-bell-fill text-warning me-2"></i>New Booking Requests</h2>
+                <div class="small text-muted">Review, accept, or decline pending requests from customers</div>
+              </div>
+              <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-secondary active filter-req-btn" data-filter="ALL" onclick="filterRequests('ALL')">All</button>
+                <button type="button" class="btn btn-outline-secondary filter-req-btn" data-filter="QUICK" onclick="filterRequests('QUICK')">Quick Service</button>
+                <button type="button" class="btn btn-outline-secondary filter-req-btn" data-filter="NORMAL" onclick="filterRequests('NORMAL')">Normal</button>
+              </div>
+            </div>
+            <div id="pendingRequestsList" class="d-flex flex-column gap-3">
+              <div class="text-center py-4 text-muted small">Loading pending requests...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- TAB 3: ACTIVE JOBS & OTP VERIFICATION -->
+      <!-- ================================================================= -->
+      <section id="pane-active" class="tab-pane-content">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <div class="mb-3">
+              <h2 class="h5 fw-bold text-dark mb-0"><i class="bi bi-lightning-charge-fill text-primary me-2"></i>Active Jobs &amp; OTP Verification</h2>
+              <div class="small text-muted">Update ongoing status, verify 4-digit start OTP with the customer, and complete jobs</div>
+            </div>
+            <div id="activeJobsList" class="d-flex flex-column gap-3">
+              <div class="text-center py-4 text-muted small">Loading active jobs...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- TAB 4: BOOKING HISTORY -->
+      <!-- ================================================================= -->
+      <section id="pane-history" class="tab-pane-content">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+              <div>
+                <h2 class="h5 fw-bold text-dark mb-0"><i class="bi bi-calendar2-check text-success me-2"></i>Booking History</h2>
+                <div class="small text-muted">Record of all completed and past appointments</div>
+              </div>
+              <input type="text" id="historySearchInput" class="form-control form-control-sm" placeholder="Search customer or service..." style="max-width: 240px;" oninput="renderHistoryBookings()">
+            </div>
+            <div id="historyBookingsList" class="d-flex flex-column gap-3">
+              <div class="text-center py-4 text-muted small">Loading history...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- TAB 5: QUICK SERVICE DISPATCH CENTER -->
+      <!-- ================================================================= -->
+      <section id="pane-quick" class="tab-pane-content">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
+              <div class="bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; font-size: 1.5rem;">
+                <i class="bi bi-stopwatch-fill"></i>
+              </div>
+              <div>
+                <h2 class="h5 fw-bold text-dark mb-1">Quick Service Dispatch Center</h2>
+                <div class="small text-muted">Urgent 10-minute target requests within your active service radius</div>
+              </div>
+            </div>
+            <div class="alert alert-info border-0 shadow-xs small mb-4">
+              <i class="bi bi-info-circle-fill me-1"></i>
+              Quick Service routes urgent requests exclusively to providers who have toggled <strong>Online</strong> and are within straight-line distance of the customer.
+            </div>
+            <div id="quickDispatchList" class="d-flex flex-column gap-3">
+              <div class="text-center py-4 text-muted small">Loading Quick Service requests...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- TAB 6: EARNINGS & PAYOUTS -->
+      <!-- ================================================================= -->
+      <section id="pane-earnings" class="tab-pane-content">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <h2 class="h5 fw-bold text-dark mb-1"><i class="bi bi-wallet2 text-success me-2"></i>Earnings &amp; Payout Summary</h2>
+            <div class="small text-muted mb-4">Financial overview computed from verified completed appointments</div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-sm-4">
+                <div class="p-3 bg-light rounded-3 border">
+                  <div class="small text-muted fw-semibold">Total Revenue</div>
+                  <div class="fs-3 fw-bold text-success" id="earnTotal">₹0</div>
+                  <div class="small text-muted">From completed jobs</div>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="p-3 bg-light rounded-3 border">
+                  <div class="small text-muted fw-semibold">Completed Orders</div>
+                  <div class="fs-3 fw-bold text-dark" id="earnOrdersCount">0</div>
+                  <div class="small text-muted">Fulfilled successfully</div>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="p-3 bg-light rounded-3 border">
+                  <div class="small text-muted fw-semibold">Average Job Ticket</div>
+                  <div class="fs-3 fw-bold text-primary" id="earnAvgTicket">₹0</div>
+                  <div class="small text-muted">Per appointment</div>
+                </div>
+              </div>
+            </div>
+
+            <h3 class="h6 fw-bold text-dark mb-3">Completed Jobs Ledger</h3>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle small mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Booking ID</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Service</th>
+                    <th>Status</th>
+                    <th class="text-end">Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="earningsTableBody">
+                  <tr><td colspan="6" class="text-center text-muted py-3">No completed appointments yet</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- TAB 7: SERVICES & SUB-SERVICE PACKAGES -->
+      <!-- ================================================================= -->
+      <section id="pane-services" class="tab-pane-content">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <h2 class="h5 fw-bold text-dark mb-1"><i class="bi bi-tools text-primary me-2"></i>My Services &amp; Packages</h2>
+            <div class="small text-muted mb-3">Select the core trade categories and add customized sub-service packages</div>
+
+            <!-- Main Categories Checklist -->
+            <h3 class="h6 fw-bold text-dark mb-2">Core Trade Categories</h3>
+            <div id="serviceCategoriesList" class="mb-4">
+              <div class="text-muted small">Loading categories...</div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3 pt-3 border-top">
+              <div>
+                <h3 class="h6 fw-bold text-dark mb-0">Sub-Services &amp; Packages</h3>
+                <span class="small text-muted">Fixed-price packages shown on your profile</span>
+              </div>
+              <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addSubModal">
+                <i class="bi bi-plus-lg me-1"></i>Add Package
+              </button>
+            </div>
+            <div id="subServicesList" class="d-flex flex-column gap-2 mb-4">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <button type="button" class="btn btn-primary btn-sm px-4 rounded-pill" onclick="saveServicesForm()">
+              Save Services &amp; Packages
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- TAB 8: SERVICE AREAS & MAP COVERAGE -->
+      <!-- ================================================================= -->
+      <section id="pane-areas" class="tab-pane-content">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <h2 class="h5 fw-bold text-dark mb-1"><i class="bi bi-geo-alt-fill text-primary me-2"></i>Service Areas &amp; Coverage Radius</h2>
+            <div class="small text-muted mb-3">Adjust your dispatch coordinates and coverage circle for customer matching</div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold small" for="provAddressInput">Business Address / Shop Location</label>
+              <div class="input-group input-group-sm mb-2">
+                <input id="provAddressInput" class="form-control" placeholder="Search address or landmark in Ranchi...">
+                <button type="button" class="btn btn-outline-secondary" id="btnDetectProvLoc" title="Detect Current GPS Location">
+                  <i class="bi bi-crosshair"></i>
+                </button>
+              </div>
+              <div id="provGeoBadge" class="small text-success mb-2 d-none">
+                <i class="bi bi-check-circle-fill"></i> Coordinates set: <span id="provCoordText"></span>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3 align-items-center">
+              <div class="col-sm-6">
+                <label class="form-label fw-semibold small" for="serviceRadiusKmSelect">Coverage Radius (km)</label>
+                <select id="serviceRadiusKmSelect" class="form-select form-select-sm">
+                  <option value="3">3 km (Immediate Neighborhood)</option>
+                  <option value="5">5 km (Local Zone)</option>
+                  <option value="8">8 km (Suburban)</option>
+                  <option value="10" selected>10 km (Standard City Radius)</option>
+                  <option value="15">15 km (Extended Metropolitan)</option>
+                  <option value="20">20 km (Wide Area)</option>
+                  <option value="30">30 km (Regional Coverage)</option>
+                </select>
+              </div>
+              <div class="col-sm-6">
+                <div class="small text-muted pt-sm-3">
+                  <i class="bi bi-info-circle me-1"></i> Customers within this radius can see and book you via map search.
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small text-muted">Pin your business location (drag marker to adjust):</label>
+              <div id="providerMap" class="border"></div>
+            </div>
+
+            <h3 class="h6 fw-bold text-dark mb-2">Service Areas (Textual Fallback)</h3>
+            <div id="areaListTokens" class="mb-2"></div>
+            <div class="row g-2 mb-4">
+              <div class="col-sm-5"><input id="newAreaInput" class="form-control form-control-sm" placeholder="Area, e.g. Lalpur"></div>
+              <div class="col-sm-4"><input id="newCityInput" class="form-control form-control-sm" value="Ranchi" placeholder="City"></div>
+              <div class="col-sm-3"><button type="button" id="btnAddAreaToken" class="btn btn-outline-primary btn-sm w-100">Add area</button></div>
+            </div>
+
+            <button type="button" class="btn btn-primary btn-sm px-4 rounded-pill" onclick="saveLocationForm()">
+              Save Location &amp; Areas
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- TAB 9: CUSTOMER REVIEWS -->
+      <!-- ================================================================= -->
+      <section id="pane-reviews" class="tab-pane-content">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+              <div>
+                <h2 class="h5 fw-bold text-dark mb-0"><i class="bi bi-star-fill text-warning me-2"></i>Customer Reviews &amp; Ratings</h2>
+                <div class="small text-muted">Ratings submitted by verified customers upon job completion</div>
+              </div>
+              <span class="badge bg-light border text-dark fs-6" id="revCountBadge">0 Reviews</span>
+            </div>
+            <div id="fullReviewsList" class="d-flex flex-column gap-3">
+              <div class="text-center py-4 text-muted small">Loading reviews...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- TAB 10: BUSINESS PROFILE & PORTFOLIO -->
+      <!-- ================================================================= -->
+      <section id="pane-profile" class="tab-pane-content">
+        <form id="profileForm" class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <h2 class="h5 fw-bold text-dark mb-3"><i class="bi bi-person-gear text-primary me-2"></i>Business Profile Details</h2>
+            
+            <div class="row g-3 mb-3">
+              <div class="col-sm-8">
+                <label class="form-label fw-semibold small" for="inpBusinessName">Business Name</label>
+                <input id="inpBusinessName" class="form-control" required maxlength="150">
+              </div>
+              <div class="col-sm-4">
+                <label class="form-label fw-semibold small" for="inpExperience">Experience (Years)</label>
+                <input id="inpExperience" type="number" min="0" max="60" class="form-control">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold small" for="inpDescription">Professional Bio</label>
+              <textarea id="inpDescription" class="form-control" rows="3" placeholder="Tell customers about your expertise and service quality..."></textarea>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-sm-6">
+                <label class="form-label fw-semibold small" for="inpApproxPrice">Starting Price (₹)</label>
+                <input id="inpApproxPrice" type="number" min="0" step="1" class="form-control" placeholder="499">
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label fw-semibold small" for="inpWorkingHours">Working Hours</label>
+                <input id="inpWorkingHours" class="form-control" placeholder="e.g. Mon - Sun: 8:00 AM - 8:00 PM">
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold small" for="inpProfileImage">Profile Photo / Logo URL</label>
+              <div class="input-group mb-2">
+                <input id="inpProfileImage" class="form-control" placeholder="https://images.unsplash.com/...">
+                <button type="button" class="btn btn-outline-secondary" onclick="previewProfileImg()">Preview</button>
+              </div>
+              <div id="imgPreviewWrap" class="d-none">
+                <img id="imgPreviewEl" src="" alt="Profile Preview" class="rounded-3 border" style="width: 70px; height: 70px; object-fit: cover;">
+              </div>
+            </div>
+
+            <!-- Before & After Portfolio -->
+            <div class="d-flex justify-content-between align-items-center mb-3 pt-3 border-top">
+              <div>
+                <h3 class="h6 fw-bold text-dark mb-0"><i class="bi bi-images text-primary me-2"></i>Before &amp; After Portfolio</h3>
+                <span class="small text-muted">Comparison sliders shown on your public profile</span>
+              </div>
+              <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addPfModal">
+                <i class="bi bi-plus-lg me-1"></i>Add Project
+              </button>
+            </div>
+            <div id="portfolioCardsList" class="d-flex flex-column gap-2 mb-4"></div>
+
+            <!-- Videos Showcase -->
+            <div class="d-flex justify-content-between align-items-center mb-3 pt-3 border-top">
+              <div>
+                <h3 class="h6 fw-bold text-dark mb-0"><i class="bi bi-camera-video text-primary me-2"></i>Work Video Demonstrations</h3>
+                <span class="small text-muted">Short video clips of repairs and services</span>
+              </div>
+              <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addVideoModal">
+                <i class="bi bi-plus-lg me-1"></i>Add Video
+              </button>
+            </div>
+            <div id="videosCardsList" class="d-flex flex-column gap-2 mb-4"></div>
+
+            <button type="submit" class="btn btn-primary btn-sm px-4 rounded-pill">
+              Save Profile Changes
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- TAB 11: SETTINGS & PASSWORD -->
+      <!-- ================================================================= -->
+      <section id="pane-settings" class="tab-pane-content">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <h2 class="h5 fw-bold text-dark mb-1"><i class="bi bi-shield-lock text-primary me-2"></i>Security &amp; Account Settings</h2>
+            <div class="small text-muted mb-4">Update your login password and manage account credentials</div>
+
+            <form id="changePasswordForm" style="max-width: 480px;">
+              <div class="mb-3">
+                <label class="form-label small fw-semibold" for="currentPassword">Current Password</label>
+                <input type="password" id="currentPassword" class="form-control form-control-sm" required autocomplete="current-password">
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-semibold" for="newPassword">New Password</label>
+                <input type="password" id="newPassword" class="form-control form-control-sm" required minlength="6" autocomplete="new-password">
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-semibold" for="confirmPassword">Confirm New Password</label>
+                <input type="password" id="confirmPassword" class="form-control form-control-sm" required minlength="6" autocomplete="new-password">
+              </div>
+              <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4" id="btnChangePassword">
+                Update Password
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- TAB 12: PROVIDER IDENTITY & BUSINESS VERIFICATION -->
+      <!-- ================================================================= -->
+      <section id="pane-verification" class="tab-pane-content">
+        <!-- Main Verification Header Card -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+              <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <h2 class="h5 fw-bold text-dark mb-0"><i class="bi bi-patch-check-fill text-primary me-2"></i>Provider Identity &amp; Business Verification</h2>
+                </div>
+                <div class="small text-muted">Complete verification to receive customer bookings and appear as a verified partner.</div>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <span id="verifRefPill" class="badge bg-light text-secondary border font-monospace px-3 py-1.5 rounded-pill" style="font-size: 0.75rem;">Ref: APP-PENDING</span>
+                <span id="verifStatusBadge" class="badge status-pill-draft px-3 py-1.5 rounded-pill fw-bold" style="font-size: 0.8rem;">DRAFT</span>
+              </div>
+            </div>
+
+            <!-- Dynamic Status Banner Message -->
+            <div id="verifStatusBanner" class="rounded-3 p-3 mb-4 d-none"></div>
+
+            <!-- Wizard Stepper Navigation -->
+            <div class="verif-stepper" id="verifStepper">
+              <div class="verif-step-node active" id="stepNode1" onclick="jumpToWizardStep(1)">
+                <div class="verif-step-circle">1</div>
+                <div class="verif-step-label">Provider Type</div>
+              </div>
+              <div class="verif-step-node" id="stepNode2" onclick="jumpToWizardStep(2)">
+                <div class="verif-step-circle">2</div>
+                <div class="verif-step-label">Identity Info</div>
+              </div>
+              <div class="verif-step-node" id="stepNode3" onclick="jumpToWizardStep(3)">
+                <div class="verif-step-circle">3</div>
+                <div class="verif-step-label">Business Info</div>
+              </div>
+              <div class="verif-step-node" id="stepNode4" onclick="jumpToWizardStep(4)">
+                <div class="verif-step-circle">4</div>
+                <div class="verif-step-label">Documents</div>
+              </div>
+              <div class="verif-step-node" id="stepNode5" onclick="jumpToWizardStep(5)">
+                <div class="verif-step-circle">5</div>
+                <div class="verif-step-label">Review &amp; Submit</div>
+              </div>
+            </div>
+
+            <!-- WIZARD STEP 1: CHOOSE PROVIDER TYPE -->
+            <div id="verifStep1" class="verif-step-content">
+              <div class="text-center mb-4">
+                <h3 class="h6 fw-bold text-dark">Step 1: Choose Your Provider Category</h3>
+                <p class="text-muted small">Select the category that represents your service model. Required documentation adapts accordingly.</p>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <!-- Option A: Individual Professional -->
+                <div class="col-md-6">
+                  <div class="prov-type-card selected" id="cardTypeIndividual" onclick="selectProviderType('INDIVIDUAL')">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div class="prov-type-icon"><i class="bi bi-person-workspace"></i></div>
+                      <div class="form-check"><input class="form-check-input fs-5" type="radio" name="provTypeRadio" id="radioIndividual" checked></div>
+                    </div>
+                    <h4 class="h6 fw-bold text-dark mb-1">Individual Service Professional</h4>
+                    <p class="small text-muted mb-3">Electrician, Plumber, Barber, Mechanic, Cleaner, or independent specialist.</p>
+                    <div class="d-flex flex-wrap gap-1 mb-2">
+                      <span class="badge bg-light text-dark border">Government ID</span>
+                      <span class="badge bg-light text-dark border">Contact Verification</span>
+                      <span class="badge bg-success-subtle text-success border border-success-subtle">No Shop Docs Required</span>
+                    </div>
+                    <div class="text-muted" style="font-size: 0.76rem;">Work independently at customer premises or mobile locations without a physical workshop.</div>
+                  </div>
+                </div>
+
+                <!-- Option B: Shop or Registered Business -->
+                <div class="col-md-6">
+                  <div class="prov-type-card" id="cardTypeBusiness" onclick="selectProviderType('BUSINESS')">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div class="prov-type-icon"><i class="bi bi-shop"></i></div>
+                      <div class="form-check"><input class="form-check-input fs-5" type="radio" name="provTypeRadio" id="radioBusiness"></div>
+                    </div>
+                    <h4 class="h6 fw-bold text-dark mb-1">Shop or Registered Business</h4>
+                    <p class="small text-muted mb-3">Automobile Garage, Repair Workshop, Salon, Dry Cleaner, or Service Firm.</p>
+                    <div class="d-flex flex-wrap gap-1 mb-2">
+                      <span class="badge bg-light text-dark border">Responsible ID</span>
+                      <span class="badge bg-light text-dark border">Shop Photographs</span>
+                      <span class="badge bg-light text-dark border">1 Location Proof</span>
+                    </div>
+                    <div class="text-muted" style="font-size: 0.76rem;">Operate from a commercial facility or shop. Requires premises photos and ownership or lease deed.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-primary btn-sm rounded-pill px-4 fw-semibold" onclick="wizardNext(1)">
+                  Continue to Identity Info <i class="bi bi-arrow-right ms-1"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- WIZARD STEP 2: IDENTITY INFORMATION -->
+            <div id="verifStep2" class="verif-step-content d-none">
+              <div class="mb-3">
+                <h3 class="h6 fw-bold text-dark mb-1">Step 2: Personal &amp; Identity Information</h3>
+                <p class="text-muted small">Provide details matching your official government-issued identification document.</p>
+              </div>
+
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold" for="vLegalName">Full Legal Name (as on ID) <span class="text-danger">*</span></label>
+                  <input type="text" id="vLegalName" class="form-control form-control-sm" placeholder="e.g. Ramesh Kumar Sharma" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold" for="vDob">Date of Birth (Optional)</label>
+                  <input type="date" id="vDob" class="form-control form-control-sm">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold" for="vIdType">Government-Issued ID Type <span class="text-danger">*</span></label>
+                  <select id="vIdType" class="form-select form-select-sm" required>
+                    <option value="">Select ID Document</option>
+                    <option value="PAN">PAN Card (Income Tax Dept)</option>
+                    <option value="VOTER_ID">Voter ID Card (Election Commission)</option>
+                    <option value="DRIVING_LICENSE">Driving License (State Transport)</option>
+                    <option value="PASSPORT">Indian Passport</option>
+                    <option value="MASKED_AADHAAR">Masked Aadhaar Card (Last 4 digits visible)</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold" for="vIdNumber">ID Document Number <span class="text-danger">*</span></label>
+                  <input type="text" id="vIdNumber" class="form-control form-control-sm" placeholder="e.g. ABCPS1234F" required>
+                  <div class="form-text" style="font-size: 0.72rem;">Only authorized verification personnel inspect documents. Your number will be masked in public records.</div>
+                </div>
+                <div class="col-12">
+                  <label class="form-label small fw-semibold" for="vServiceAddress">Residential or Contact Address <span class="text-danger">*</span></label>
+                  <input type="text" id="vServiceAddress" class="form-control form-control-sm" placeholder="Door/Flat No, Street, Landmark" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small fw-semibold" for="vCity">City</label>
+                  <input type="text" id="vCity" class="form-control form-control-sm" placeholder="e.g. Bengaluru">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small fw-semibold" for="vLocality">Locality / Area</label>
+                  <input type="text" id="vLocality" class="form-control form-control-sm" placeholder="e.g. Indiranagar">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small fw-semibold" for="vPincode">PIN Code</label>
+                  <input type="text" id="vPincode" class="form-control form-control-sm" placeholder="e.g. 560038" maxlength="10">
+                </div>
+              </div>
+
+              <!-- Privacy Consent -->
+              <div class="p-3 bg-light rounded-3 border mb-4">
+                <div class="form-check mb-0">
+                  <input class="form-check-input" type="checkbox" id="vPrivacyConsent" required>
+                  <label class="form-check-label small fw-semibold text-dark" for="vPrivacyConsent">
+                    I consent to Local Service Connect reviewing my identity details and submitted documents strictly for account verification, partner onboarding, and platform fraud prevention in accordance with privacy policies.
+                  </label>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="wizardBack(2)">
+                  <i class="bi bi-arrow-left me-1"></i> Back
+                </button>
+                <div class="d-flex gap-2">
+                  <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="saveDraftAction(false)">
+                    <i class="bi bi-save me-1"></i> Save Draft
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm rounded-pill px-4 fw-semibold" onclick="wizardNext(2)">
+                    Continue to Business Details <i class="bi bi-arrow-right ms-1"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- WIZARD STEP 3: BUSINESS INFORMATION -->
+            <div id="verifStep3" class="verif-step-content d-none">
+              <div class="mb-3">
+                <h3 class="h6 fw-bold text-dark mb-1">Step 3: Service &amp; Business Details</h3>
+                <p class="text-muted small" id="step3Subtitle">Verify service operational coverage and commercial establishment details.</p>
+              </div>
+
+              <!-- Individual Notice -->
+              <div id="individualNoticeStep3" class="alert bg-success-subtle border-success-subtle rounded-3 p-3 mb-3 d-none">
+                <div class="d-flex gap-2">
+                  <i class="bi bi-info-circle-fill text-success fs-5"></i>
+                  <div class="small">
+                    <strong>Individual Professional:</strong> You operate independently without a commercial storefront. Physical shop documentation is not required. Your services and service coverage areas will be synced from your operations profile.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Business Establishment Fields (for Business type) -->
+              <div id="businessFieldsStep3" class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold" for="vBizName">Business or Shop Name <span class="text-danger">*</span></label>
+                  <input type="text" id="vBizName" class="form-control form-control-sm" placeholder="e.g. Apex Car Care & Garage">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold" for="vBizType">Business Category / Type</label>
+                  <input type="text" id="vBizType" class="form-control form-control-sm" placeholder="e.g. Automobile Repair Garage, Salon, Electrical Store">
+                </div>
+                <div class="col-12">
+                  <label class="form-label small fw-semibold" for="vBizAddress">Shop / Commercial Premises Address <span class="text-danger">*</span></label>
+                  <input type="text" id="vBizAddress" class="form-control form-control-sm" placeholder="Shop No, Commercial Complex, Street">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold" for="vBizPhone">Business Contact Phone (if different)</label>
+                  <input type="tel" id="vBizPhone" class="form-control form-control-sm" placeholder="e.g. 080-25539988">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold" for="vOperatingHours">Operating Hours</label>
+                  <input type="text" id="vOperatingHours" class="form-control form-control-sm" placeholder="e.g. Mon - Sat: 9:00 AM - 8:00 PM">
+                </div>
+                <div class="col-12">
+                  <label class="form-label small fw-semibold" for="vBizDesc">Business Description</label>
+                  <textarea id="vBizDesc" class="form-control form-control-sm" rows="2" placeholder="Describe your shop facility, special equipment, and customer services..."></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label small fw-semibold" for="vLocationProofType">Premises Proof Option (Select ONE applicable proof) <span class="text-danger">*</span></label>
+                  <select id="vLocationProofType" class="form-select form-select-sm">
+                    <option value="RENT_AGREEMENT">Valid Rent or Commercial Lease Agreement</option>
+                    <option value="OWNERSHIP_DOCUMENT">Property Ownership Document / Deed</option>
+                    <option value="APPROVED_ALTERNATIVE">Approved Alternative (Commercial Utility Bill / Municipal Tax Receipt)</option>
+                  </select>
+                  <div class="form-text text-muted" style="font-size: 0.72rem;">You only need to supply ONE applicable document. Do not submit both ownership and lease deeds.</div>
+                </div>
+              </div>
+
+              <!-- Operational Coverage (Services & Areas) -->
+              <div class="p-3 bg-light rounded-3 border mb-4">
+                <div class="row g-2">
+                  <div class="col-md-6">
+                    <label class="form-label small fw-semibold" for="vServicesOffered">Services Offered</label>
+                    <input type="text" id="vServicesOffered" class="form-control form-control-sm" placeholder="e.g. Electrician, Wiring, Appliance Repair">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-semibold" for="vServiceAreas">Service Locations / Coverage</label>
+                    <input type="text" id="vServiceAreas" class="form-control form-control-sm" placeholder="e.g. Indiranagar, Koramangala, HSR Layout">
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="wizardBack(3)">
+                  <i class="bi bi-arrow-left me-1"></i> Back
+                </button>
+                <div class="d-flex gap-2">
+                  <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="saveDraftAction(false)">
+                    <i class="bi bi-save me-1"></i> Save Draft
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm rounded-pill px-4 fw-semibold" onclick="wizardNext(3)">
+                    Continue to Document Uploads <i class="bi bi-arrow-right ms-1"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- WIZARD STEP 4: DOCUMENT UPLOADS -->
+            <div id="verifStep4" class="verif-step-content d-none">
+              <div class="mb-3">
+                <h3 class="h6 fw-bold text-dark mb-1">Step 4: Upload Verification Documents</h3>
+                <p class="text-muted small">Upload readable documents. Supports JPEG, PNG, WebP and PDF up to 5 MB per file.</p>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <!-- Dropzone 1: Government ID Proof (Everyone) -->
+                <div class="col-12">
+                  <div class="card border rounded-3 p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <div>
+                        <span class="fw-bold small text-dark"><i class="bi bi-person-badge-fill text-primary me-1"></i>Government-Issued Identity Document <span class="text-danger">*</span></span>
+                        <div class="text-muted" style="font-size: 0.75rem;">Clear photo or scan of PAN, Voter ID, Driving License, Passport, or Masked Aadhaar.</div>
+                      </div>
+                      <span class="badge bg-danger-subtle text-danger" id="badgeReqId">Required</span>
+                    </div>
+
+                    <div class="verif-dropzone" id="dz_IDENTITY_PROOF" onclick="triggerFileInput('IDENTITY_PROOF')">
+                      <i class="bi bi-cloud-arrow-up fs-2 text-primary d-block mb-1"></i>
+                      <div class="small fw-semibold text-dark">Click to browse or drop file here</div>
+                      <div class="text-muted" style="font-size: 0.72rem;">JPEG, PNG, WebP or PDF · Max 5 MB</div>
+                      <input type="file" id="file_IDENTITY_PROOF" class="d-none" accept=".jpg,.jpeg,.png,.webp,.pdf" onchange="uploadSelectedFile('IDENTITY_PROOF', this)">
+                    </div>
+                    <div id="preview_IDENTITY_PROOF"></div>
+                  </div>
+                </div>
+
+                <!-- Business-Only Document Dropzones -->
+                <div id="businessDocFields" class="col-12 d-none">
+                  <div class="row g-3">
+                    <!-- Dropzone 2: Shop Exterior -->
+                    <div class="col-md-6">
+                      <div class="card border rounded-3 p-3 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <span class="fw-bold small text-dark"><i class="bi bi-camera-fill text-primary me-1"></i>Shop Exterior Photograph <span class="text-danger">*</span></span>
+                          <span class="badge bg-danger-subtle text-danger">Required</span>
+                        </div>
+                        <div class="text-muted mb-2" style="font-size: 0.72rem;">Exterior storefront showing entrance &amp; building premises.</div>
+                        <div class="verif-dropzone" id="dz_SHOP_EXTERIOR" onclick="triggerFileInput('SHOP_EXTERIOR')">
+                          <i class="bi bi-image fs-3 text-primary d-block mb-1"></i>
+                          <div class="small fw-semibold text-dark">Upload Exterior Photo</div>
+                          <div class="text-muted" style="font-size: 0.7rem;">JPEG, PNG, WebP · Max 5 MB</div>
+                          <input type="file" id="file_SHOP_EXTERIOR" class="d-none" accept=".jpg,.jpeg,.png,.webp" onchange="uploadSelectedFile('SHOP_EXTERIOR', this)">
+                        </div>
+                        <div id="preview_SHOP_EXTERIOR"></div>
+                      </div>
+                    </div>
+
+                    <!-- Dropzone 3: Shop Signboard -->
+                    <div class="col-md-6">
+                      <div class="card border rounded-3 p-3 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <span class="fw-bold small text-dark"><i class="bi bi-signpost-2 text-primary me-1"></i>Signboard Photograph</span>
+                          <span class="badge bg-light text-secondary border">Recommended</span>
+                        </div>
+                        <div class="text-muted mb-2" style="font-size: 0.72rem;">Legible photo of shop nameboard or banner.</div>
+                        <div class="verif-dropzone" id="dz_SHOP_SIGNBOARD" onclick="triggerFileInput('SHOP_SIGNBOARD')">
+                          <i class="bi bi-image fs-3 text-primary d-block mb-1"></i>
+                          <div class="small fw-semibold text-dark">Upload Signboard Photo</div>
+                          <div class="text-muted" style="font-size: 0.7rem;">JPEG, PNG, WebP · Max 5 MB</div>
+                          <input type="file" id="file_SHOP_SIGNBOARD" class="d-none" accept=".jpg,.jpeg,.png,.webp" onchange="uploadSelectedFile('SHOP_SIGNBOARD', this)">
+                        </div>
+                        <div id="preview_SHOP_SIGNBOARD"></div>
+                      </div>
+                    </div>
+
+                    <!-- Dropzone 4: Shop Interior -->
+                    <div class="col-md-6">
+                      <div class="card border rounded-3 p-3 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <span class="fw-bold small text-dark"><i class="bi bi-door-open text-primary me-1"></i>Shop Interior Photograph</span>
+                          <span class="badge bg-light text-secondary border">Recommended</span>
+                        </div>
+                        <div class="text-muted mb-2" style="font-size: 0.72rem;">Inside facility, repair bay, counter, or reception.</div>
+                        <div class="verif-dropzone" id="dz_SHOP_INTERIOR" onclick="triggerFileInput('SHOP_INTERIOR')">
+                          <i class="bi bi-image fs-3 text-primary d-block mb-1"></i>
+                          <div class="small fw-semibold text-dark">Upload Interior Photo</div>
+                          <div class="text-muted" style="font-size: 0.7rem;">JPEG, PNG, WebP · Max 5 MB</div>
+                          <input type="file" id="file_SHOP_INTERIOR" class="d-none" accept=".jpg,.jpeg,.png,.webp" onchange="uploadSelectedFile('SHOP_INTERIOR', this)">
+                        </div>
+                        <div id="preview_SHOP_INTERIOR"></div>
+                      </div>
+                    </div>
+
+                    <!-- Dropzone 5: Location Proof (Rent Agreement OR Property Deed) -->
+                    <div class="col-md-6">
+                      <div class="card border rounded-3 p-3 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <span class="fw-bold small text-dark"><i class="bi bi-file-earmark-check-fill text-primary me-1"></i>Premises Location Proof <span class="text-danger">*</span></span>
+                          <span class="badge bg-danger-subtle text-danger">Required</span>
+                        </div>
+                        <div class="text-muted mb-2" style="font-size: 0.72rem;">Rent/Lease deed OR Property paper OR Commercial bill.</div>
+                        <div class="verif-dropzone" id="dz_LOCATION_PROOF" onclick="triggerFileInput('LOCATION_PROOF')">
+                          <i class="bi bi-file-earmark-pdf fs-3 text-primary d-block mb-1"></i>
+                          <div class="small fw-semibold text-dark">Upload Location Proof</div>
+                          <div class="text-muted" style="font-size: 0.7rem;">PDF, JPEG, PNG, WebP · Max 5 MB</div>
+                          <input type="file" id="file_LOCATION_PROOF" class="d-none" accept=".pdf,.jpg,.jpeg,.png,.webp" onchange="uploadSelectedFile('LOCATION_PROOF', this)">
+                        </div>
+                        <div id="preview_LOCATION_PROOF"></div>
+                      </div>
+                    </div>
+
+                    <!-- Dropzone 6: Optional Registration -->
+                    <div class="col-12">
+                      <div class="card border rounded-3 p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <span class="fw-bold small text-dark"><i class="bi bi-award-fill text-primary me-1"></i>Commercial Registration Proof (Optional)</span>
+                          <span class="badge bg-light text-secondary border">If Applicable</span>
+                        </div>
+                        <div class="text-muted mb-2" style="font-size: 0.72rem;">Trade license, Shop &amp; Establishment cert, or GST registration (only if applicable).</div>
+                        <div class="verif-dropzone" id="dz_BUSINESS_REGISTRATION" onclick="triggerFileInput('BUSINESS_REGISTRATION')">
+                          <i class="bi bi-upload fs-3 text-secondary d-block mb-1"></i>
+                          <div class="small fw-semibold text-dark">Upload Registration Document</div>
+                          <div class="text-muted" style="font-size: 0.7rem;">PDF, JPEG, PNG, WebP · Max 5 MB</div>
+                          <input type="file" id="file_BUSINESS_REGISTRATION" class="d-none" accept=".pdf,.jpg,.jpeg,.png,.webp" onchange="uploadSelectedFile('BUSINESS_REGISTRATION', this)">
+                        </div>
+                        <div id="preview_BUSINESS_REGISTRATION"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="wizardBack(4)">
+                  <i class="bi bi-arrow-left me-1"></i> Back
+                </button>
+                <button type="button" class="btn btn-primary btn-sm rounded-pill px-4 fw-semibold" onclick="wizardNext(4)">
+                  Review &amp; Submit <i class="bi bi-arrow-right ms-1"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- WIZARD STEP 5: REVIEW AND SUBMIT -->
+            <div id="verifStep5" class="verif-step-content d-none">
+              <div class="mb-3">
+                <h3 class="h6 fw-bold text-dark mb-1">Step 5: Review &amp; Submit Application</h3>
+                <p class="text-muted small">Carefully verify all details before final submission. You may correct any section prior to review.</p>
+              </div>
+
+              <!-- Review Summary Cards -->
+              <div class="d-flex flex-column gap-3 mb-4">
+                <!-- Section 1 Summary -->
+                <div class="card border rounded-3 p-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold small text-dark"><i class="bi bi-card-checklist text-primary me-1"></i>1. Provider Type</span>
+                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold" onclick="jumpToWizardStep(1)">Edit</button>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary-subtle text-primary fw-bold" id="revProviderType">INDIVIDUAL</span>
+                    <span class="small text-muted" id="revProviderTypeDesc">Independent Service Professional</span>
+                  </div>
+                </div>
+
+                <!-- Section 2 Summary -->
+                <div class="card border rounded-3 p-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold small text-dark"><i class="bi bi-person-badge text-primary me-1"></i>2. Identity Details</span>
+                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold" onclick="jumpToWizardStep(2)">Edit</button>
+                  </div>
+                  <div class="row g-2 small">
+                    <div class="col-sm-6"><span class="text-muted">Legal Name:</span> <strong id="revLegalName">-</strong></div>
+                    <div class="col-sm-6"><span class="text-muted">ID Type:</span> <span id="revIdType">-</span></div>
+                    <div class="col-sm-6"><span class="text-muted">ID Number:</span> <span id="revIdNumber">-</span></div>
+                    <div class="col-sm-6"><span class="text-muted">Address:</span> <span id="revAddress">-</span></div>
+                    <div class="col-12"><span class="text-muted">Privacy Consent:</span> <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Consented to Verification Policy</span></div>
+                  </div>
+                </div>
+
+                <!-- Section 3 Summary -->
+                <div class="card border rounded-3 p-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold small text-dark"><i class="bi bi-shop text-primary me-1"></i>3. Business &amp; Operations</span>
+                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold" onclick="jumpToWizardStep(3)">Edit</button>
+                  </div>
+                  <div id="revBusinessBlock" class="row g-2 small">
+                    <div class="col-sm-6"><span class="text-muted">Business Name:</span> <strong id="revBizName">-</strong></div>
+                    <div class="col-sm-6"><span class="text-muted">Business Type:</span> <span id="revBizType">-</span></div>
+                    <div class="col-12"><span class="text-muted">Shop Address:</span> <span id="revBizAddress">-</span></div>
+                  </div>
+                  <div class="row g-2 small mt-2 pt-2 border-top">
+                    <div class="col-sm-6"><span class="text-muted">Services:</span> <span id="revServices">-</span></div>
+                    <div class="col-sm-6"><span class="text-muted">Areas:</span> <span id="revAreas">-</span></div>
+                  </div>
+                </div>
+
+                <!-- Section 4 Summary -->
+                <div class="card border rounded-3 p-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold small text-dark"><i class="bi bi-files text-primary me-1"></i>4. Submitted Documents</span>
+                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold" onclick="jumpToWizardStep(4)">Edit</button>
+                  </div>
+                  <div id="revDocList" class="d-flex flex-column gap-2"></div>
+                </div>
+              </div>
+
+              <!-- Declaration & Submit -->
+              <div class="p-3 bg-light rounded-3 border mb-4">
+                <div class="form-check mb-0">
+                  <input class="form-check-input" type="checkbox" id="vFinalConsent" checked>
+                  <label class="form-check-label small text-muted" for="vFinalConsent">
+                    I confirm that all information and documents submitted are authentic, legally compliant, and accurate to the best of my knowledge.
+                  </label>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="wizardBack(5)">
+                  <i class="bi bi-arrow-left me-1"></i> Back
+                </button>
+                <button type="button" class="btn btn-success btn-sm rounded-pill px-4 fw-bold shadow-sm" id="btnSubmitVerification" onclick="confirmSubmitVerification()">
+                  <i class="bi bi-send-check me-1"></i> Submit Verification Application
+                </button>
+              </div>
+            </div>
+
+            <!-- APPLICATION TRACKER & AUDIT TIMELINE (Shown when Submitted/Under Review/Verified) -->
+            <div id="verifTrackerView" class="d-none">
+              <div class="card border-0 bg-light rounded-4 p-4 mb-4">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                  <h3 class="h6 fw-bold text-dark mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Application History &amp; Review Timeline</h3>
+                  <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" id="btnEditSubmittedApp" onclick="enableWizardEditing()" style="display:none;">
+                    <i class="bi bi-pencil me-1"></i>Update Application
+                  </button>
+                </div>
+                <div id="verifAuditTimeline" class="d-flex flex-column gap-3"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- MODALS -->
+<!-- ================================================================= -->
+
+<!-- Modal: Add Sub-Service Package -->
+<div class="modal fade" id="addSubModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-light border-bottom">
+        <h5 class="modal-title fw-bold">Add Sub-Service Package</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="mSubName">Package / Sub-Service Name</label>
+          <input id="mSubName" class="form-control" placeholder="e.g. Master Bedroom Deep Sanitization" required>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="form-label small fw-bold" for="mSubPrice">Price (₹)</label>
+            <input id="mSubPrice" type="number" min="0" step="1" class="form-control" placeholder="499" required>
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-bold" for="mSubDuration">Duration</label>
+            <input id="mSubDuration" class="form-control" placeholder="e.g. 45 mins" value="45 mins">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="mSubDesc">Description</label>
+          <textarea id="mSubDesc" class="form-control" rows="2" placeholder="Describe what is included in this package..."></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="mSubImg">Image URL</label>
+          <input id="mSubImg" class="form-control" placeholder="https://images.unsplash.com/photo-...">
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm px-4 rounded-pill fw-semibold" id="btnConfirmAddSub">Add Package</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add Before & After Project -->
+<div class="modal fade" id="addPfModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-light border-bottom">
+        <h5 class="modal-title fw-bold">Add Before &amp; After Project</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="mPfTitle">Project Title</label>
+          <input id="mPfTitle" class="form-control" placeholder="e.g. 3-Seater Velvet Sofa Deep Shampooing" required>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="form-label small fw-bold" for="mPfSub">Sub-Service Tag</label>
+            <input id="mPfSub" class="form-control" placeholder="e.g. Sofa Cleaning" required>
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-bold" for="mPfDate">Completion Date</label>
+            <input id="mPfDate" class="form-control" placeholder="e.g. October 2026" value="October 2026">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="mPfBefore">Before Image URL</label>
+          <input id="mPfBefore" class="form-control" placeholder="https://images.unsplash.com/photo-... (dirty/stained)" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="mPfAfter">After Image URL</label>
+          <input id="mPfAfter" class="form-control" placeholder="https://images.unsplash.com/photo-... (cleaned/restored)" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="mPfDesc">Work Performed Description</label>
+          <textarea id="mPfDesc" class="form-control" rows="2" placeholder="Describe the problem, technique, and result..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm px-4 rounded-pill fw-semibold" id="btnConfirmAddPf">Add Project</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add Work Video -->
+<div class="modal fade" id="addVideoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-light border-bottom">
+        <h5 class="modal-title fw-bold">Add Work Video Demo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="mVidTitle">Video Title</label>
+          <input id="mVidTitle" class="form-control" placeholder="e.g. Live Foam Jet Cleaning Demo" required>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="form-label small fw-bold" for="mVidSub">Sub-Service Tag</label>
+            <input id="mVidSub" class="form-control" placeholder="e.g. Sofa Cleaning" required>
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-bold" for="mVidDuration">Duration</label>
+            <input id="mVidDuration" class="form-control" placeholder="e.g. 0:45" value="0:45">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="mVidUrl">Video URL (MP4)</label>
+          <input id="mVidUrl" class="form-control" placeholder="https://commondatastorage.googleapis.com/.../video.mp4" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="mVidThumb">Thumbnail Poster Image URL</label>
+          <input id="mVidThumb" class="form-control" placeholder="https://images.unsplash.com/photo-...">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold" for="mVidDesc">Video Description</label>
+          <textarea id="mVidDesc" class="form-control" rows="2" placeholder="What does this video demonstrate?"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm px-4 rounded-pill fw-semibold" id="btnConfirmAddVideo">Add Video</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="site py-4 mt-5 bg-white border-top">
+  <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+      <strong class="text-dark">Local Service Connect</strong>
+      <div class="small text-muted">Dedicated Service Provider Operations Workspace</div>
+    </div>
+    <div class="small text-muted">&copy; <span id="yr"></span> Local Service Connect. All rights reserved.</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/maps.js"></script>
+<script>
+// Role enforcement: only authenticated providers can access this page
+const me = Auth.require('PROVIDER');
+if (!me) {
+  throw new Error('Authentication required');
+}
+navbar();
+
+const $ = id => document.getElementById(id);
+if ($('yr')) $('yr').textContent = new Date().getFullYear();
+if ($('currentDateDisplay')) $('currentDateDisplay').textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+
+// State
+let providerData = null;
+let allBookings = [];
+let allReviews = [];
+let areas = [];
+let mySubServices = [];
+let myPortfolio = [];
+let myVideos = [];
+let provLat = null;
+let provLng = null;
+let provFormattedAddress = null;
+let providerMapObj = null;
+let activeRequestFilter = 'ALL';
+let isDashboardRefreshing = false;
+let isVerificationInitialized = false;
+
+const num = v => v === '' || v === null ? null : Number(v);
+
+function showPageAlert(t, ok = true, showRetry = false) {
+  const m = $('pageAlert');
+  if (!m) return;
+  m.className = 'alert alert-' + (ok ? 'success' : 'danger') + ' shadow-sm rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2';
+  m.innerHTML = `
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi ${ok ? 'bi-check-circle-fill text-success' : 'bi-exclamation-octagon-fill text-danger'} fs-5 flex-shrink-0"></i>
+      <span>${esc(t)}</span>
+    </div>
+    ${showRetry ? '<button type="button" class="btn btn-sm btn-outline-danger fw-semibold px-3 rounded-pill" onclick="refreshDashboard(true)"><i class="bi bi-arrow-clockwise me-1"></i>Retry</button>' : ''}
+  `;
+  m.classList.remove('d-none');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (ok) {
+    setTimeout(() => m.classList.add('d-none'), 6000);
+  }
+}
+
+function renderDashboardErrorState(msg) {
+  const errCardHtml = `
+    <div class="text-center py-4 px-3 bg-light rounded-3 border">
+      <i class="bi bi-exclamation-triangle text-warning fs-3 d-block mb-2"></i>
+      <div class="fw-semibold text-dark mb-1">Unable to load information</div>
+      <div class="text-muted small mb-3">${esc(msg || 'Network or server response issue.')}</div>
+      <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold" onclick="refreshDashboard(true)">
+        <i class="bi bi-arrow-clockwise me-1"></i>Retry Loading
+      </button>
+    </div>
+  `;
+  if (!allBookings.length) {
+    if ($('overviewRecentList')) $('overviewRecentList').innerHTML = errCardHtml;
+    if ($('pendingRequestsList')) $('pendingRequestsList').innerHTML = errCardHtml;
+    if ($('activeJobsList')) $('activeJobsList').innerHTML = errCardHtml;
+    if ($('historyBookingsList')) $('historyBookingsList').innerHTML = errCardHtml;
+    if ($('quickDispatchList')) $('quickDispatchList').innerHTML = errCardHtml;
+    if ($('earningsTableBody')) $('earningsTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Failed to load earnings. <a href="javascript:void(0)" onclick="refreshDashboard(true)" class="text-primary fw-semibold text-decoration-none ms-1">Click to retry</a></td></tr>`;
+  }
+  if (!allReviews.length) {
+    if ($('overviewReviewsList')) $('overviewReviewsList').innerHTML = errCardHtml;
+    if ($('fullReviewsList')) $('fullReviewsList').innerHTML = errCardHtml;
+  }
+}
+
+// Tab Switching
+function switchTab(tabId, pushState = true) {
+  const validTabs = ['overview', 'requests', 'active', 'history', 'quick', 'earnings', 'services', 'areas', 'reviews', 'profile', 'verification', 'settings'];
+  if (!validTabs.includes(tabId)) tabId = 'overview';
+
+  document.querySelectorAll('.tab-pane-content').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-prov-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.account-mobile-pill').forEach(b => b.classList.remove('active'));
+
+  const targetPane = $('pane-' + tabId);
+  if (targetPane) {
+    targetPane.classList.add('active');
+  }
+
+  const sidebarBtn = document.querySelector(`.nav-prov-btn[data-tab="${tabId}"]`);
+  if (sidebarBtn) sidebarBtn.classList.add('active');
+
+  const mobilePill = document.querySelector(`.account-mobile-pill[data-tab="${tabId}"]`);
+  if (mobilePill) mobilePill.classList.add('active');
+
+  const titles = {
+    overview: 'Dashboard Overview',
+    requests: 'Booking Requests',
+    active: 'Active Jobs & OTP Verification',
+    history: 'Booking History',
+    quick: 'Quick Service Dispatch Center',
+    earnings: 'Earnings & Payouts',
+    services: 'Services & Packages',
+    areas: 'Service Areas & Map Coverage',
+    reviews: 'Customer Reviews',
+    profile: 'Business Profile',
+    verification: 'Identity & Business Verification',
+    settings: 'Account Settings'
+  };
+  if ($('breadcrumbActive')) $('breadcrumbActive').textContent = titles[tabId] || 'Dashboard';
+
+  if (pushState) {
+    const url = new URL(window.location);
+    url.searchParams.set('tab', tabId);
+    url.hash = '';
+    window.history.pushState({ tab: tabId }, '', url);
+  }
+
+  // If opening verification tab and not yet loaded, load it immediately
+  if (tabId === 'verification' && !currentVerifApp) {
+    loadVerification(true);
+  }
+
+  // Invalidate map size if opening areas tab
+  if (tabId === 'areas' && providerMapObj && providerMapObj.map) {
+    setTimeout(() => providerMapObj.map.invalidateSize(), 200);
+  }
+}
+
+// Click listener for tabs
+document.addEventListener('click', e => {
+  const tabBtn = e.target.closest('[data-tab]');
+  if (tabBtn && tabBtn.dataset.tab) {
+    switchTab(tabBtn.dataset.tab);
+  }
+});
+
+// Handle browser Back / Forward buttons without unwanted page reloads
+window.addEventListener('popstate', e => {
+  const tab = (e.state && e.state.tab) || new URLSearchParams(window.location.search).get('tab') || (location.hash ? location.hash.replace('#', '') : '') || 'overview';
+  switchTab(tab, false);
+});
+
+// Availability Toggle Listener
+$('switchAvailability').addEventListener('change', async () => {
+  const box = $('switchAvailability');
+  const targetState = box.checked;
+  try {
+    const res = await api('/provider/availability', {
+      method: 'PUT',
+      body: { available: targetState }
+    });
+    updateAvailabilityUI(res.availability, res.verificationStatus);
+    showPageAlert(res.availability ? 'You are now online! Quick Service requests will route to you.' : 'You are now offline. No immediate Quick Service requests will route.');
+  } catch (err) {
+    box.checked = !targetState;
+    showPageAlert(err.message || 'Could not update availability', false);
+  }
+});
+
+function updateAvailabilityUI(isAvailable, verifStatus) {
+  const box = $('switchAvailability');
+  const text = $('availStatusText');
+  const dot = $('availDotIndicator');
+  const livePill = $('liveDispatchPill');
+
+  box.checked = !!isAvailable;
+  box.disabled = (verifStatus !== 'VERIFIED');
+
+  if (isAvailable && verifStatus === 'VERIFIED') {
+    text.textContent = 'Online for Quick Service';
+    text.className = 'small fw-bold text-success';
+    dot.className = 'pulse-online';
+    livePill.className = 'badge bg-success-subtle text-success border border-success-subtle rounded-pill fs-7 fw-semibold py-1 px-2.5';
+    livePill.innerHTML = '<span class="pulse-online me-1"></span> Live Dispatch Active';
+  } else {
+    text.textContent = verifStatus !== 'VERIFIED' ? 'Pending Verification' : 'Offline / Away';
+    text.className = 'small fw-bold text-muted';
+    dot.className = 'pulse-offline';
+    livePill.className = 'badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill fs-7 fw-semibold py-1 px-2.5';
+    livePill.innerHTML = '<i class="bi bi-moon-fill me-1"></i> Dispatch Inactive';
+  }
+}
+
+// Verification Status Renderer
+function renderVerificationBadge(status) {
+  const badge = $('verifBadge');
+  if (!badge) return;
+  if (status === 'VERIFIED') {
+    badge.className = 'badge bg-success-subtle text-success border border-success-subtle py-1 px-2.5 rounded-pill fw-semibold cursor-pointer';
+    badge.innerHTML = '<i class="bi bi-shield-fill-check me-1"></i>Verified Professional';
+  } else if (status === 'REJECTED') {
+    badge.className = 'badge bg-danger-subtle text-danger border border-danger-subtle py-1 px-2.5 rounded-pill fw-semibold cursor-pointer';
+    badge.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i>Verification Rejected';
+  } else {
+    badge.className = 'badge bg-warning-subtle text-warning border border-warning-subtle py-1 px-2.5 rounded-pill fw-semibold cursor-pointer';
+    badge.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Verification Pending';
+  }
+}
+
+// =================================================================
+// PROVIDER VERIFICATION WIZARD & STATUS MANAGEMENT
+// =================================================================
+let currentVerifApp = null;
+let currentWizardStep = 1;
+let selectedProviderType = 'INDIVIDUAL';
+let isVerifSubmitting = false;
+
+async function loadVerification(isInitialLoad = false) {
+  try {
+    const app = await api('/provider/verification/application');
+    currentVerifApp = app;
+    renderVerificationUI(app, isInitialLoad);
+  } catch (err) {
+    console.error('Could not load verification application:', err);
+    const vBanner = $('verifStatusBanner');
+    if (vBanner) {
+      vBanner.className = 'rounded-3 p-3 mb-4 alert alert-danger border-danger-subtle shadow-xs d-flex align-items-center justify-content-between flex-wrap gap-2';
+      vBanner.innerHTML = `
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-exclamation-octagon-fill text-danger fs-5"></i>
+          <div>
+            <strong class="d-block text-dark">Unable to load your verification application</strong>
+            <div class="small text-muted">${esc(err.message || 'Please check your connection and retry.')}</div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-semibold" onclick="loadVerification(true)">
+          <i class="bi bi-arrow-clockwise me-1"></i>Retry
+        </button>
+      `;
+      vBanner.classList.remove('d-none');
+    }
+  }
+}
+
+function selectProviderType(type, saveDraft = true) {
+  selectedProviderType = type;
+  const isInd = type === 'INDIVIDUAL';
+  const cardInd = $('cardTypeIndividual');
+  const cardBiz = $('cardTypeBusiness');
+  const radioInd = $('radioIndividual');
+  const radioBiz = $('radioBusiness');
+  
+  if (cardInd) cardInd.classList.toggle('selected', isInd);
+  if (cardBiz) cardBiz.classList.toggle('selected', !isInd);
+  if (radioInd) radioInd.checked = isInd;
+  if (radioBiz) radioBiz.checked = !isInd;
+
+  // Toggle Step 3 fields & notices
+  const indNotice = $('individualNoticeStep3');
+  const bizFields = $('businessFieldsStep3');
+  const step3Sub = $('step3Subtitle');
+  if (indNotice) indNotice.classList.toggle('d-none', !isInd);
+  if (bizFields) bizFields.classList.toggle('d-none', isInd);
+  if (step3Sub) {
+    step3Sub.textContent = isInd
+      ? 'Verify service coverage and operations profile.'
+      : 'Verify service operational coverage and commercial establishment details.';
+  }
+
+  // Toggle Step 4 dropzones
+  const bizDocFields = $('businessDocFields');
+  if (bizDocFields) bizDocFields.classList.toggle('d-none', isInd);
+
+  if (saveDraft && currentVerifApp && (currentVerifApp.status === 'DRAFT' || currentVerifApp.status === 'ACTION_REQUIRED')) {
+    saveDraftAction(false);
+  }
+}
+
+function jumpToWizardStep(step) {
+  if (step < 1 || step > 5) return;
+  currentWizardStep = step;
+  try {
+    sessionStorage.setItem('lsc_verif_step', String(step));
+  } catch {}
+
+  // Update Stepper Nodes
+  for (let i = 1; i <= 5; i++) {
+    const node = $('stepNode' + i);
+    const content = $('verifStep' + i);
+    if (node) {
+      node.classList.remove('active', 'completed');
+      if (i === step) node.classList.add('active');
+      else if (i < step) node.classList.add('completed');
+    }
+    if (content) {
+      if (i === step) {
+        content.classList.remove('d-none');
+      } else {
+        content.classList.add('d-none');
+      }
+    }
+  }
+
+  // If jumping to step 5, populate review summary
+  if (step === 5) {
+    populateReviewSummary();
+  }
+}
+
+function wizardNext(currentStep) {
+  const clearFieldErrors = () => {
+    ['vLegalName', 'vIdType', 'vIdNumber', 'vServiceAddress', 'vPrivacyConsent', 'vBizName', 'vBizAddress', 'vLocationProofType'].forEach(id => {
+      $(id)?.classList.remove('is-invalid');
+    });
+  };
+  clearFieldErrors();
+
+  if (currentStep === 1) {
+    jumpToWizardStep(2);
+    return;
+  }
+  if (currentStep === 2) {
+    const legalName = ($('vLegalName')?.value || '').trim();
+    const idType = $('vIdType')?.value || '';
+    const idNumber = ($('vIdNumber')?.value || '').trim();
+    const serviceAddress = ($('vServiceAddress')?.value || '').trim();
+    const privacyConsent = $('vPrivacyConsent')?.checked;
+
+    if (!legalName) {
+      $('vLegalName')?.classList.add('is-invalid');
+      showPageAlert('Please enter your full legal name as shown on your ID document.', false);
+      $('vLegalName')?.focus();
+      return;
+    }
+    if (!idType) {
+      $('vIdType')?.classList.add('is-invalid');
+      showPageAlert('Please select your government-issued ID type.', false);
+      $('vIdType')?.focus();
+      return;
+    }
+    if (!idNumber) {
+      $('vIdNumber')?.classList.add('is-invalid');
+      showPageAlert('Please enter your ID document number.', false);
+      $('vIdNumber')?.focus();
+      return;
+    }
+    if (!serviceAddress) {
+      $('vServiceAddress')?.classList.add('is-invalid');
+      showPageAlert('Please enter your residential or contact address.', false);
+      $('vServiceAddress')?.focus();
+      return;
+    }
+    if (!privacyConsent) {
+      $('vPrivacyConsent')?.classList.add('is-invalid');
+      showPageAlert('You must consent to the privacy and verification policy to proceed.', false);
+      $('vPrivacyConsent')?.focus();
+      return;
+    }
+
+    saveDraftAction(false);
+    jumpToWizardStep(3);
+    return;
+  }
+  if (currentStep === 3) {
+    if (selectedProviderType === 'BUSINESS') {
+      const bizName = ($('vBizName')?.value || '').trim();
+      const bizAddress = ($('vBizAddress')?.value || '').trim();
+      const proofType = $('vLocationProofType')?.value || '';
+
+      if (!bizName) {
+        $('vBizName')?.classList.add('is-invalid');
+        showPageAlert('Please enter your business or shop name.', false);
+        $('vBizName')?.focus();
+        return;
+      }
+      if (!bizAddress) {
+        $('vBizAddress')?.classList.add('is-invalid');
+        showPageAlert('Please enter your commercial or shop address.', false);
+        $('vBizAddress')?.focus();
+        return;
+      }
+      if (!proofType) {
+        $('vLocationProofType')?.classList.add('is-invalid');
+        showPageAlert('Please select your premises location proof option.', false);
+        $('vLocationProofType')?.focus();
+        return;
+      }
+    }
+
+    saveDraftAction(false);
+    jumpToWizardStep(4);
+    return;
+  }
+  if (currentStep === 4) {
+    // Check required documents
+    const docs = (currentVerifApp && currentVerifApp.documents) || [];
+    const hasId = docs.some(d => d.documentType === 'IDENTITY_PROOF');
+    if (!hasId) {
+      showPageAlert('Please upload your government-issued ID document.', false);
+      return;
+    }
+
+    if (selectedProviderType === 'BUSINESS') {
+      const hasExterior = docs.some(d => d.documentType === 'SHOP_EXTERIOR');
+      const hasProof = docs.some(d => d.documentType === 'LOCATION_PROOF');
+      if (!hasExterior) {
+        showPageAlert('Please upload a clear photograph of the shop exterior.', false);
+        return;
+      }
+      if (!hasProof) {
+        showPageAlert('Please upload your business premises location proof (rent agreement or ownership deed).', false);
+        return;
+      }
+    }
+
+    jumpToWizardStep(5);
+  }
+}
+
+function wizardBack(currentStep) {
+  if (currentStep > 1) {
+    jumpToWizardStep(currentStep - 1);
+  }
+}
+
+function triggerFileInput(docType) {
+  const inp = $('file_' + docType);
+  if (inp) inp.click();
+}
+
+async function uploadSelectedFile(docType, inputEl) {
+  if (!inputEl || !inputEl.files || !inputEl.files[0]) return;
+  const file = inputEl.files[0];
+
+  const maxBytes = 5 * 1024 * 1024;
+  if (file.size > maxBytes) {
+    showPageAlert(`File "${file.name}" exceeds the maximum 5 MB limit (${(file.size / (1024*1024)).toFixed(1)} MB).`, false);
+    inputEl.value = '';
+    return;
+  }
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  const allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'pdf'];
+  if (!allowedExts.includes(ext)) {
+    showPageAlert(`File format ".${ext}" is not supported. Please upload JPEG, PNG, WebP or PDF.`, false);
+    inputEl.value = '';
+    return;
+  }
+
+  const dz = $('dz_' + docType);
+  let oldDzHtml = '';
+  if (dz) {
+    oldDzHtml = dz.innerHTML;
+    dz.innerHTML = `
+      <div class="py-2 text-center">
+        <div class="spinner-border spinner-border-sm text-primary mb-1"></div>
+        <div class="small fw-semibold text-primary">Uploading & verifying file content...</div>
+        <div class="text-muted" style="font-size:0.7rem;">Checking magic bytes & security signatures</div>
+      </div>`;
+    dz.style.pointerEvents = 'none';
+  }
+
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('type', docType);
+
+    await api('/provider/verification/documents', {
+      method: 'POST',
+      body: fd
+    });
+
+    showPageAlert(`Document "${file.name}" uploaded and verified successfully!`, true);
+    await loadVerification(false);
+  } catch (err) {
+    showPageAlert(err.message || 'Failed to upload document', false);
+  } finally {
+    if (dz) {
+      dz.innerHTML = oldDzHtml;
+      dz.style.pointerEvents = 'auto';
+    }
+    inputEl.value = '';
+  }
+}
+
+async function deleteDoc(docId) {
+  if (!confirm('Are you sure you want to remove this document? You can upload a replacement.')) return;
+  try {
+    await api('/provider/verification/documents/' + docId, { method: 'DELETE' });
+    showPageAlert('Document removed.', true);
+    await loadVerification(false);
+  } catch (err) {
+    showPageAlert(err.message || 'Could not delete document', false);
+  }
+}
+
+async function saveDraftAction(showToast = true) {
+  const payload = {
+    providerType: selectedProviderType,
+    legalName: $('vLegalName')?.value || '',
+    dob: $('vDob')?.value || null,
+    idType: $('vIdType')?.value || '',
+    idNumber: $('vIdNumber')?.value || '',
+    serviceAddress: $('vServiceAddress')?.value || '',
+    city: $('vCity')?.value || '',
+    locality: $('vLocality')?.value || '',
+    pincode: $('vPincode')?.value || '',
+    privacyConsent: $('vPrivacyConsent')?.checked || false,
+    businessName: $('vBizName')?.value || '',
+    businessType: $('vBizType')?.value || '',
+    businessAddress: $('vBizAddress')?.value || '',
+    shopAddress: $('vBizAddress')?.value || '',
+    businessPhone: $('vBizPhone')?.value || '',
+    businessDescription: $('vBizDesc')?.value || '',
+    locationProofType: $('vLocationProofType')?.value || '',
+    servicesOffered: $('vServicesOffered')?.value || '',
+    serviceAreas: $('vServiceAreas')?.value || '',
+    operatingHours: $('vOperatingHours')?.value || ''
+  };
+
+  try {
+    const app = await api('/provider/verification/draft', {
+      method: 'POST',
+      body: payload
+    });
+    currentVerifApp = app;
+    if (showToast) {
+      showPageAlert('Verification draft progress saved successfully.', true);
+    }
+  } catch (err) {
+    if (showToast) {
+      showPageAlert(err.message || 'Could not save draft.', false);
+    }
+  }
+}
+
+async function confirmSubmitVerification() {
+  if (isVerifSubmitting) return;
+
+  const finalConsent = $('vFinalConsent');
+  if (finalConsent && !finalConsent.checked) {
+    showPageAlert('Please confirm the accuracy declaration before submitting.', false);
+    return;
+  }
+
+  isVerifSubmitting = true;
+  const btn = $('btnSubmitVerification');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting Application...';
+  }
+
+  try {
+    await saveDraftAction(false);
+    const res = await api('/provider/verification/submit', { method: 'POST' });
+    currentVerifApp = res;
+    showPageAlert(`Application ${res.referenceNumber || ''} submitted successfully! Our onboarding team will review it shortly.`, true);
+    await loadVerification();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (err) {
+    showPageAlert(err.message || 'Could not submit application.', false);
+  } finally {
+    isVerifSubmitting = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-send-check me-1"></i> Submit Verification Application';
+    }
+  }
+}
+
+function enableWizardEditing() {
+  const stepper = $('verifStepper');
+  const trackerView = $('verifTrackerView');
+  if (stepper) stepper.classList.remove('d-none');
+  if (trackerView) trackerView.classList.add('d-none');
+  jumpToWizardStep(1);
+}
+
+function renderVerificationUI(app, isInitialLoad = false) {
+  if (!app) return;
+
+  const st = app.status || 'DRAFT';
+  const ref = app.referenceNumber || 'APP-PENDING';
+  selectedProviderType = app.providerType || 'INDIVIDUAL';
+
+  const stBadge = $('verifStatusBadge');
+  const refPill = $('verifRefPill');
+  const navBadge = $('navVerificationBadge');
+  const verifBadgeSidebar = $('verifBadge');
+
+  if (refPill) refPill.textContent = 'Ref: ' + ref;
+
+  const statusStyles = {
+    DRAFT: { cls: 'status-pill-draft', text: 'DRAFT', navCls: 'bg-light text-secondary' },
+    SUBMITTED: { cls: 'status-pill-submitted', text: 'SUBMITTED', navCls: 'bg-info-subtle text-info' },
+    UNDER_REVIEW: { cls: 'status-pill-review', text: 'UNDER REVIEW', navCls: 'bg-primary-subtle text-primary' },
+    ACTION_REQUIRED: { cls: 'status-pill-action', text: 'ACTION REQUIRED', navCls: 'bg-warning-subtle text-warning' },
+    VERIFIED: { cls: 'status-pill-verified', text: 'VERIFIED', navCls: 'bg-success-subtle text-success' },
+    REJECTED: { cls: 'status-pill-rejected', text: 'REJECTED', navCls: 'bg-danger-subtle text-danger' }
+  };
+
+  const style = statusStyles[st] || statusStyles.DRAFT;
+  if (stBadge) {
+    stBadge.className = `badge ${style.cls} px-3 py-1.5 rounded-pill fw-bold`;
+    stBadge.textContent = style.text;
+  }
+  if (navBadge) {
+    navBadge.className = `badge rounded-pill ms-auto ${style.navCls}`;
+    navBadge.textContent = style.text;
+  }
+  if (verifBadgeSidebar) {
+    renderVerificationBadge(st === 'VERIFIED' ? 'VERIFIED' : (st === 'REJECTED' ? 'REJECTED' : 'PENDING'));
+  }
+
+  // Overview Alerts
+  const bAction = $('bannerActionRequired');
+  const bDraft = $('bannerDraft');
+  const bReview = $('bannerUnderReview');
+
+  if (bAction) bAction.classList.add('d-none');
+  if (bDraft) bDraft.classList.add('d-none');
+  if (bReview) bReview.classList.add('d-none');
+
+  if (st === 'ACTION_REQUIRED') {
+    if (bAction) {
+      bAction.classList.remove('d-none');
+      if ($('bannerActionRequiredText')) {
+        $('bannerActionRequiredText').textContent = app.actionRequiredReason || 'Administrator requested document corrections or additional details.';
+      }
+    }
+  } else if (st === 'DRAFT') {
+    if (bDraft) bDraft.classList.remove('d-none');
+  } else if (st === 'SUBMITTED' || st === 'UNDER_REVIEW') {
+    if (bReview) {
+      bReview.classList.remove('d-none');
+      if ($('bannerUnderReviewText')) {
+        $('bannerUnderReviewText').textContent = st === 'UNDER_REVIEW'
+          ? 'An authorized administrator is actively reviewing your submitted documents.'
+          : 'Your application has been received and is queued for verification review.';
+      }
+    }
+  }
+
+  // Populate inputs safely without overwriting fields the user is currently typing in
+  const setValSafe = (id, val) => {
+    const el = $(id);
+    if (!el) return;
+    if (document.activeElement === el) return;
+    if (isInitialLoad || !el.value) {
+      el.value = val || '';
+    }
+  };
+
+  setValSafe('vLegalName', app.legalName);
+  setValSafe('vDob', app.dob);
+  setValSafe('vIdType', app.idType);
+  setValSafe('vIdNumber', app.idNumber || app.idNumberMasked);
+  setValSafe('vServiceAddress', app.serviceAddress);
+  setValSafe('vCity', app.city);
+  setValSafe('vLocality', app.locality);
+  setValSafe('vPincode', app.pincode);
+  if ($('vPrivacyConsent') && (isInitialLoad || !$('vPrivacyConsent').checked)) {
+    $('vPrivacyConsent').checked = !!app.privacyConsent;
+  }
+
+  setValSafe('vBizName', app.businessName);
+  setValSafe('vBizType', app.businessType);
+  setValSafe('vBizAddress', app.businessAddress || app.shopAddress);
+  setValSafe('vBizPhone', app.businessPhone);
+  setValSafe('vOperatingHours', app.operatingHours);
+  setValSafe('vBizDesc', app.businessDescription);
+  setValSafe('vLocationProofType', app.locationProofType || 'RENT_AGREEMENT');
+  setValSafe('vServicesOffered', app.servicesOffered);
+  setValSafe('vServiceAreas', app.serviceAreas);
+
+  selectProviderType(selectedProviderType, false);
+  renderDocPreviews(app.documents || [], st);
+
+  // Status Banner in Verification Tab
+  const vBanner = $('verifStatusBanner');
+  if (vBanner) {
+    if (st === 'ACTION_REQUIRED') {
+      vBanner.className = 'rounded-3 p-3 mb-4 alert alert-warning border-warning-subtle shadow-xs';
+      vBanner.innerHTML = `
+        <div class="d-flex align-items-start gap-2">
+          <i class="bi bi-exclamation-octagon-fill text-warning fs-5 mt-0.5"></i>
+          <div>
+            <strong class="d-block text-dark">Action Required by Reviewer</strong>
+            <div class="small text-dark mb-2">${esc(app.actionRequiredReason || 'Please review your submitted documents and correct the requested items.')}</div>
+            <div class="small text-muted">You can replace the requested files below and resubmit your application for verification.</div>
+          </div>
+        </div>`;
+      vBanner.classList.remove('d-none');
+    } else if (st === 'VERIFIED') {
+      vBanner.className = 'rounded-3 p-3 mb-4 alert alert-success border-success-subtle shadow-xs';
+      vBanner.innerHTML = `
+        <div class="d-flex align-items-start gap-2">
+          <i class="bi bi-patch-check-fill text-success fs-5 mt-0.5"></i>
+          <div>
+            <strong class="d-block text-dark">Partner Account Verified</strong>
+            <div class="small text-dark">Your identity and credentials have been verified by platform administrators. Your verified badge is active and customer bookings are enabled.</div>
+          </div>
+        </div>`;
+      vBanner.classList.remove('d-none');
+    } else if (st === 'REJECTED') {
+      vBanner.className = 'rounded-3 p-3 mb-4 alert alert-danger border-danger-subtle shadow-xs';
+      vBanner.innerHTML = `
+        <div class="d-flex align-items-start gap-2">
+          <i class="bi bi-x-circle-fill text-danger fs-5 mt-0.5"></i>
+          <div>
+            <strong class="d-block text-dark">Verification Not Approved</strong>
+            <div class="small text-dark mb-2">${esc(app.rejectionReason || 'The application did not satisfy verification criteria.')}</div>
+            <button type="button" class="btn btn-danger btn-sm rounded-pill px-3 fw-semibold" onclick="enableWizardEditing()">
+              <i class="bi bi-arrow-repeat me-1"></i>Edit & Resubmit Application
+            </button>
+          </div>
+        </div>`;
+      vBanner.classList.remove('d-none');
+    } else if (st === 'UNDER_REVIEW') {
+      vBanner.className = 'rounded-3 p-3 mb-4 alert alert-primary border-primary-subtle shadow-xs';
+      vBanner.innerHTML = `
+        <div class="d-flex align-items-center gap-2">
+          <div class="spinner-border spinner-border-sm text-primary"></div>
+          <div>
+            <strong class="d-block text-dark">Application Under Review</strong>
+            <div class="small text-dark">An administrator is inspecting your submitted documents. You will be notified once a decision is made.</div>
+          </div>
+        </div>`;
+      vBanner.classList.remove('d-none');
+    } else if (st === 'SUBMITTED') {
+      vBanner.className = 'rounded-3 p-3 mb-4 alert alert-info border-info-subtle shadow-xs';
+      vBanner.innerHTML = `
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-check2-circle text-info fs-5"></i>
+          <div>
+            <strong class="d-block text-dark">Application Submitted Successfully</strong>
+            <div class="small text-dark">Reference: <code>${esc(ref)}</code>. Awaiting onboarding review.</div>
+          </div>
+        </div>`;
+      vBanner.classList.remove('d-none');
+    } else {
+      vBanner.classList.add('d-none');
+    }
+  }
+
+  // Application Tracker & View State
+  const trackerView = $('verifTrackerView');
+  const stepper = $('verifStepper');
+  const btnEditSubmitted = $('btnEditSubmittedApp');
+
+  if (st === 'SUBMITTED' || st === 'UNDER_REVIEW' || st === 'VERIFIED') {
+    if (trackerView) trackerView.classList.remove('d-none');
+    renderAuditTimeline(app.history || []);
+    if (btnEditSubmitted) {
+      btnEditSubmitted.style.display = (st === 'VERIFIED') ? 'none' : 'inline-block';
+    }
+  } else {
+    if (trackerView) trackerView.classList.add('d-none');
+    if (stepper) stepper.classList.remove('d-none');
+  }
+
+  // ONLY adjust or reset wizard step on initial load
+  // Background polling or doc updates will NEVER jump or reset the current step
+  if (isInitialLoad) {
+    if (st === 'ACTION_REQUIRED') {
+      jumpToWizardStep(4);
+    } else if (st === 'DRAFT') {
+      const urlStep = parseInt(new URLSearchParams(window.location.search).get('step') || '0', 10);
+      const savedStep = parseInt(sessionStorage.getItem('lsc_verif_step') || '0', 10);
+      const targetStep = (urlStep >= 1 && urlStep <= 5) ? urlStep : ((savedStep >= 1 && savedStep <= 5) ? savedStep : 1);
+      jumpToWizardStep(targetStep);
+    }
+  }
+}
+
+function renderDocPreviews(docs, status) {
+  const docTypes = ['IDENTITY_PROOF', 'SHOP_EXTERIOR', 'SHOP_SIGNBOARD', 'SHOP_INTERIOR', 'LOCATION_PROOF', 'BUSINESS_REGISTRATION'];
+  const canModify = (status === 'DRAFT' || status === 'ACTION_REQUIRED');
+
+  docTypes.forEach(type => {
+    const container = $('preview_' + type);
+    const dz = $('dz_' + type);
+    if (!container) return;
+
+    const matched = docs.filter(d => d.documentType === type);
+    if (matched.length === 0) {
+      container.innerHTML = '';
+      if (dz) dz.classList.remove('d-none');
+      return;
+    }
+
+    container.innerHTML = matched.map(doc => {
+      const isImg = ['IMAGE_JPEG', 'IMAGE_PNG', 'IMAGE_WEBP'].includes(doc.contentType) || /\.(jpe?g|png|webp)$/i.test(doc.fileName);
+      const token = (typeof Auth !== 'undefined' && typeof Auth.token === 'function')
+        ? Auth.token()
+        : ((typeof Auth !== 'undefined' && typeof Auth.getToken === 'function')
+          ? Auth.getToken()
+          : (localStorage.getItem('lsc_token') || ''));
+      const fileUrl = `/api/verification/documents/${doc.id}/file?token=${encodeURIComponent(token)}`;
+
+      return `
+        <div class="d-flex align-items-center justify-content-between p-2 mt-2 bg-light rounded-3 border">
+          <div class="d-flex align-items-center gap-2 overflow-hidden">
+            ${isImg 
+              ? `<img src="${fileUrl}" class="rounded object-fit-cover" style="width: 44px; height: 44px; flex-shrink: 0;" alt="${esc(doc.documentType)}">` 
+              : `<div class="rounded bg-danger-subtle text-danger d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; flex-shrink: 0;"><i class="bi bi-file-earmark-pdf fs-4"></i></div>`}
+            <div class="overflow-hidden">
+              <div class="small fw-bold text-dark text-truncate">${esc(doc.fileName)}</div>
+              <div class="text-muted" style="font-size: 0.7rem;">${(doc.fileSize / 1024).toFixed(0)} KB · Verified Content · <a href="${fileUrl}" target="_blank" class="text-primary text-decoration-none">Inspect <i class="bi bi-box-arrow-up-right"></i></a></div>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;"><i class="bi bi-check-circle-fill me-1"></i>Uploaded</span>
+            ${canModify ? `<button type="button" class="btn btn-outline-danger btn-sm p-1 rounded-circle" style="width: 28px; height: 28px;" onclick="deleteDoc(${doc.id})" title="Remove document"><i class="bi bi-trash"></i></button>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+
+    if (dz) {
+      if (type === 'IDENTITY_PROOF' || type === 'LOCATION_PROOF') {
+        dz.classList.add('d-none');
+      }
+    }
+  });
+}
+
+function populateReviewSummary() {
+  if ($('revProviderType')) $('revProviderType').textContent = selectedProviderType;
+  if ($('revProviderTypeDesc')) {
+    $('revProviderTypeDesc').textContent = (selectedProviderType === 'INDIVIDUAL')
+      ? 'Independent Service Professional (No commercial storefront)'
+      : 'Shop or Registered Commercial Establishment';
+  }
+
+  if ($('revLegalName')) $('revLegalName').textContent = $('vLegalName')?.value || '-';
+  if ($('revIdType')) $('revIdType').textContent = $('vIdType')?.value || '-';
+  if ($('revIdNumber')) $('revIdNumber').textContent = $('vIdNumber')?.value || '-';
+  if ($('revAddress')) {
+    const parts = [$('vServiceAddress')?.value, $('vLocality')?.value, $('vCity')?.value, $('vPincode')?.value].filter(Boolean);
+    $('revAddress').textContent = parts.join(', ') || '-';
+  }
+
+  const revBizBlock = $('revBusinessBlock');
+  if (revBizBlock) {
+    if (selectedProviderType === 'INDIVIDUAL') {
+      revBizBlock.innerHTML = `
+        <div class="col-12 text-muted fst-italic">Individual Professional · No commercial premises required</div>`;
+    } else {
+      revBizBlock.innerHTML = `
+        <div class="col-sm-6"><span class="text-muted">Business Name:</span> <strong>${esc($('vBizName')?.value || '-')}</strong></div>
+        <div class="col-sm-6"><span class="text-muted">Business Type:</span> <span>${esc($('vBizType')?.value || '-')}</span></div>
+        <div class="col-12"><span class="text-muted">Shop Address:</span> <span>${esc($('vBizAddress')?.value || '-')}</span></div>
+        <div class="col-sm-6"><span class="text-muted">Contact Phone:</span> <span>${esc($('vBizPhone')?.value || '-')}</span></div>
+        <div class="col-sm-6"><span class="text-muted">Premises Proof:</span> <span>${esc($('vLocationProofType')?.value || '-')}</span></div>`;
+    }
+  }
+
+  if ($('revServices')) $('revServices').textContent = $('vServicesOffered')?.value || (providerData?.services?.map(s => s.name).join(', ') || 'General');
+  if ($('revAreas')) $('revAreas').textContent = $('vServiceAreas')?.value || (areas?.map(a => a.area).join(', ') || 'City-wide');
+
+  const docList = $('revDocList');
+  if (docList) {
+    const docs = (currentVerifApp && currentVerifApp.documents) || [];
+    if (docs.length === 0) {
+      docList.innerHTML = '<div class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>No documents uploaded yet. Go back to Step 4 to upload required proofs.</div>';
+    } else {
+      docList.innerHTML = docs.map(d => `
+        <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded-2 border small">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-file-earmark-check-fill text-success fs-5"></i>
+            <div>
+              <span class="fw-semibold text-dark">${esc(d.documentType.replace('_', ' '))}</span>
+              <div class="text-muted" style="font-size: 0.7rem;">${esc(d.fileName)} (${(d.fileSize/1024).toFixed(0)} KB)</div>
+            </div>
+          </div>
+          <span class="badge bg-success-subtle text-success">Ready</span>
+        </div>
+      `).join('');
+    }
+  }
+}
+
+function renderAuditTimeline(history) {
+  const container = $('verifAuditTimeline');
+  if (!container) return;
+
+  if (!history || history.length === 0) {
+    container.innerHTML = '<div class="text-muted small">No audit history recorded yet.</div>';
+    return;
+  }
+
+  const badgeForAction = {
+    DRAFT_SAVED: 'bg-light text-secondary border',
+    SUBMITTED: 'bg-info-subtle text-info border border-info-subtle',
+    START_REVIEW: 'bg-primary-subtle text-primary border border-primary-subtle',
+    REQUEST_INFO: 'bg-warning-subtle text-warning border border-warning-subtle',
+    APPROVE: 'bg-success-subtle text-success border border-success-subtle',
+    REJECT: 'bg-danger-subtle text-danger border border-danger-subtle',
+    DOC_UPLOADED: 'bg-light text-dark border',
+    DOC_DELETED: 'bg-light text-danger border'
+  };
+
+  container.innerHTML = history.map(item => `
+    <div class="d-flex align-items-start gap-3 p-3 bg-white rounded-3 border">
+      <div class="rounded-circle bg-light p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; font-size: 1rem;">
+        <i class="bi bi-clock-history text-secondary"></i>
+      </div>
+      <div class="flex-grow-1">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge ${badgeForAction[item.action] || 'bg-light text-dark'} fw-bold" style="font-size: 0.72rem;">${esc(item.action)}</span>
+            <span class="small fw-semibold text-dark">${esc(item.actorName || 'System')}</span>
+            <span class="badge bg-light text-secondary" style="font-size: 0.65rem;">${esc(item.actorRole || 'SYSTEM')}</span>
+          </div>
+          <div class="text-muted" style="font-size: 0.72rem;">${item.timestamp ? new Date(item.timestamp).toLocaleString() : ''}</div>
+        </div>
+        ${item.reason ? `<div class="small text-danger fw-semibold mt-1"><i class="bi bi-chat-left-dots me-1"></i>${esc(item.reason)}</div>` : ''}
+        ${item.notes ? `<div class="small text-muted mt-0.5">${esc(item.notes)}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// Helper: Formats appointment date & time
+function formatBookingSchedule(b) {
+  if (b.bookingType === 'QUICK_SERVICE') {
+    return '⚡ Urgent Quick Service (Immediate)';
+  }
+  const dateStr = b.bookingDate || 'Scheduled';
+  const timeStr = b.bookingTime || '';
+  return `${dateStr}${timeStr ? ' at ' + timeStr : ''}`;
+}
+
+// Status badge helper
+function getStatusBadge(status) {
+  const map = {
+    PENDING: '<span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pending Request</span>',
+    ACCEPTED: '<span class="badge bg-info-subtle text-info border border-info-subtle">Accepted</span>',
+    ON_THE_WAY: '<span class="badge bg-primary-subtle text-primary border border-primary-subtle">On The Way</span>',
+    SERVICE_STARTED: '<span class="badge bg-success-subtle text-success border border-success-subtle">Service Started</span>',
+    AWAITING_COMPLETION: '<span class="badge bg-warning text-dark border">Awaiting Customer Confirmation</span>',
+    COMPLETED: '<span class="badge bg-success text-white">Completed</span>',
+    CANCELLED: '<span class="badge bg-secondary text-white">Cancelled</span>'
+  };
+  return map[status] || `<span class="badge bg-light text-dark">${esc(status)}</span>`;
+}
+
+// Render Bookings & Financials
+function renderBookingsData() {
+  const pending = allBookings.filter(b => b.status === 'PENDING').sort((a, b) => (b.bookingType === 'QUICK_SERVICE') - (a.bookingType === 'QUICK_SERVICE'));
+  const activeStatuses = ['ACCEPTED', 'ON_THE_WAY', 'SERVICE_STARTED', 'AWAITING_COMPLETION'];
+  const active = allBookings.filter(b => activeStatuses.includes(b.status));
+  const completed = allBookings.filter(b => b.status === 'COMPLETED');
+
+  // Update counters
+  $('stPending').textContent = pending.length;
+  $('stActive').textContent = active.length;
+  $('stDone').textContent = completed.length;
+
+  document.querySelectorAll('.badge-pend-count').forEach(b => {
+    b.textContent = pending.length;
+    b.classList.toggle('d-none', pending.length === 0);
+  });
+  document.querySelectorAll('.badge-active-count').forEach(b => {
+    b.textContent = active.length;
+    b.classList.toggle('d-none', active.length === 0);
+  });
+
+  // Calculate real earnings from completed bookings
+  const baseRate = (providerData && providerData.approxPrice) ? Number(providerData.approxPrice) : 499;
+  const totalEarn = completed.length * baseRate;
+  $('stEarnings').textContent = `₹${totalEarn.toLocaleString('en-IN')}`;
+  $('earnTotal').textContent = `₹${totalEarn.toLocaleString('en-IN')}`;
+  $('earnOrdersCount').textContent = completed.length;
+  $('earnAvgTicket').textContent = `₹${baseRate.toLocaleString('en-IN')}`;
+
+  // Urgent Alert on Overview
+  const urgentQuick = pending.filter(b => b.bookingType === 'QUICK_SERVICE');
+  const urgentBox = $('urgentQuickServiceAlert');
+  if (urgentQuick.length > 0) {
+    urgentBox.classList.remove('d-none');
+    $('urgentQuickSummary').textContent = `${urgentQuick.length} customer${urgentQuick.length > 1 ? 's' : ''} requesting urgent dispatch in your area.`;
+  } else {
+    urgentBox.classList.add('d-none');
+  }
+
+  // 1. Render Overview Recent Activity (Top 4)
+  const recent = allBookings.slice(0, 4);
+  if (recent.length > 0) {
+    $('overviewRecentList').innerHTML = recent.map(b => renderBookingRow(b, false)).join('');
+  } else {
+    $('overviewRecentList').innerHTML = '<div class="text-center py-4 text-muted small"><i class="bi bi-inbox fs-3 d-block mb-2 text-muted"></i>No booking activity yet. When customers request your services, they will appear here.</div>';
+  }
+
+  // 2. Render Pending Requests Tab
+  renderFilteredRequests();
+
+  // 3. Render Active Jobs Tab
+  if (active.length > 0) {
+    $('activeJobsList').innerHTML = active.map(b => renderBookingRow(b, true)).join('');
+  } else {
+    $('activeJobsList').innerHTML = '<div class="text-center py-4 text-muted small"><i class="bi bi-check2-circle fs-3 d-block mb-2 text-success"></i>No active jobs right now. Accepted bookings will appear here for progress tracking and OTP verification.</div>';
+  }
+
+  // 4. Render History Tab
+  renderHistoryBookings();
+
+  // 5. Render Quick Service Dispatch Tab
+  const allQuick = allBookings.filter(b => b.bookingType === 'QUICK_SERVICE');
+  if (allQuick.length > 0) {
+    $('quickDispatchList').innerHTML = allQuick.map(b => renderBookingRow(b, true)).join('');
+  } else {
+    $('quickDispatchList').innerHTML = '<div class="text-center py-4 text-muted small"><i class="bi bi-stopwatch fs-3 d-block mb-2 text-muted"></i>No Quick Service requests logged yet. Stay online to be matched with urgent nearby customers.</div>';
+  }
+
+  // 6. Render Earnings Table
+  if (completed.length > 0) {
+    $('earningsTableBody').innerHTML = completed.map(b => `
+      <tr>
+        <td class="font-monospace fw-semibold text-primary">#BK-${b.id}</td>
+        <td>${b.completedAt ? b.completedAt.substring(0, 10) : (b.bookingDate || 'Recent')}</td>
+        <td><strong>${esc(b.customerName || 'Customer')}</strong></td>
+        <td>${esc(b.serviceName || 'Home Service')}</td>
+        <td><span class="badge bg-success-subtle text-success">Paid / Verified</span></td>
+        <td class="text-end fw-bold text-dark">₹${baseRate.toLocaleString('en-IN')}</td>
+      </tr>
+    `).join('');
+  } else {
+    $('earningsTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No completed appointments yet</td></tr>';
+  }
+}
+
+function filterRequests(filterType) {
+  activeRequestFilter = filterType;
+  document.querySelectorAll('.filter-req-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === filterType);
+  });
+  renderFilteredRequests();
+}
+
+function renderFilteredRequests() {
+  let pending = allBookings.filter(b => b.status === 'PENDING');
+  if (activeRequestFilter === 'QUICK') {
+    pending = pending.filter(b => b.bookingType === 'QUICK_SERVICE');
+  } else if (activeRequestFilter === 'NORMAL') {
+    pending = pending.filter(b => b.bookingType !== 'QUICK_SERVICE');
+  }
+
+  if (pending.length > 0) {
+    $('pendingRequestsList').innerHTML = pending.map(b => renderBookingRow(b, true)).join('');
+  } else {
+    $('pendingRequestsList').innerHTML = '<div class="text-center py-4 text-muted small"><i class="bi bi-bell-slash fs-3 d-block mb-2 text-muted"></i>No pending requests matching the filter.</div>';
+  }
+}
+
+function renderHistoryBookings() {
+  const q = ($('historySearchInput') ? $('historySearchInput').value.trim().toLowerCase() : '');
+  const pastStatuses = ['COMPLETED', 'CANCELLED'];
+  let list = allBookings.filter(b => pastStatuses.includes(b.status));
+  if (q) {
+    list = list.filter(b => (b.customerName && b.customerName.toLowerCase().includes(q)) || (b.serviceName && b.serviceName.toLowerCase().includes(q)));
+  }
+
+  if (list.length > 0) {
+    $('historyBookingsList').innerHTML = list.map(b => renderBookingRow(b, false)).join('');
+  } else {
+    $('historyBookingsList').innerHTML = '<div class="text-center py-4 text-muted small"><i class="bi bi-clock-history fs-3 d-block mb-2 text-muted"></i>No completed or past appointments found.</div>';
+  }
+}
+
+// Booking Card Component Generator
+function renderBookingRow(b, showFullActions) {
+  const isQuick = b.bookingType === 'QUICK_SERVICE';
+  const hasCoords = b.latitude != null && b.longitude != null;
+  const mapsLink = hasCoords ? `https://www.google.com/maps/dir/?api=1&destination=${b.latitude},${b.longitude}` : null;
+  const baseRate = (providerData && providerData.approxPrice) ? Number(providerData.approxPrice) : 499;
+
+  let actionButtonsHtml = '';
+  if (showFullActions) {
+    if (b.status === 'PENDING') {
+      actionButtonsHtml = `
+        <div class="d-flex align-items-center gap-2 mt-3 pt-2 border-top">
+          <button type="button" class="btn btn-success btn-sm rounded-pill px-3 fw-semibold act-btn" data-act="accept" data-id="${b.id}">
+            <i class="bi bi-check-lg me-1"></i>Accept Job
+          </button>
+          <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 act-btn" data-act="reject" data-id="${b.id}">
+            <i class="bi bi-x-lg me-1"></i>Decline
+          </button>
+        </div>
+      `;
+    } else if (b.status === 'ACCEPTED') {
+      actionButtonsHtml = `
+        <div class="mt-3 pt-2 border-top">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+            <span class="small text-muted"><i class="bi bi-info-circle me-1"></i>Job accepted. Dispatch to customer:</span>
+            <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 act-btn" data-act="status" data-to="ON_THE_WAY" data-id="${b.id}">
+              <i class="bi bi-bicycle me-1"></i>Mark "On The Way"
+            </button>
+          </div>
+          ${renderOtpBox(b.id)}
+        </div>
+      `;
+    } else if (b.status === 'ON_THE_WAY') {
+      actionButtonsHtml = `
+        <div class="mt-3 pt-2 border-top">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="badge bg-primary-subtle text-primary"><i class="bi bi-geo-alt-fill me-1"></i>En Route to Customer</span>
+          </div>
+          ${renderOtpBox(b.id)}
+        </div>
+      `;
+    } else if (b.status === 'SERVICE_STARTED') {
+      actionButtonsHtml = `
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-3 pt-2 border-top">
+          <span class="badge bg-success-subtle text-success"><i class="bi bi-play-circle-fill me-1"></i>Service Currently in Progress</span>
+          <button type="button" class="btn btn-warning btn-sm rounded-pill px-3 fw-semibold act-btn" data-act="status" data-to="AWAITING_COMPLETION" data-id="${b.id}">
+            <i class="bi bi-check2-circle me-1"></i>Mark Service Finished
+          </button>
+        </div>
+      `;
+    } else if (b.status === 'AWAITING_COMPLETION') {
+      actionButtonsHtml = `
+        <div class="mt-3 pt-2 border-top small text-muted d-flex align-items-center gap-2">
+          <span class="spinner-grow spinner-grow-sm text-warning" role="status"></span>
+          <span>Awaiting customer sign-off and completion confirmation.</span>
+        </div>
+      `;
+    }
+  }
+
+  return `
+    <div class="booking-row-card ${isQuick ? 'quick-highlight' : ''}">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+          <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+            <span class="font-monospace small text-muted">#BK-${b.id}</span>
+            <strong class="text-dark fs-6">${esc(b.serviceName || 'Home Service')}</strong>
+            ${isQuick ? '<span class="urgent-quick-pill"><i class="bi bi-stopwatch-fill me-1"></i>Quick Service</span>' : ''}
+            ${b.distanceKm != null ? `<span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class="bi bi-pin-map-fill me-1"></i>${b.distanceKm} km away</span>` : ''}
+          </div>
+          <div class="small text-muted mb-1">
+            <i class="bi bi-person-fill text-secondary me-1"></i><strong>${esc(b.customerName || 'Customer')}</strong>
+            ${b.customerPhone ? `&bull; <a href="tel:${esc(b.customerPhone)}" class="text-primary text-decoration-none fw-semibold"><i class="bi bi-telephone-fill ms-1 me-1"></i>${esc(b.customerPhone)}</a>` : ''}
+          </div>
+          <div class="small text-muted mb-1">
+            <i class="bi bi-geo-alt-fill text-danger me-1"></i>${esc(b.formattedAddress || b.address || 'Address provided upon confirmation')}
+            ${mapsLink ? `<a href="${mapsLink}" target="_blank" class="badge text-bg-light border text-primary text-decoration-none ms-1"><i class="bi bi-map me-1"></i>Directions</a>` : ''}
+          </div>
+          <div class="small text-muted">
+            <i class="bi bi-clock-fill text-primary me-1"></i>${formatBookingSchedule(b)}
+            ${b.notes ? `&bull; <span class="text-dark">Note: <em>"${esc(b.notes)}"</em></span>` : ''}
+          </div>
+        </div>
+        <div class="text-end">
+          <div class="mb-2">${getStatusBadge(b.status)}</div>
+          <div class="fw-bold text-dark">₹${baseRate}</div>
+        </div>
+      </div>
+      ${actionButtonsHtml}
+    </div>
+  `;
+}
+
+function renderOtpBox(bookingId) {
+  return `
+    <div class="p-2.5 bg-light rounded-3 border mt-2">
+      <label class="form-label small fw-bold text-primary mb-1" for="otp-input-${bookingId}">
+        <i class="bi bi-shield-lock-fill me-1"></i>Enter Customer 4-Digit OTP to Start Service:
+      </label>
+      <div class="input-group input-group-sm" style="max-width: 290px;">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="otp-input-${bookingId}" class="form-control font-monospace text-center fw-bold" placeholder="4-digit OTP" autocomplete="off" style="letter-spacing: 5px; font-size: 1.05rem;">
+        <button class="btn btn-primary verify-otp-btn fw-semibold" type="button" data-id="${bookingId}">
+          <span class="btn-text"><i class="bi bi-check-circle me-1"></i>Verify OTP</span>
+          <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+        </button>
+      </div>
+      <div class="text-danger small mt-1 d-none" id="otp-err-${bookingId}"></div>
+    </div>
+  `;
+}
+
+// Action Button Click Listeners (Accept, Reject, Status)
+document.addEventListener('click', async e => {
+  const btn = e.target.closest('.act-btn');
+  if (btn) {
+    const { act, id, to } = btn.dataset;
+    if (act === 'reject' && !confirm('Are you sure you want to decline this booking request?')) {
+      return;
+    }
+    btn.disabled = true;
+    try {
+      if (act === 'accept') {
+        await api(`/provider/bookings/${id}/accept`, { method: 'PUT' });
+        showPageAlert('Booking accepted! Customer has been notified.');
+      } else if (act === 'reject') {
+        await api(`/provider/bookings/${id}/reject`, { method: 'PUT' });
+        showPageAlert('Booking declined.');
+      } else if (act === 'status') {
+        await api(`/provider/bookings/${id}/status`, { method: 'PUT', body: { status: to } });
+        showPageAlert(to === 'AWAITING_COMPLETION' ? 'Service finished! Awaiting customer confirmation.' : 'Status updated.');
+      }
+      await refreshDashboard(false);
+    } catch (ex) {
+      showPageAlert(ex.message || 'Operation failed', false);
+      btn.disabled = false;
+    }
+    return;
+  }
+
+  // OTP Verification Submission
+  const vBtn = e.target.closest('.verify-otp-btn');
+  if (vBtn) {
+    const id = vBtn.dataset.id;
+    const input = document.getElementById(`otp-input-${id}`);
+    const errEl = document.getElementById(`otp-err-${id}`);
+    const spinner = vBtn.querySelector('.spinner-border');
+    const btnText = vBtn.querySelector('.btn-text');
+    
+    if (errEl) errEl.classList.add('d-none');
+    const otpVal = input ? input.value.trim() : '';
+    if (!otpVal || !otpVal.match(/^[0-9]{4}$/)) {
+      if (errEl) {
+        errEl.textContent = 'Please enter the exact 4-digit numeric OTP provided by the customer.';
+        errEl.classList.remove('d-none');
+      }
+      return;
+    }
+
+    vBtn.disabled = true;
+    if (spinner) spinner.classList.remove('d-none');
+    if (btnText) btnText.classList.add('d-none');
+
+    try {
+      await api(`/provider/bookings/${id}/otp/verify`, {
+        method: 'POST',
+        body: { otp: otpVal }
+      });
+      showPageAlert('OTP successfully verified! Service is now marked in progress.');
+      await refreshDashboard(false);
+    } catch (ex) {
+      if (errEl) {
+        errEl.textContent = ex.message || 'Invalid or expired OTP. Please verify with customer.';
+        errEl.classList.remove('d-none');
+      } else {
+        showPageAlert(ex.message, false);
+      }
+      vBtn.disabled = false;
+      if (spinner) spinner.classList.add('d-none');
+      if (btnText) btnText.classList.remove('d-none');
+    }
+  }
+});
+
+// Render Customer Reviews
+function renderReviewsData() {
+  $('revCountBadge').textContent = `${allReviews.length} Review${allReviews.length === 1 ? '' : 's'}`;
+  $('sidebarReviewCount').textContent = allReviews.length;
+
+  if (allReviews.length > 0) {
+    // Overview Snapshot (top 2)
+    $('overviewReviewsList').innerHTML = allReviews.slice(0, 2).map(r => `
+      <div class="p-3 bg-light rounded-3 border">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <strong class="text-dark small">${esc(r.customerFirstName || 'Customer')}</strong>
+          <span class="text-muted" style="font-size: 0.75rem;">${r.createdAt ? r.createdAt.substring(0, 10) : ''}</span>
+        </div>
+        <div class="mb-1 text-warning small">${stars(r.rating)}</div>
+        <p class="small text-muted mb-0">"${esc(r.review || 'Excellent service!')}"</p>
+      </div>
+    `).join('');
+
+    // Full Reviews Tab
+    $('fullReviewsList').innerHTML = allReviews.map(r => `
+      <div class="p-3 bg-white rounded-3 border">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <div>
+            <strong class="text-dark">${esc(r.customerFirstName || 'Verified Customer')}</strong>
+            <span class="badge bg-success-subtle text-success ms-2 font-monospace" style="font-size: 0.68rem;">Verified Job #BK-${r.bookingId}</span>
+          </div>
+          <span class="text-muted small">${r.createdAt ? r.createdAt.substring(0, 10) : ''}</span>
+        </div>
+        <div class="mb-2 text-warning">${stars(r.rating)}</div>
+        <p class="text-muted small mb-0">${esc(r.review || 'No written comment.')}</p>
+      </div>
+    `).join('');
+  } else {
+    $('overviewReviewsList').innerHTML = '<div class="text-center py-3 text-muted small">No reviews received yet. Reviews appear here after customers rate completed jobs.</div>';
+    $('fullReviewsList').innerHTML = '<div class="text-center py-4 text-muted small"><i class="bi bi-star fs-3 d-block mb-2 text-muted"></i>No reviews received yet. Completed bookings with customer ratings will appear here.</div>';
+  }
+}
+
+// Render Sub-Services Packages
+function renderSubServices() {
+  const container = $('subServicesList');
+  if (!mySubServices.length) {
+    container.innerHTML = '<div class="text-muted small py-3 bg-light rounded-3 text-center">No specific sub-service packages configured yet. Click "+ Add Package" to customize.</div>';
+    return;
+  }
+  container.innerHTML = mySubServices.map((sub, i) => `
+    <div class="card p-3 border rounded-3 bg-white">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+          <img src="${esc(sub.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=400&q=80')}" alt="${esc(sub.name)}" class="thumb-preview-sm">
+          <div>
+            <strong class="text-dark d-block">${esc(sub.name)}</strong>
+            <span class="small text-muted">${esc(sub.category || 'Package')} &bull; ${esc(sub.duration || '40 mins')} &bull; <strong class="text-dark">₹${esc(sub.price || 499)}</strong></span>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" id="subEn-${i}" ${sub.enabled ? 'checked' : ''} onchange="toggleSubEnabled(${i}, this.checked)">
+            <label class="form-check-label small" for="subEn-${i}">${sub.enabled ? 'Active' : 'Hidden'}</label>
+          </div>
+          <button type="button" class="btn btn-outline-danger btn-sm p-1 px-2" onclick="removeSubService(${i})" title="Remove Package">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleSubEnabled(idx, val) {
+  if (mySubServices[idx]) mySubServices[idx].enabled = val;
+}
+
+function removeSubService(idx) {
+  mySubServices.splice(idx, 1);
+  renderSubServices();
+}
+
+$('btnConfirmAddSub').addEventListener('click', () => {
+  const name = $('mSubName').value.trim();
+  const price = num($('mSubPrice').value) || 499;
+  const duration = $('mSubDuration').value.trim() || '45 mins';
+  const description = $('mSubDesc').value.trim();
+  const imageUrl = $('mSubImg').value.trim() || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=400&q=80';
+
+  if (!name) return alert('Please enter package name');
+  mySubServices.push({ name, category: (providerData && providerData.businessName) || 'Service', description, price, duration, imageUrl, enabled: true });
+  renderSubServices();
+  bootstrap.Modal.getInstance($('addSubModal')).hide();
+  $('mSubName').value = '';
+  $('mSubPrice').value = '';
+  $('mSubDesc').value = '';
+  $('mSubImg').value = '';
+});
+
+// Render Portfolio & Videos
+function renderPortfolio() {
+  const container = $('portfolioCardsList');
+  if (!myPortfolio.length) {
+    container.innerHTML = '<div class="text-muted small py-3 bg-light rounded-3 text-center">No portfolio items added yet. Click "+ Add Project" to showcase before &amp; after transformations.</div>';
+    return;
+  }
+  container.innerHTML = myPortfolio.map((pf, i) => `
+    <div class="card p-3 border rounded-3 bg-white">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+          <img src="${esc(pf.beforeImageUrl)}" class="thumb-preview-sm" title="Before">
+          <i class="bi bi-arrow-right text-muted"></i>
+          <img src="${esc(pf.afterImageUrl)}" class="thumb-preview-sm" title="After">
+          <div class="ms-2">
+            <strong class="text-dark d-block">${esc(pf.title)}</strong>
+            <span class="small text-muted">${esc(pf.subService)} &bull; ${esc(pf.completedDate || 'Recent')}</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline-danger btn-sm p-1 px-2" onclick="removePfItem(${i})" title="Remove Project">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function removePfItem(idx) {
+  myPortfolio.splice(idx, 1);
+  renderPortfolio();
+}
+
+$('btnConfirmAddPf').addEventListener('click', () => {
+  const title = $('mPfTitle').value.trim();
+  const subService = $('mPfSub').value.trim() || 'Work Showcase';
+  const completedDate = $('mPfDate').value.trim() || 'Recent';
+  const beforeImageUrl = $('mPfBefore').value.trim();
+  const afterImageUrl = $('mPfAfter').value.trim();
+  const description = $('mPfDesc').value.trim();
+
+  if (!title || !beforeImageUrl || !afterImageUrl) return alert('Please enter project title, before image URL, and after image URL');
+  myPortfolio.push({ title, subService, completedDate, beforeImageUrl, afterImageUrl, description });
+  renderPortfolio();
+  bootstrap.Modal.getInstance($('addPfModal')).hide();
+  $('mPfTitle').value = '';
+  $('mPfBefore').value = '';
+  $('mPfAfter').value = '';
+  $('mPfDesc').value = '';
+});
+
+function renderVideos() {
+  const container = $('videosCardsList');
+  if (!myVideos.length) {
+    container.innerHTML = '<div class="text-muted small py-3 bg-light rounded-3 text-center">No video demonstrations added yet. Click "+ Add Video" to upload demos.</div>';
+    return;
+  }
+  container.innerHTML = myVideos.map((v, i) => `
+    <div class="card p-3 border rounded-3 bg-white">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+          <img src="${esc(v.thumbnailUrl || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=400&q=80')}" class="thumb-preview-sm">
+          <div>
+            <strong class="text-dark d-block"><i class="bi bi-play-circle text-danger me-1"></i>${esc(v.title)}</strong>
+            <span class="small text-muted">${esc(v.subService)} &bull; Duration: ${esc(v.duration || '0:45')}</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline-danger btn-sm p-1 px-2" onclick="removeVideoItem(${i})" title="Remove Video">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function removeVideoItem(idx) {
+  myVideos.splice(idx, 1);
+  renderVideos();
+}
+
+$('btnConfirmAddVideo').addEventListener('click', () => {
+  const title = $('mVidTitle').value.trim();
+  const subService = $('mVidSub').value.trim() || 'Work Video';
+  const duration = $('mVidDuration').value.trim() || '0:45';
+  const videoUrl = $('mVidUrl').value.trim();
+  const thumbnailUrl = $('mVidThumb').value.trim() || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=400&q=80';
+  const description = $('mVidDesc').value.trim();
+
+  if (!title || !videoUrl) return alert('Please enter video title and video URL');
+  myVideos.push({ title, subService, duration, videoUrl, thumbnailUrl, description });
+  renderVideos();
+  bootstrap.Modal.getInstance($('addVideoModal')).hide();
+  $('mVidTitle').value = '';
+  $('mVidUrl').value = '';
+  $('mVidThumb').value = '';
+  $('mVidDesc').value = '';
+});
+
+// Area Tokens
+function renderAreaTokens() {
+  $('areaListTokens').innerHTML = areas.map((a, i) => `
+    <span class="badge text-bg-light border me-1 mb-1 fs-6 fw-normal">${esc(a.area)}, ${esc(a.city)}
+      <a href="#" data-i="${i}" class="text-danger text-decoration-none ms-1">&times;</a>
+    </span>
+  `).join('') || '<span class="text-muted small">No specific area tags added yet</span>';
+}
+
+$('areaListTokens').addEventListener('click', e => {
+  if (e.target.dataset.i === undefined) return;
+  e.preventDefault();
+  areas.splice(Number(e.target.dataset.i), 1);
+  renderAreaTokens();
+});
+
+$('btnAddAreaToken').addEventListener('click', () => {
+  const area = $('newAreaInput').value.trim(), city = $('newCityInput').value.trim();
+  if (!area || !city) return alert('Enter both area and city');
+  areas.push({ area, city });
+  $('newAreaInput').value = '';
+  renderAreaTokens();
+});
+
+// Save Handlers
+async function saveServicesForm() {
+  try {
+    await updateProviderPayload({
+      serviceIds: [...document.querySelectorAll('.cat-check:checked')].map(c => Number(c.value)),
+      subServices: mySubServices
+    });
+    showPageAlert('Services & sub-service packages updated successfully!');
+  } catch (ex) {
+    showPageAlert(ex.message, false);
+  }
+}
+
+async function saveLocationForm() {
+  try {
+    await updateProviderPayload({
+      formattedAddress: provFormattedAddress || $('provAddressInput').value.trim() || null,
+      latitude: provLat,
+      longitude: provLng,
+      serviceRadiusKm: Number($('serviceRadiusKmSelect').value) || 10.0,
+      areas
+    });
+    showPageAlert('Location, coverage radius, and service areas updated successfully!');
+  } catch (ex) {
+    showPageAlert(ex.message, false);
+  }
+}
+
+$('profileForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  try {
+    await updateProviderPayload({
+      businessName: $('inpBusinessName').value.trim(),
+      description: $('inpDescription').value.trim(),
+      experienceYears: num($('inpExperience').value),
+      approxPrice: num($('inpApproxPrice').value),
+      workingHours: $('inpWorkingHours').value.trim() || 'Mon - Sun: 8:00 AM - 8:00 PM',
+      profileImage: $('inpProfileImage').value.trim() || null,
+      portfolioItems: myPortfolio,
+      workVideos: myVideos
+    });
+    showPageAlert('Business profile and portfolios updated successfully!');
+  } catch (ex) {
+    showPageAlert(ex.message, false);
+  }
+});
+
+async function updateProviderPayload(delta) {
+  const current = providerData || {};
+  const body = {
+    businessName: delta.businessName !== undefined ? delta.businessName : current.businessName,
+    description: delta.description !== undefined ? delta.description : current.description,
+    experienceYears: delta.experienceYears !== undefined ? delta.experienceYears : current.experienceYears,
+    approxPrice: delta.approxPrice !== undefined ? delta.approxPrice : current.approxPrice,
+    workingHours: delta.workingHours !== undefined ? delta.workingHours : (current.workingHours || 'Mon - Sun: 8:00 AM - 8:00 PM'),
+    profileImage: delta.profileImage !== undefined ? delta.profileImage : current.profileImage,
+    serviceIds: delta.serviceIds !== undefined ? delta.serviceIds : (current.services ? current.services.map(s => s.id) : []),
+    areas: delta.areas !== undefined ? delta.areas : areas,
+    formattedAddress: delta.formattedAddress !== undefined ? delta.formattedAddress : current.formattedAddress,
+    latitude: delta.latitude !== undefined ? delta.latitude : current.latitude,
+    longitude: delta.longitude !== undefined ? delta.longitude : current.longitude,
+    serviceRadiusKm: delta.serviceRadiusKm !== undefined ? delta.serviceRadiusKm : (current.serviceRadiusKm || 10.0),
+    subServices: delta.subServices !== undefined ? delta.subServices : mySubServices,
+    portfolioItems: delta.portfolioItems !== undefined ? delta.portfolioItems : myPortfolio,
+    workVideos: delta.workVideos !== undefined ? delta.workVideos : myVideos
+  };
+  const updated = await api('/provider/profile', { method: 'PUT', body });
+  providerData = updated;
+  applyProviderData(updated);
+}
+
+// Password Change Handler
+$('changePasswordForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const cur = $('currentPassword').value;
+  const nw = $('newPassword').value;
+  const cf = $('confirmPassword').value;
+  if (nw !== cf) {
+    return alert('New password and confirmation password do not match.');
+  }
+  const btn = $('btnChangePassword');
+  btn.disabled = true;
+  btn.textContent = 'Updating...';
+  try {
+    await api('/auth/change-password', {
+      method: 'POST',
+      body: { currentPassword: cur, newPassword: nw }
+    });
+    showPageAlert('Password updated successfully!');
+    $('changePasswordForm').reset();
+  } catch (ex) {
+    showPageAlert(ex.message || 'Could not change password', false);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Update Password';
+  }
+});
+
+function previewProfileImg() {
+  const url = $('inpProfileImage').value.trim();
+  const wrap = $('imgPreviewWrap');
+  const img = $('imgPreviewEl');
+  if (url) {
+    img.src = url;
+    wrap.classList.remove('d-none');
+  } else {
+    wrap.classList.add('d-none');
+  }
+}
+
+// GPS Location Detector
+$('btnDetectProvLoc').addEventListener('click', async () => {
+  const btn = $('btnDetectProvLoc');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+  try {
+    const loc = await LSC_MAPS.getCurrentLocation();
+    provLat = loc.lat;
+    provLng = loc.lng;
+    provFormattedAddress = loc.formattedAddress;
+    if (loc.formattedAddress) $('provAddressInput').value = loc.formattedAddress;
+    $('provGeoBadge').classList.remove('d-none');
+    $('provCoordText').textContent = `${provLat.toFixed(4)}, ${provLng.toFixed(4)}`;
+    if (providerMapObj) {
+      providerMapObj.setLocation(provLat, provLng);
+    }
+    showPageAlert('GPS location detected successfully!');
+  } catch (ex) {
+    showPageAlert(ex.message || 'Could not detect location', false);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-crosshair"></i>';
+  }
+});
+
+// Map Radius Change
+$('serviceRadiusKmSelect').addEventListener('change', () => {
+  if (providerMapObj) {
+    providerMapObj.setRadiusKm(Number($('serviceRadiusKmSelect').value));
+  }
+});
+
+// Apply Loaded Provider Data to UI
+function applyProviderData(p) {
+  providerData = p;
+  $('sidebarBusinessName').textContent = p.businessName || 'Business Name';
+  $('sidebarOwnerName').textContent = me.name || 'Service Provider';
+  $('welcomeProviderName').textContent = me.name || p.businessName || 'Provider';
+  $('sidebarRating').textContent = (p.rating != null ? Number(p.rating).toFixed(1) : '0.0');
+  $('btnViewPublicProfile').href = `/provider-profile.html?id=${p.id}`;
+
+  renderVerificationBadge(p.verificationStatus);
+  updateAvailabilityUI(p.availability, p.verificationStatus);
+
+  if (p.profileImage) {
+    $('provAvatarImg').src = p.profileImage;
+    $('provAvatarImg').classList.remove('d-none');
+    $('provAvatarInitial').classList.add('d-none');
+    $('inpProfileImage').value = p.profileImage;
+    previewProfileImg();
+  } else {
+    $('provAvatarInitial').textContent = (p.businessName ? p.businessName.charAt(0) : 'P').toUpperCase();
+    $('provAvatarImg').classList.add('d-none');
+    $('provAvatarInitial').classList.remove('d-none');
+  }
+
+  // Profile Form
+  $('inpBusinessName').value = p.businessName || '';
+  $('inpDescription').value = p.description || '';
+  $('inpExperience').value = p.experienceYears ?? '';
+  $('inpApproxPrice').value = p.approxPrice ?? 499;
+  $('inpWorkingHours').value = p.workingHours || 'Mon - Sun: 8:00 AM - 8:00 PM';
+
+  // Location Form
+  if (p.formattedAddress) $('provAddressInput').value = p.formattedAddress;
+  if (p.serviceRadiusKm) $('serviceRadiusKmSelect').value = String(Math.round(p.serviceRadiusKm));
+  provLat = p.latitude;
+  provLng = p.longitude;
+  provFormattedAddress = p.formattedAddress;
+  if (provLat && provLng) {
+    $('provGeoBadge').classList.remove('d-none');
+    $('provCoordText').textContent = `${provLat.toFixed(4)}, ${provLng.toFixed(4)}`;
+  }
+
+  // Areas
+  areas = (p.areas || []).map(a => ({ area: a.area, city: a.city }));
+  renderAreaTokens();
+
+  // SubServices & Portfolio
+  mySubServices = p.subServices || [];
+  renderSubServices();
+  myPortfolio = p.portfolioItems || [];
+  renderPortfolio();
+  myVideos = p.workVideos || [];
+  renderVideos();
+}
+
+// Master Refresh
+async function refreshDashboard(showToast = false) {
+  if (isDashboardRefreshing) return;
+  isDashboardRefreshing = true;
+  const spin = $('refreshSpin');
+  if (spin) spin.classList.add('spin-animation');
+  try {
+    const [p, bList, rList, allSvcs] = await Promise.all([
+      api('/provider/profile'),
+      api('/bookings/my'),
+      api('/provider/reviews').catch(() => []),
+      api('/services')
+    ]);
+    applyProviderData(p);
+    allBookings = bList || [];
+    allReviews = rList || [];
+
+    // Core Categories
+    const chosen = new Set((p.services || []).map(s => s.id));
+    if ($('serviceCategoriesList')) {
+      $('serviceCategoriesList').innerHTML = (allSvcs || []).map(s => `
+        <div class="form-check form-check-inline me-3 mb-2">
+          <input class="form-check-input cat-check" type="checkbox" id="cat_${s.id}" value="${s.id}" ${chosen.has(s.id) ? 'checked' : ''}>
+          <label class="form-check-label small fw-semibold" for="cat_${s.id}">${esc(s.name)}</label>
+        </div>
+      `).join('');
+    }
+
+    renderBookingsData();
+    renderReviewsData();
+    const isFirstVerif = !isVerificationInitialized;
+    await loadVerification(isFirstVerif);
+    isVerificationInitialized = true;
+
+    // Hide any previous danger alert banner
+    const pageAlertEl = $('pageAlert');
+    if (pageAlertEl && pageAlertEl.classList.contains('alert-danger')) {
+      pageAlertEl.classList.add('d-none');
+    }
+
+    if (showToast) showPageAlert('Dashboard refreshed with latest bookings.');
+  } catch (ex) {
+    const errMsg = ex.message || 'Could not refresh data. Please check your network or server status.';
+    showPageAlert(errMsg, false, true);
+    if (!providerData) {
+      renderDashboardErrorState(errMsg);
+    }
+  } finally {
+    isDashboardRefreshing = false;
+    if (spin) spin.classList.remove('spin-animation');
+  }
+}
+
+// Init
+(async () => {
+  if (!me) return;
+
+  // 1. Immediately activate the requested tab synchronously to avoid layout flashing
+  const urlTab = new URLSearchParams(window.location.search).get('tab');
+  const hashTab = location.hash ? location.hash.replace('#', '') : '';
+  const initialTab = urlTab || hashTab || 'overview';
+  switchTab(initialTab, false);
+
+  // 2. Fetch dashboard data in background
+  await refreshDashboard(false);
+
+  // 3. Init Maps
+  const mapRes = await LSC_MAPS.loadGoogleMaps().catch(() => ({ configured: false }));
+  if (mapRes && mapRes.configured) {
+    LSC_MAPS.setupPlacesAutocomplete($('provAddressInput'), placeData => {
+      provLat = placeData.lat;
+      provLng = placeData.lng;
+      provFormattedAddress = placeData.formattedAddress;
+      $('provGeoBadge').classList.remove('d-none');
+      $('provCoordText').textContent = `${provLat.toFixed(4)}, ${provLng.toFixed(4)}`;
+      if (providerMapObj) providerMapObj.setLocation(provLat, provLng);
+    });
+
+    const initLat = provLat || 23.3441;
+    const initLng = provLng || 85.3096;
+    const radius = Number($('serviceRadiusKmSelect').value) || 10.0;
+
+    providerMapObj = LSC_MAPS.createLocationPickerMap('providerMap', {
+      initialLat: initLat,
+      initialLng: initLng,
+      draggable: true,
+      showRadius: true,
+      radiusKm: radius,
+      markerTitle: (providerData && providerData.businessName) || 'Business Location',
+      onLocationChange: loc => {
+        provLat = loc.lat;
+        provLng = loc.lng;
+        provFormattedAddress = loc.formattedAddress;
+        if (loc.formattedAddress) $('provAddressInput').value = loc.formattedAddress;
+        $('provGeoBadge').classList.remove('d-none');
+        $('provCoordText').textContent = `${provLat.toFixed(4)}, ${provLng.toFixed(4)}`;
+      }
+    });
+  } else {
+    $('providerMap').innerHTML = `
+      <div class="p-4 text-center text-muted small bg-light rounded-3">
+        <i class="bi bi-geo-alt-fill text-primary fs-3 d-block mb-2"></i>
+        <strong>OpenStreetMap Geolocation Active</strong>
+        <p class="text-muted mb-0">Drag marker and use GPS crosshair to set dispatch coverage coordinates.</p>
+      </div>`;
+  }
+
+  // Auto refresh every 20 seconds for real-time dispatch updates
+  setInterval(() => refreshDashboard(false), 20000);
+})();
+</script>
+</body>
+</html>

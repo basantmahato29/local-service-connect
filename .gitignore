@@ -1,0 +1,37 @@
+# Environment configuration
+.env
+.env.local
+.env.*.local
+*.env
+*.key
+
+# Compiled class files
+*.class
+target/
+backend/target/
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Database and runtime data
+backend/data/
+data/
+*.h2.db
+*.trace.db
+
+# Logs
+*.log
+logs/
+
+# IDE & OS files
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db

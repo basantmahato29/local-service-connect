@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Activity Log &amp; Audit Trail - Local Service Connect</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .log-row {
+      transition: background-color 0.15s ease;
+    }
+    .log-row:hover {
+      background-color: #f8faff;
+    }
+    .badge-action-verified {
+      background-color: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+    }
+    .badge-action-rejected, .badge-action-suspended, .badge-action-deleted {
+      background-color: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+    .badge-action-correction {
+      background-color: #fffbeb;
+      color: #d97706;
+      border: 1px solid #fde68a;
+    }
+    .badge-action-override {
+      background-color: #f5f3ff;
+      color: #7c3aed;
+      border: 1px solid #ddd6fe;
+    }
+    .badge-action-default {
+      background-color: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div id="nav"></div>
+
+  <div class="container-xl py-3 pb-5">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+      <div>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-1 small">
+            <li class="breadcrumb-item"><a href="/admin/dashboard.html">Admin Console</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Activity Log</li>
+          </ol>
+        </nav>
+        <h2 class="h3 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+          <i class="bi bi-clock-history text-primary"></i> Administrative Activity Log
+        </h2>
+        <p class="text-muted small mb-0">Immutable audit trail of administrator verification decisions, account suspensions, booking overrides, and catalog modifications</p>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-xs" onclick="loadActivityLogs()">
+          <i class="bi bi-arrow-clockwise me-1"></i> Refresh Log
+        </button>
+      </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="pageAlert" class="alert d-none shadow-sm rounded-3 mb-4" role="alert"></div>
+
+    <!-- Filters Strip -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+      <div class="row g-2 align-items-center">
+        <!-- Search -->
+        <div class="col-12 col-md-3">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control bg-light border-start-0" id="logSearch" placeholder="Search actor, reason, entity...">
+          </div>
+        </div>
+        <!-- Action Type Filter -->
+        <div class="col-6 col-md-2">
+          <select class="form-select form-select-sm" id="logActionType">
+            <option value="ALL">All Action Types</option>
+          </select>
+        </div>
+        <!-- Entity Type Filter -->
+        <div class="col-6 col-md-2">
+          <select class="form-select form-select-sm" id="logEntityType">
+            <option value="ALL">All Entity Types</option>
+          </select>
+        </div>
+        <!-- From Date -->
+        <div class="col-6 col-md-2">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-light text-muted" style="font-size:0.75rem;">From</span>
+            <input type="date" class="form-control form-control-sm" id="logFromDate">
+          </div>
+        </div>
+        <!-- To Date -->
+        <div class="col-6 col-md-2">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-light text-muted" style="font-size:0.75rem;">To</span>
+            <input type="date" class="form-control form-control-sm" id="logToDate">
+          </div>
+        </div>
+        <!-- Reset Button -->
+        <div class="col-12 col-md-1 text-end">
+          <button type="button" class="btn btn-outline-secondary btn-sm w-100 rounded-pill" onclick="resetLogFilters()">
+            Reset
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity Log Table Card -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mb-4">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light text-muted small">
+            <tr>
+              <th class="ps-4 text-nowrap" style="width: 170px;">Timestamp</th>
+              <th style="width: 190px;">Administrator</th>
+              <th style="width: 170px;">Action</th>
+              <th style="min-width: 220px;">Target Entity</th>
+              <th style="min-width: 260px;">Details &amp; Reason</th>
+              <th class="text-end pe-4" style="width: 100px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="logTableBody">
+            <tr>
+              <td colspan="6" class="text-center py-5 text-muted">
+                <span class="spinner-border spinner-border-sm text-primary me-2"></span>
+                <span>Loading activity logs...</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-between align-items-center mt-3 d-none" id="logPaginationBar">
+      <span class="text-muted small" id="logPageInfo">Showing 0 of 0</span>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" id="btnLogPrevPage" onclick="changeLogPage(-1)" disabled>
+          <i class="bi bi-chevron-left me-1"></i>Previous
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" id="btnLogNextPage" onclick="changeLogPage(1)" disabled>
+          Next<i class="bi bi-chevron-right ms-1"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAILS MODAL -->
+  <div class="modal fade" id="logDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="modal-header bg-light border-bottom py-3 px-4">
+          <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-shield-check text-primary"></i> Audit Entry Details
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4" id="logModalBody">
+          <!-- Populated dynamically -->
+        </div>
+        <div class="modal-footer bg-light py-2.5 px-4 d-flex justify-content-between">
+          <span class="text-muted small"><i class="bi bi-lock me-1"></i>Immutable Audit Trail</span>
+          <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script>
+    const me = Auth.require('ADMIN');
+    adminNav('activity-logs');
+
+    const $ = id => document.getElementById(id);
+
+    // State
+    let logCurrentPage = 0;
+    const logPageSize = 15;
+    let logTotalPages = 1;
+    let logSearchDebounce = null;
+    let logDetailModalInstance = null;
+    let activeLogsCache = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      logDetailModalInstance = new bootstrap.Modal($('logDetailModal'));
+
+      // Wire filter listeners
+      $('logSearch').addEventListener('input', () => {
+        clearTimeout(logSearchDebounce);
+        logSearchDebounce = setTimeout(() => {
+          logCurrentPage = 0;
+          loadActivityLogs();
+        }, 350);
+      });
+
+      $('logActionType').addEventListener('change', () => { logCurrentPage = 0; loadActivityLogs(); });
+      $('logEntityType').addEventListener('change', () => { logCurrentPage = 0; loadActivityLogs(); });
+      $('logFromDate').addEventListener('change', () => { logCurrentPage = 0; loadActivityLogs(); });
+      $('logToDate').addEventListener('change', () => { logCurrentPage = 0; loadActivityLogs(); });
+
+      // Load action types & entity types for dropdowns
+      loadFilterDropdowns();
+
+      // Initial load
+      loadActivityLogs();
+    });
+
+    async function loadFilterDropdowns() {
+      try {
+        const [actionTypes, entityTypes] = await Promise.all([
+          api('/admin/activity-logs/action-types').catch(() => []),
+          api('/admin/activity-logs/entity-types').catch(() => [])
+        ]);
+
+        const aSelect = $('logActionType');
+        if (Array.isArray(actionTypes)) {
+          actionTypes.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t;
+            opt.textContent = t.replace(/_/g, ' ');
+            aSelect.appendChild(opt);
+          });
+        }
+
+        const eSelect = $('logEntityType');
+        if (Array.isArray(entityTypes)) {
+          entityTypes.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t;
+            opt.textContent = t;
+            eSelect.appendChild(opt);
+          });
+        }
+      } catch {}
+    }
+
+    function resetLogFilters() {
+      $('logSearch').value = '';
+      $('logActionType').value = 'ALL';
+      $('logEntityType').value = 'ALL';
+      $('logFromDate').value = '';
+      $('logToDate').value = '';
+      logCurrentPage = 0;
+      loadActivityLogs();
+    }
+
+    async function loadActivityLogs() {
+      const tbody = $('logTableBody');
+      const search = $('logSearch').value.trim();
+      const actionType = $('logActionType').value;
+      const entityType = $('logEntityType').value;
+      const fromDate = $('logFromDate').value;
+      const toDate = $('logToDate').value;
+
+      let url = `/admin/activity-logs?page=${logCurrentPage}&size=${logPageSize}&sortBy=timestamp&sortDir=desc`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+      if (actionType && actionType !== 'ALL') url += `&actionType=${encodeURIComponent(actionType)}`;
+      if (entityType && entityType !== 'ALL') url += `&entityType=${encodeURIComponent(entityType)}`;
+      if (fromDate) url += `&fromDate=${encodeURIComponent(fromDate)}`;
+      if (toDate) url += `&toDate=${encodeURIComponent(toDate)}`;
+
+      try {
+        const res = await api(url);
+        const items = Array.isArray(res) ? res : (res && res.content ? res.content : []);
+        const totalElements = res && typeof res.totalElements === 'number' ? res.totalElements : items.length;
+        logTotalPages = res && typeof res.totalPages === 'number' ? res.totalPages : 1;
+        activeLogsCache = items;
+
+        renderLogTable(items);
+        renderLogPagination(totalElements);
+      } catch (err) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-5 text-danger">
+              <i class="bi bi-exclamation-triangle fs-2 mb-2 d-block"></i>
+              <strong>Failed to load activity logs</strong>
+              <div class="small text-muted mb-2">${esc(err.message || 'Server error')}</div>
+              <button class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="loadActivityLogs()">Retry</button>
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    function renderLogTable(items) {
+      const tbody = $('logTableBody');
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-5 text-muted">
+              <i class="bi bi-clock-history fs-2 mb-2 d-block text-secondary"></i>
+              <strong>No Administrative Activity Logged Yet</strong>
+              <div class="small">Actions performed by administrators (such as provider decisions, account toggles, and catalog edits) will be permanently recorded here.</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = items.map(l => {
+        const exactTime = l.timestamp ? new Date(l.timestamp).toLocaleString() : 'N/A';
+        const timeAgo = l.timestamp ? formatTimeAgo(l.timestamp) : '';
+
+        // Badge styling based on action
+        let badgeClass = 'badge-action-default';
+        const act = l.actionType || '';
+        if (act.includes('VERIFIED') || act.includes('REINSTATED') || act.includes('CREATED')) {
+          badgeClass = 'badge-action-verified';
+        } else if (act.includes('REJECTED') || act.includes('SUSPENDED') || act.includes('DELETED')) {
+          badgeClass = 'badge-action-rejected';
+        } else if (act.includes('CORRECTION') || act.includes('REQUESTED')) {
+          badgeClass = 'badge-action-correction';
+        } else if (act.includes('OVERRIDE') || act.includes('UPDATED')) {
+          badgeClass = 'badge-action-override';
+        }
+
+        // Entity Link
+        let entityDisplay = esc(l.entityIdentifier || '#' + (l.entityId || ''));
+        if (l.targetUrl) {
+          entityDisplay = `<a href="${esc(l.targetUrl)}" class="fw-semibold text-decoration-none text-primary"><i class="bi bi-box-arrow-up-right me-1 small"></i>${entityDisplay}</a>`;
+        }
+
+        const reasonSnippet = l.reason || l.details || '-';
+
+        return `
+          <tr class="log-row">
+            <td class="ps-4 text-nowrap">
+              <div class="fw-semibold text-dark small" style="font-size: 0.8rem;">${esc(timeAgo)}</div>
+              <div class="text-muted" style="font-size: 0.72rem;" title="${esc(exactTime)}">${esc(exactTime)}</div>
+            </td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <span class="user-avatar-circle" style="width:26px; height:26px; font-size:0.75rem; background: #6366f1;">
+                  ${esc((l.actorName || 'A').charAt(0).toUpperCase())}
+                </span>
+                <div>
+                  <div class="fw-semibold text-dark small" style="font-size: 0.8rem;">${esc(l.actorName || 'System')}</div>
+                  <div class="text-muted" style="font-size: 0.7rem;">${esc(l.actorEmail || '')}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge ${badgeClass} rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.72rem;">
+                ${esc(act.replace(/_/g, ' '))}
+              </span>
+            </td>
+            <td>
+              <div class="small fw-semibold text-dark">${entityDisplay}</div>
+              <span class="badge bg-light text-secondary border rounded-pill px-2 py-0.5" style="font-size: 0.68rem;">${esc(l.entityType || 'SYSTEM')}</span>
+            </td>
+            <td>
+              <div class="text-truncate text-muted small" style="max-width: 320px;" title="${esc(reasonSnippet)}">
+                ${esc(reasonSnippet)}
+              </div>
+            </td>
+            <td class="text-end pe-4">
+              <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5 py-0.5" style="font-size: 0.72rem;" onclick="openLogDetail(${l.id})">
+                <i class="bi bi-eye me-1"></i>Details
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderLogPagination(total) {
+      const bar = $('logPaginationBar');
+      if (total <= logPageSize) {
+        bar.classList.add('d-none');
+        return;
+      }
+      bar.classList.remove('d-none');
+      const start = logCurrentPage * logPageSize + 1;
+      const end = Math.min((logCurrentPage + 1) * logPageSize, total);
+      $('logPageInfo').textContent = `Showing ${start} to ${end} of ${total} entries`;
+
+      $('btnLogPrevPage').disabled = logCurrentPage <= 0;
+      $('btnLogNextPage').disabled = logCurrentPage >= logTotalPages - 1;
+    }
+
+    function changeLogPage(delta) {
+      logCurrentPage = Math.max(0, Math.min(logTotalPages - 1, logCurrentPage + delta));
+      loadActivityLogs();
+    }
+
+    function openLogDetail(id) {
+      const logItem = activeLogsCache.find(x => x.id === id);
+      if (!logItem) return;
+
+      const body = $('logModalBody');
+      const exactTime = logItem.timestamp ? new Date(logItem.timestamp).toLocaleString() : 'N/A';
+
+      body.innerHTML = `
+        <div class="d-flex flex-column gap-3">
+          <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
+            <div>
+              <span class="text-muted small">Action Taken</span>
+              <h5 class="fw-bold mb-0 text-dark">${esc(logItem.actionType || '')}</h5>
+            </div>
+            <span class="badge ${logItem.result === 'SUCCESS' ? 'bg-success' : 'bg-danger'} rounded-pill px-3 py-1.5">
+              ${esc(logItem.result || 'SUCCESS')}
+            </span>
+          </div>
+
+          <div class="row g-2 small">
+            <div class="col-6">
+              <span class="text-muted d-block">Admin Actor:</span>
+              <strong>${esc(logItem.actorName || 'System')} (${esc(logItem.actorEmail || '-')})</strong>
+            </div>
+            <div class="col-6">
+              <span class="text-muted d-block">Timestamp:</span>
+              <strong>${esc(exactTime)}</strong>
+            </div>
+            <div class="col-6">
+              <span class="text-muted d-block">Target Entity:</span>
+              <strong>${esc(logItem.entityType || '-')} #${esc(logItem.entityId || '-')}</strong>
+            </div>
+            <div class="col-6">
+              <span class="text-muted d-block">Entity Identifier:</span>
+              <strong>${esc(logItem.entityIdentifier || '-')}</strong>
+            </div>
+            <div class="col-12">
+              <span class="text-muted d-block">IP Address:</span>
+              <code>${esc(logItem.ipAddress || 'Internal / Proxy')}</code>
+            </div>
+          </div>
+
+          <div>
+            <span class="text-muted small d-block mb-1">Details / Description:</span>
+            <div class="p-2.5 bg-light border rounded-3 small text-dark">${esc(logItem.details || 'No detailed payload recorded.')}</div>
+          </div>
+
+          ${logItem.reason ? `
+            <div>
+              <span class="text-muted small d-block mb-1">Administrative Reason:</span>
+              <div class="p-2.5 bg-warning-subtle border border-warning-subtle rounded-3 small text-dark fw-semibold">
+                ${esc(logItem.reason)}
+              </div>
+            </div>
+          ` : ''}
+
+          ${logItem.targetUrl ? `
+            <div class="mt-2 text-end">
+              <a href="${esc(logItem.targetUrl)}" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm fw-semibold">
+                <i class="bi bi-box-arrow-up-right me-1"></i>Open Target Entity Page
+              </a>
+            </div>
+          ` : ''}
+        </div>
+      `;
+
+      logDetailModalInstance.show();
+    }
+  </script>
+</body>
+</html>
+

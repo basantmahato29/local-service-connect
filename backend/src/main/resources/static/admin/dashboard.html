@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard &amp; Analytics · Local Service Connect</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --admin-primary: #7c3aed;
+      --admin-indigo: #6366f1;
+      --admin-bg-soft: #f8fafc;
+      --admin-card-border: #e2e8f0;
+    }
+    body {
+      background-color: #f8fafc;
+    }
+    .dashboard-kpi-card {
+      background: #ffffff;
+      border: 1px solid var(--admin-card-border);
+      border-radius: 14px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      cursor: pointer;
+    }
+    .dashboard-kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.1);
+      border-color: #c4b5fd;
+    }
+    .period-btn {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      padding: 0.35rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: #475569;
+      transition: all 0.15s ease;
+    }
+    .period-btn:hover {
+      background: #f1f5f9;
+      color: var(--admin-primary);
+    }
+    .period-btn.active {
+      background: var(--admin-primary);
+      border-color: var(--admin-primary);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+    }
+    .section-card {
+      background: #ffffff;
+      border: 1px solid var(--admin-card-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+    .chart-container-box {
+      position: relative;
+      height: 310px;
+      width: 100%;
+    }
+    .status-bar-link {
+      transition: background-color 0.12s ease;
+      border-radius: 8px;
+      padding: 4px 6px;
+    }
+    .status-bar-link:hover {
+      background-color: #f1f5f9;
+    }
+    .badge-soft-success {
+      background-color: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+    .badge-soft-warning {
+      background-color: #fef9c3;
+      color: #854d0e;
+      border: 1px solid #fef08a;
+    }
+    .badge-soft-danger {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+    .badge-soft-primary {
+      background-color: #ede9fe;
+      color: #6d28d9;
+      border: 1px solid #ddd6fe;
+    }
+    .badge-soft-info {
+      background-color: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+    .skeleton-bar {
+      height: 18px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: skeletonLoading 1.5s infinite;
+    }
+    @keyframes skeletonLoading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="nav"></div>
+
+  <div class="container-xl py-4 py-lg-5">
+    <!-- Top Header & Global Date Filter Toolbar -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+      <div>
+        <h1 class="h3 fw-bold mb-1 text-dark d-flex align-items-center gap-2">
+          <i class="bi bi-speedometer2 text-primary"></i>
+          Platform Analytics &amp; Operations
+        </h1>
+        <p class="text-muted mb-0 small">Accurate, unified intelligence across customer demand, booking trends, provider reliability, and Quick Service operations.</p>
+      </div>
+
+      <!-- Quick Shortcuts -->
+      <div class="d-flex flex-wrap gap-2">
+        <a href="/admin/services.html" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+          <i class="bi bi-grid-plus me-1"></i>Services
+        </a>
+        <a href="/admin/providers.html?status=PENDING" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+          <i class="bi bi-patch-check me-1"></i>Review Approvals
+        </a>
+        <a href="/admin/bookings.html" class="btn btn-primary btn-sm rounded-pill px-3">
+          <i class="bi bi-journal-text me-1"></i>All Bookings
+        </a>
+      </div>
+    </div>
+
+    <!-- Date Range Filter Bar -->
+    <div class="card border-0 shadow-sm p-3 mb-4 rounded-3 bg-white">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <!-- Preset Buttons -->
+        <div class="d-flex align-items-center flex-wrap gap-1.5" id="periodBtnGroup" role="group" aria-label="Date Range Presets">
+          <span class="small fw-bold text-muted me-2"><i class="bi bi-calendar3 me-1"></i>Timeframe:</span>
+          <button type="button" class="period-btn" data-period="today">Today</button>
+          <button type="button" class="period-btn" data-period="7d">Last 7 Days</button>
+          <button type="button" class="period-btn active" data-period="30d">Last 30 Days</button>
+          <button type="button" class="period-btn" data-period="90d">Last 90 Days</button>
+          <button type="button" class="period-btn" data-period="custom" id="btnCustomPeriod">Custom Range</button>
+        </div>
+
+        <!-- Custom Date Input Form -->
+        <div class="d-flex align-items-center gap-2 flex-wrap d-none" id="customDateRangeInputs">
+          <input type="date" class="form-control form-control-sm" id="inputFromDate" style="max-width: 140px;" aria-label="Start Date">
+          <span class="small text-muted">to</span>
+          <input type="date" class="form-control form-control-sm" id="inputToDate" style="max-width: 140px;" aria-label="End Date">
+          <button type="button" class="btn btn-primary btn-sm rounded-3 px-3" id="btnApplyCustomRange">Apply</button>
+        </div>
+
+        <!-- Active Date Label & Sync Status -->
+        <div class="d-flex align-items-center gap-2 ms-auto">
+          <span class="badge bg-light text-dark border px-2.5 py-1.5 small fw-semibold" id="activeDateRangeLabel">
+            <i class="bi bi-clock-history me-1 text-primary"></i>Last 30 Days
+          </span>
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="btnRefreshAnalytics" title="Refresh Live Analytics">
+            <i class="bi bi-arrow-repeat" id="refreshSpinner"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Banner with Retry -->
+    <div id="analyticsErrorBanner" class="alert alert-danger d-none d-flex justify-content-between align-items-center" role="alert">
+      <div>
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span id="analyticsErrorMessage">An error occurred while loading analytics.</span>
+      </div>
+      <button type="button" class="btn btn-sm btn-outline-danger" id="btnRetryAnalytics">Retry</button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 1: OVERVIEW METRIC CARDS (10 CARDS) -->
+    <!-- ========================================== -->
+    <div id="kpiCardsContainer" class="row g-3 mb-4">
+      <div class="col-12 text-center py-4 text-muted">
+        <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+        <span>Aggregating verified platform metrics...</span>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- SECTION 2: BOOKING VOLUME TRENDS & LIFECYCLE DISTRIBUTION -->
+    <!-- ============================================================= -->
+    <div class="row g-4 mb-4">
+      <!-- Interactive Booking Volume Trend Chart -->
+      <div class="col-lg-8">
+        <div class="section-card p-4 h-100">
+          <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <div>
+              <h2 class="h5 fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                <i class="bi bi-graph-up text-primary"></i>
+                Reservation &amp; Dispatch Trends
+              </h2>
+              <span class="small text-muted" id="trendSubtext">Daily volume across scheduled and urgent requests</span>
+            </div>
+            <div class="d-flex gap-1.5">
+              <button type="button" class="btn btn-sm btn-outline-secondary active" id="btnChartModeLine" title="Line Chart">
+                <i class="bi bi-graph-up"></i>
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="btnChartModeBar" title="Bar Chart">
+                <i class="bi bi-bar-chart"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="chart-container-box">
+            <canvas id="bookingTrendsCanvas"></canvas>
+            <div id="chartFallbackBox" class="d-none text-center py-5 text-muted"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bookings by Status Breakdown & Type Comparison -->
+      <div class="col-lg-4">
+        <div class="section-card p-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h2 class="h5 fw-bold mb-0 text-dark">Bookings by Status</h2>
+              <span class="small text-muted">Click any stage to filter bookings</span>
+            </div>
+            <a href="/admin/bookings.html" class="small text-decoration-none fw-semibold">View All &rarr;</a>
+          </div>
+
+          <!-- Type Distribution Ratio -->
+          <div class="p-3 bg-light rounded-3 mb-3 border">
+            <div class="d-flex justify-content-between small fw-bold mb-1">
+              <span><i class="bi bi-calendar-check text-primary me-1"></i>Normal: <span id="valNormalCount">0</span> (<span id="valNormalPct">0%</span>)</span>
+              <span><i class="bi bi-lightning-charge text-warning me-1"></i>Quick: <span id="valQuickCount">0</span> (<span id="valQuickPct">0%</span>)</span>
+            </div>
+            <div class="progress" style="height: 10px; border-radius: 5px;">
+              <div class="progress-bar bg-primary" id="barNormalShare" style="width: 50%;"></div>
+              <div class="progress-bar bg-warning" id="barQuickShare" style="width: 50%;"></div>
+            </div>
+          </div>
+
+          <!-- Status Bars List -->
+          <div id="statusBarsList" class="d-flex flex-column gap-1.5"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- SECTION 3: QUICK SERVICE DISPATCH OPERATIONS & HEALTH (TASK 5) -->
+    <!-- ============================================================= -->
+    <div class="section-card p-4 mb-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <div>
+          <h2 class="h5 fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-lightning-charge-fill text-warning"></i>
+            Quick Service Operations &amp; Dispatch Performance
+          </h2>
+          <span class="small text-muted">On-demand emergency requests, assignment speed, and fulfillment verification.</span>
+        </div>
+        <a href="/admin/bookings.html?type=QUICK_SERVICE" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+          <i class="bi bi-binoculars me-1"></i>Inspect Quick Service Bookings
+        </a>
+      </div>
+
+      <div class="row g-3">
+        <!-- Total Quick Requests -->
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="p-3 bg-light rounded-3 text-center border h-100">
+            <div class="small text-muted mb-1">Total Requests</div>
+            <div class="fs-4 fw-bold text-dark" id="qsTotal">0</div>
+            <span class="badge badge-soft-primary mt-1">In Selected Period</span>
+          </div>
+        </div>
+        <!-- Assigned Requests -->
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="p-3 bg-light rounded-3 text-center border h-100">
+            <div class="small text-muted mb-1">Assigned</div>
+            <div class="fs-4 fw-bold text-success" id="qsAssigned">0</div>
+            <span class="badge badge-soft-success mt-1" id="qsAssignedRate">0% Rate</span>
+          </div>
+        </div>
+        <!-- Unassigned Requests -->
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="p-3 bg-light rounded-3 text-center border h-100">
+            <div class="small text-muted mb-1">Unassigned</div>
+            <div class="fs-4 fw-bold text-warning" id="qsUnassigned">0</div>
+            <span class="badge badge-soft-warning mt-1">Awaiting Match</span>
+          </div>
+        </div>
+        <!-- Delayed Requests (>15m) -->
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="p-3 bg-light rounded-3 text-center border h-100">
+            <div class="small text-muted mb-1">Delayed (&gt;15m)</div>
+            <div class="fs-4 fw-bold text-danger" id="qsDelayed">0</div>
+            <span class="badge badge-soft-danger mt-1">Needs Attention</span>
+          </div>
+        </div>
+        <!-- Average Assignment Time -->
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="p-3 bg-light rounded-3 text-center border h-100">
+            <div class="small text-muted mb-1">Avg. Assignment</div>
+            <div class="fs-4 fw-bold text-dark" id="qsAvgAssignment">--</div>
+            <span class="badge bg-light text-secondary border mt-1" id="qsAssignmentSample" title="Sample Size">0 samples</span>
+          </div>
+        </div>
+        <!-- Average Arrival Time -->
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="p-3 bg-light rounded-3 text-center border h-100">
+            <div class="small text-muted mb-1">Avg. Provider Arrival</div>
+            <div class="fs-4 fw-bold text-dark" id="qsAvgArrival">--</div>
+            <span class="badge bg-light text-secondary border mt-1" id="qsArrivalSample" title="Sample Size">0 samples</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-3 p-2.5 rounded-3 border bg-light bg-opacity-50 small text-muted d-flex align-items-center gap-2">
+        <i class="bi bi-shield-check text-success fs-5"></i>
+        <span>
+          <strong>Data Integrity Rule:</strong> Dispatch intervals are computed from actual audit timestamps recorded in <code>booking_status_history</code>. Zero fictitious 10-minute promises or simulated metrics are displayed.
+        </span>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- SECTION 4: SERVICE DEMAND & AREA COVERAGE (TASK 4) -->
+    <!-- ============================================================= -->
+    <div class="row g-4 mb-4">
+      <!-- Most Popular Services & Subservices -->
+      <div class="col-lg-6">
+        <div class="section-card p-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+              <i class="bi bi-grid-3x3-gap-fill text-primary"></i>
+              Service &amp; Subservice Demand
+            </h2>
+            <a href="/admin/services.html" class="small text-decoration-none fw-semibold">Catalog &rarr;</a>
+          </div>
+
+          <h6 class="small fw-bold text-muted text-uppercase mb-2">Top Requested Categories</h6>
+          <div id="popularCategoriesList" class="d-flex flex-column gap-2 mb-4"></div>
+
+          <h6 class="small fw-bold text-muted text-uppercase mb-2">Most Popular Subservices</h6>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle small mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th>Subservice</th>
+                  <th>Category</th>
+                  <th class="text-center">Bookings</th>
+                  <th class="text-end">Avg. Price</th>
+                </tr>
+              </thead>
+              <tbody id="popularSubservicesBody">
+                <tr><td colspan="4" class="text-center text-muted py-3">Loading subservices demand...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Area Demand & Provider Supply Gap Analysis -->
+      <div class="col-lg-6">
+        <div class="section-card p-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+              <i class="bi bi-geo-alt-fill text-danger"></i>
+              Area Demand &amp; Provider Supply Gaps
+            </h2>
+            <span class="badge badge-soft-info">Geo Intelligence</span>
+          </div>
+          <p class="small text-muted mb-3">Cross-referencing locality booking demand against verified and active online provider coverage.</p>
+
+          <div class="table-responsive">
+            <table class="table table-sm align-middle small mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th>Area / Locality</th>
+                  <th class="text-center">Total</th>
+                  <th class="text-center">Quick</th>
+                  <th class="text-center">Verified</th>
+                  <th class="text-center">Online</th>
+                  <th class="text-end">Supply Status</th>
+                </tr>
+              </thead>
+              <tbody id="areaSupplyGapsBody">
+                <tr><td colspan="6" class="text-center text-muted py-3">Loading area supply analytics...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- SECTION 5: PROVIDER PERFORMANCE & RELIABILITY (TASK 3) -->
+    <!-- ============================================================= -->
+    <div class="section-card p-4 mb-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <div>
+          <h2 class="h5 fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-award-fill text-warning"></i>
+            Provider Performance &amp; Accountability
+          </h2>
+          <span class="small text-muted">Evaluations based on customer feedback, fulfillment volume, cancellation rates, and operational activity.</span>
+        </div>
+        <a href="/admin/providers.html" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+          <i class="bi bi-people me-1"></i>Provider Directory
+        </a>
+      </div>
+
+      <ul class="nav nav-pills mb-3 gap-2" id="providerPerformanceTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active btn-sm rounded-pill px-3" id="tabTopRatedBtn" data-bs-toggle="pill" data-bs-target="#tabTopRated" type="button" role="tab">
+            <i class="bi bi-star-fill text-warning me-1"></i>Highest Rated
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link btn-sm rounded-pill px-3" id="tabMostBookedBtn" data-bs-toggle="pill" data-bs-target="#tabMostBooked" type="button" role="tab">
+            <i class="bi bi-lightning-charge me-1"></i>Most Booked
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link btn-sm rounded-pill px-3" id="tabMostCompletedBtn" data-bs-toggle="pill" data-bs-target="#tabMostCompleted" type="button" role="tab">
+            <i class="bi bi-check2-circle text-success me-1"></i>Most Completed
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link btn-sm rounded-pill px-3" id="tabCancellationBtn" data-bs-toggle="pill" data-bs-target="#tabCancellation" type="button" role="tab">
+            <i class="bi bi-exclamation-circle text-danger me-1"></i>Cancellation Rates
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link btn-sm rounded-pill px-3" id="tabInactiveBtn" data-bs-toggle="pill" data-bs-target="#tabInactive" type="button" role="tab">
+            <i class="bi bi-moon-stars text-secondary me-1"></i>Inactive Providers
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="providerPerformanceTabContent">
+        <!-- 1. Highest Rated -->
+        <div class="tab-pane fade show active" id="tabTopRated" role="tabpanel">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle small mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th>Provider / Business</th>
+                  <th>Owner Name</th>
+                  <th class="text-center">Average Rating</th>
+                  <th class="text-center">Review Count</th>
+                  <th class="text-center">Completed Jobs</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="topRatedProvidersBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 2. Most Booked -->
+        <div class="tab-pane fade" id="tabMostBooked" role="tabpanel">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle small mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th>Provider / Business</th>
+                  <th>Owner Name</th>
+                  <th class="text-center">Total Bookings</th>
+                  <th class="text-center">Completed</th>
+                  <th class="text-center">Active Jobs</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="mostBookedProvidersBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 3. Most Completed -->
+        <div class="tab-pane fade" id="tabMostCompleted" role="tabpanel">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle small mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th>Provider / Business</th>
+                  <th>Owner Name</th>
+                  <th class="text-center">Completed Jobs</th>
+                  <th class="text-center">Completion Rate</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="mostCompletedProvidersBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 4. Cancellation Rates -->
+        <div class="tab-pane fade" id="tabCancellation" role="tabpanel">
+          <div class="alert alert-warning py-2 px-3 small rounded-3 mb-3">
+            <i class="bi bi-info-circle me-1"></i><strong>Statistical Quality Rule:</strong> Provider cancellation rates require at least 1 booking to calculate. Always consider sample size before penalizing providers.
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle small mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th>Provider / Business</th>
+                  <th>Owner Name</th>
+                  <th class="text-center">Total Bookings</th>
+                  <th class="text-center">Cancelled</th>
+                  <th class="text-center">Cancellation Rate</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="cancellationProvidersBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 5. Inactive Providers -->
+        <div class="tab-pane fade" id="tabInactive" role="tabpanel">
+          <div class="alert alert-secondary py-2 px-3 small rounded-3 mb-3">
+            <i class="bi bi-info-circle me-1"></i>Verified providers with zero bookings during the selected timeframe. Helpful for re-engagement campaigns.
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle small mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th>Provider / Business</th>
+                  <th>Owner Name</th>
+                  <th class="text-center">Verification Status</th>
+                  <th class="text-center">Online Availability</th>
+                  <th class="text-center">Lifetime Bookings</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inactiveProvidersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script>
+    const me = Auth.require('ADMIN');
+    adminNav('dashboard');
+    const $ = id => document.getElementById(id);
+
+    // State
+    let currentPeriod = '30d';
+    let currentFromDate = null;
+    let currentToDate = null;
+    let trendsChartInstance = null;
+    let chartType = 'line';
+
+    // Format helper
+    const formatNumber = n => Number(n || 0).toLocaleString();
+
+    // Map supply gap badges
+    const renderSupplyBadge = status => {
+      if (status === 'NO_COVERAGE') {
+        return '<span class="badge badge-soft-danger"><i class="bi bi-x-circle me-1"></i>No Coverage</span>';
+      } else if (status === 'HIGH_DEMAND') {
+        return '<span class="badge badge-soft-warning"><i class="bi bi-exclamation-triangle me-1"></i>High Demand</span>';
+      }
+      return '<span class="badge badge-soft-success"><i class="bi bi-check-circle me-1"></i>Adequate</span>';
+    };
+
+    // Show Loading Skeleton / Indicators
+    let overviewLoaded = false;
+
+    function computeTypeComparison(overview) {
+      if (!overview) return null;
+      const total = Number(overview.totalBookings || 0);
+      const quick = Number(overview.quickServiceBookings || 0);
+      const normal = Math.max(0, total - quick);
+      const normalPct = total > 0 ? Math.round((normal * 1000.0) / total) / 10.0 : 0.0;
+      const quickPct = total > 0 ? Math.round((quick * 1000.0) / total) / 10.0 : 0.0;
+      return {
+        normalCount: normal,
+        quickServiceCount: quick,
+        normalPercentage: normalPct,
+        quickPercentage: quickPct
+      };
+    }
+
+    function showLoadingStates() {
+      $('analyticsErrorBanner').classList.add('d-none');
+      $('refreshSpinner').classList.add('spinner-border', 'spinner-border-sm');
+      if (!overviewLoaded && ($('kpiCardsContainer').children.length === 0 || $('kpiCardsContainer').innerHTML.includes('Aggregating verified platform metrics'))) {
+        $('activeDateRangeLabel').innerHTML = '<i class="bi bi-clock-history me-1 text-primary"></i>Updating timeframe...';
+        $('kpiCardsContainer').innerHTML = `
+          <div class="col-12 text-center py-4 text-muted">
+            <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+            <span>Aggregating verified platform metrics...</span>
+          </div>
+        `;
+      }
+    }
+
+    function showChartFallback(msg, trends = null) {
+      const canvas = $('bookingTrendsCanvas');
+      const box = $('chartFallbackBox');
+      if (canvas) canvas.classList.add('d-none');
+      if (!box) return;
+      box.classList.remove('d-none');
+
+      if (trends && trends.length > 0) {
+        const totalVol = trends.reduce((sum, t) => sum + (t.total || 0), 0);
+        const quickVol = trends.reduce((sum, t) => sum + (t.quickService || 0), 0);
+        const compVol = trends.reduce((sum, t) => sum + (t.completed || 0), 0);
+        const maxVal = Math.max(1, ...trends.map(t => t.total || 0));
+
+        box.innerHTML = `
+          <div class="p-3 bg-light rounded text-start">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <strong class="text-dark"><i class="bi bi-bar-chart-line me-1 text-primary"></i>Booking Trend Activity (${trends.length} days)</strong>
+              <span class="badge bg-primary">${totalVol} Bookings</span>
+            </div>
+            <div class="d-flex align-items-end gap-1 mb-2 pt-2 pb-1 overflow-auto" style="height: 90px; border-bottom: 1px solid #e2e8f0;">
+              ${trends.map(t => {
+                const pct = Math.round(((t.total || 0) / maxVal) * 100);
+                const isNonZero = (t.total || 0) > 0;
+                return `
+                  <div class="d-flex flex-column align-items-center" style="flex: 1; min-width: 14px;" title="${t.date}: ${t.total} total (${t.quickService} quick, ${t.completed} completed)">
+                    <div style="width: 80%; max-width: 16px; height: ${Math.max(4, pct)}%; background-color: ${isNonZero ? '#7c3aed' : '#cbd5e1'}; border-radius: 3px 3px 0 0;"></div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            <div class="d-flex flex-wrap justify-content-between text-muted small">
+              <span><i class="bi bi-check-circle text-success me-1"></i>Completed: ${compVol}</span>
+              <span><i class="bi bi-lightning-charge text-warning me-1"></i>Quick Service: ${quickVol}</span>
+              <span><i class="bi bi-calendar3 me-1"></i>Timeframe: ${trends[0].date} &rarr; ${trends[trends.length - 1].date}</span>
+            </div>
+          </div>
+        `;
+      } else {
+        box.innerHTML = `<span class="text-muted small"><i class="bi bi-info-circle me-1"></i>${msg}</span>`;
+      }
+    }
+
+    // Show Error States on failure
+    function showErrorStates(err) {
+      console.error('Failed to load dashboard analytics:', err);
+      const msg = err.message || 'Failed to aggregate analytics. Please check backend connection.';
+      $('analyticsErrorMessage').textContent = msg;
+      $('analyticsErrorBanner').classList.remove('d-none');
+
+      // If overview wasn't loaded, load /admin/dashboard as fallback
+      if (!overviewLoaded) {
+        loadDashboardOverview().then(() => {
+          if (!overviewLoaded) {
+            $('activeDateRangeLabel').innerHTML = '<i class="bi bi-exclamation-circle text-danger me-1"></i>Error loading timeframe';
+            $('kpiCardsContainer').innerHTML = `
+              <div class="col-12 text-center py-4">
+                <div class="p-3 bg-white rounded-3 border border-danger-subtle d-inline-block text-danger">
+                  <i class="bi bi-exclamation-triangle-fill fs-4 d-block mb-1"></i>
+                  <span class="small fw-semibold">Failed to load platform KPI overview.</span>
+                </div>
+              </div>
+            `;
+          }
+        });
+      }
+      showChartFallback('Reservation trends chart temporarily unavailable.');
+    }
+
+    // Load lightweight overview instantly
+    async function loadDashboardOverview() {
+      try {
+        const dash = await api('/admin/dashboard', { timeout: 8000 });
+        if (dash) {
+          overviewLoaded = true;
+          renderOverviewKpis(dash);
+          if (dash.bookingsByStatus) {
+            renderStatusBreakdown(dash.bookingsByStatus, computeTypeComparison(dash));
+          }
+        }
+      } catch (err) {
+        console.warn('Initial /admin/dashboard fetch notice:', err.message);
+      }
+    }
+
+    // Load full analytics data with independent section isolation
+    async function loadAnalytics() {
+      if (!me) return;
+      showLoadingStates();
+
+      // Trigger overview immediately in parallel to avoid blank KPIs
+      if (!overviewLoaded) {
+        loadDashboardOverview();
+      }
+
+      try {
+        let url = `/admin/analytics?period=${encodeURIComponent(currentPeriod)}`;
+        if (currentPeriod === 'custom' && currentFromDate && currentToDate) {
+          url += `&fromDate=${encodeURIComponent(currentFromDate)}&toDate=${encodeURIComponent(currentToDate)}`;
+        }
+
+        const data = await api(url, { timeout: 15000 });
+        if (data) {
+          if (data.overview) {
+            overviewLoaded = true;
+            renderOverviewKpis(data.overview);
+          }
+          if (data.dateRange) {
+            renderDateRangeLabel(data.dateRange);
+          }
+          try {
+            renderTrendsChart(data.dailyTrends);
+          } catch (chartErr) {
+            console.error('Error rendering trends chart:', chartErr);
+            showChartFallback('Failed to initialize interactive trends chart.', data.dailyTrends);
+          }
+          try {
+            const fallbackTypeComp = data.typeComparison || (data.overview ? computeTypeComparison(data.overview) : null);
+            renderStatusBreakdown(data.statusBreakdown, fallbackTypeComp);
+          } catch (statusErr) {
+            console.error('Error rendering status breakdown:', statusErr);
+          }
+          try {
+            renderQuickServiceSection(data.quickServicePerformance);
+          } catch (qsErr) {
+            console.error('Error rendering quick service section:', qsErr);
+          }
+          try {
+            renderServiceDemandSection(data.serviceDemand);
+          } catch (sdErr) {
+            console.error('Error rendering service demand section:', sdErr);
+          }
+          try {
+            renderProviderPerformanceSection(data.providerPerformance);
+          } catch (ppErr) {
+            console.error('Error rendering provider performance section:', ppErr);
+          }
+        }
+      } catch (err) {
+        showErrorStates(err);
+      } finally {
+        $('refreshSpinner').classList.remove('spinner-border', 'spinner-border-sm');
+      }
+    }
+
+    // 1. Render 10 KPI Overview Cards
+    function renderOverviewKpis(o) {
+      if (!o) return;
+      const cards = [
+        ['Total Customers', o.totalCustomers, 'bi-people', 'text-primary', '/admin/customers.html', 'Registered customer accounts'],
+        ['Total Providers', o.totalProviders, 'bi-tools', 'text-info', '/admin/providers.html', 'All onboarded providers'],
+        ['Verified Providers', o.verifiedProviders, 'bi-patch-check', 'text-success', '/admin/providers.html?status=VERIFIED', 'Audited & certified partners'],
+        ['Pending Approvals', o.pendingProviders, 'bi-hourglass-split', 'text-warning', '/admin/providers.html?status=PENDING', 'Awaiting identity check'],
+        ['Total Services', o.totalServices, 'bi-grid', 'text-secondary', '/admin/services.html', 'Active service categories'],
+        ['Total Bookings', o.totalBookings, 'bi-journal-text', 'text-dark', '/admin/bookings.html', 'All historical reservations'],
+        ['Active Bookings', o.activeBookings, 'bi-activity', 'text-primary', '/admin/bookings.html?status=ACTIVE', 'In-progress & fulfillment'],
+        ['Completed Jobs', o.completedBookings, 'bi-check2-circle', 'text-success', '/admin/bookings.html?status=COMPLETED', 'Successfully verified & closed'],
+        ['Cancelled / Rejected', o.cancelledBookings, 'bi-x-circle', 'text-danger', '/admin/bookings.html?status=CANCELLED', 'Unfulfilled appointments'],
+        ['Quick Service', o.quickServiceBookings, 'bi-lightning-charge', 'text-warning', '/admin/bookings.html?type=QUICK_SERVICE', 'On-demand urgent dispatches']
+      ];
+
+      $('kpiCardsContainer').innerHTML = cards.map(([t, v, icon, color, href, subtitle]) => `
+        <div class="col-6 col-md-4 col-lg-2-4" style="flex: 0 0 auto; width: 20%;">
+          <div class="dashboard-kpi-card p-3 h-100 d-flex flex-column justify-content-between" onclick="location.href='${href}'">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div class="p-2 rounded-3 bg-light ${color}"><i class="bi ${icon} fs-5"></i></div>
+              <i class="bi bi-arrow-up-right text-muted small"></i>
+            </div>
+            <div>
+              <div class="fs-3 fw-bold text-dark lh-1 mb-1">${formatNumber(v)}</div>
+              <div class="small fw-semibold text-dark text-truncate" title="${t}">${t}</div>
+              <div class="text-muted" style="font-size: 0.72rem;">${subtitle}</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 2. Render Active Timeframe Label
+    function renderDateRangeLabel(r) {
+      if (!r) return;
+      $('activeDateRangeLabel').innerHTML = `<i class="bi bi-clock-history me-1 text-primary"></i>${esc(r.fromDate)} &rarr; ${esc(r.toDate)} (${r.daysCount} days)`;
+    }
+
+    // 3. Render Interactive Booking Trends Chart (Chart.js with fallback)
+    function renderTrendsChart(trends) {
+      if (!trends || !trends.length) {
+        showChartFallback('No booking activity recorded for this timeframe.', null);
+        if (trendsChartInstance) trendsChartInstance.destroy();
+        return;
+      }
+
+      const labels = trends.map(t => t.date);
+      const totals = trends.map(t => t.total);
+      const quicks = trends.map(t => t.quickService);
+      const completeds = trends.map(t => t.completed);
+      const cancelleds = trends.map(t => t.cancelled);
+
+      if (typeof Chart === 'undefined') {
+        // Fallback if Chart.js CDN is unavailable
+        showChartFallback('Visualizing platform booking trend breakdown:', trends);
+        return;
+      }
+
+      if (trendsChartInstance) {
+        trendsChartInstance.destroy();
+      }
+
+      $('chartFallbackBox').classList.add('d-none');
+      $('bookingTrendsCanvas').classList.remove('d-none');
+
+      const ctx = $('bookingTrendsCanvas').getContext('2d');
+      trendsChartInstance = new Chart(ctx, {
+        type: chartType,
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Total Bookings',
+              data: totals,
+              borderColor: '#7c3aed',
+              backgroundColor: chartType === 'bar' ? '#7c3aed' : 'rgba(124, 58, 237, 0.08)',
+              borderWidth: 2,
+              fill: chartType === 'line',
+              tension: 0.35
+            },
+            {
+              label: 'Quick Service',
+              data: quicks,
+              borderColor: '#f59e0b',
+              backgroundColor: chartType === 'bar' ? '#f59e0b' : 'rgba(245, 158, 11, 0.05)',
+              borderWidth: 2,
+              borderDash: chartType === 'line' ? [4, 4] : [],
+              fill: false,
+              tension: 0.35
+            },
+            {
+              label: 'Completed',
+              data: completeds,
+              borderColor: '#10b981',
+              backgroundColor: chartType === 'bar' ? '#10b981' : 'rgba(16, 185, 129, 0.05)',
+              borderWidth: 2,
+              fill: false,
+              tension: 0.35
+            },
+            {
+              label: 'Cancelled / Rejected',
+              data: cancelleds,
+              borderColor: '#ef4444',
+              backgroundColor: chartType === 'bar' ? '#ef4444' : 'rgba(239, 68, 68, 0.05)',
+              borderWidth: 2,
+              fill: false,
+              tension: 0.35
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                boxWidth: 12,
+                font: { size: 11, weight: '600' }
+              }
+            },
+            tooltip: {
+              padding: 10,
+              boxPadding: 4,
+              usePointStyle: true
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 10 } }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0, font: { size: 10 } }
+            }
+          }
+        }
+      });
+    }
+
+    // 4. Render Status Bars & Type Comparison
+    function renderStatusBreakdown(byStatus, typeComp) {
+      if (!byStatus) return;
+
+      if (typeComp) {
+        $('valNormalCount').textContent = formatNumber(typeComp.normalCount);
+        $('valNormalPct').textContent = `${typeComp.normalPercentage}%`;
+        $('valQuickCount').textContent = formatNumber(typeComp.quickServiceCount);
+        $('valQuickPct').textContent = `${typeComp.quickPercentage}%`;
+        $('barNormalShare').style.width = `${typeComp.normalPercentage}%`;
+        $('barQuickShare').style.width = `${typeComp.quickPercentage}%`;
+      }
+
+      const max = Math.max(1, ...Object.values(byStatus));
+      $('statusBarsList').innerHTML = Object.entries(byStatus).map(([statusKey, count]) => {
+        const meta = (typeof STATUS !== 'undefined' && STATUS[statusKey]) ? STATUS[statusKey] : ['primary', statusKey];
+        const barColor = meta[0] || 'primary';
+        const label = meta[1] || statusKey;
+        const pct = Math.round((count / max) * 100);
+
+        return `
+          <a href="/admin/bookings.html?status=${encodeURIComponent(statusKey)}" class="status-bar-link d-flex align-items-center text-decoration-none text-dark" title="Filter by ${label}">
+            <div style="width: 135px;" class="small fw-semibold text-truncate me-2">${label}</div>
+            <div class="progress flex-grow-1" style="height: 18px; border-radius: 6px; background-color: #f1f5f9;">
+              <div class="progress-bar bg-${barColor}" style="width: ${pct}%; font-weight: 700; font-size: 0.72rem;">
+                ${count > 0 ? count : ''}
+              </div>
+            </div>
+            <div class="ms-2 text-end fw-bold small text-muted" style="width: 32px;">${count}</div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    // 5. Render Quick Service Operations
+    function renderQuickServiceSection(qs) {
+      if (!qs) return;
+      $('qsTotal').textContent = formatNumber(qs.totalRequests);
+      $('qsAssigned').textContent = formatNumber(qs.assignedRequests);
+      const rate = qs.totalRequests > 0 ? Math.round((qs.assignedRequests * 100.0) / qs.totalRequests) : 100;
+      $('qsAssignedRate').textContent = `${rate}% Rate`;
+      $('qsUnassigned').textContent = formatNumber(qs.unassignedRequests);
+      $('qsDelayed').textContent = formatNumber(qs.delayedCount);
+
+      if (qs.avgAssignmentMinutes != null) {
+        $('qsAvgAssignment').textContent = `${qs.avgAssignmentMinutes}m`;
+        $('qsAssignmentSample').textContent = `${qs.assignmentSampleCount} samples`;
+      } else {
+        $('qsAvgAssignment').textContent = '--';
+        $('qsAssignmentSample').textContent = 'No verified samples';
+      }
+
+      if (qs.avgArrivalMinutes != null) {
+        $('qsAvgArrival').textContent = `${qs.avgArrivalMinutes}m`;
+        $('qsArrivalSample').textContent = `${qs.arrivalSampleCount} samples`;
+      } else {
+        $('qsAvgArrival').textContent = '--';
+        $('qsArrivalSample').textContent = 'No verified samples';
+      }
+    }
+
+    // 6. Render Service Demand Section
+    function renderServiceDemandSection(sd) {
+      if (!sd) return;
+
+      // Popular categories
+      const catList = sd.popularCategories || [];
+      if (!catList.length) {
+        $('popularCategoriesList').innerHTML = '<div class="text-muted small py-2">No category demand recorded in this range.</div>';
+      } else {
+        $('popularCategoriesList').innerHTML = catList.map(c => `
+          <div class="p-2.5 rounded-3 border bg-light d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2">
+              <div class="p-2 rounded bg-white text-primary border"><i class="bi ${c.icon || 'bi-stars'}"></i></div>
+              <div>
+                <strong class="d-block text-dark small">${esc(c.name)}</strong>
+                <span class="text-muted" style="font-size: 0.72rem;">Est. Revenue: ₹${formatNumber(c.estimatedRevenue)}</span>
+              </div>
+            </div>
+            <div class="text-end">
+              <span class="badge bg-primary rounded-pill">${c.bookingCount} bookings</span>
+              <div class="text-muted mt-0.5" style="font-size: 0.7rem;">${c.sharePercentage}% share</div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Popular Subservices
+      const subList = sd.popularSubServices || [];
+      if (!subList.length) {
+        $('popularSubservicesBody').innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">No subservices requested in this range.</td></tr>';
+      } else {
+        $('popularSubservicesBody').innerHTML = subList.map(s => `
+          <tr>
+            <td class="fw-semibold text-dark">${esc(s.name)}</td>
+            <td class="text-muted">${esc(s.categoryName)}</td>
+            <td class="text-center"><span class="badge bg-light text-dark border">${s.bookingCount}</span></td>
+            <td class="text-end fw-bold text-success">${s.averagePrice > 0 ? '₹' + formatNumber(s.averagePrice) : '--'}</td>
+          </tr>
+        `).join('');
+      }
+
+      // Area Supply Gaps
+      const gapList = sd.supplyGaps || [];
+      if (!gapList.length) {
+        $('areaSupplyGapsBody').innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No area demand logged in this range.</td></tr>';
+      } else {
+        $('areaSupplyGapsBody').innerHTML = gapList.map(g => `
+          <tr>
+            <td class="fw-semibold text-dark"><i class="bi bi-geo-alt me-1 text-danger"></i>${esc(g.area)}</td>
+            <td class="text-center fw-bold">${g.activeDemand}</td>
+            <td class="text-center"><span class="badge badge-soft-warning">${g.activeDemand > 0 ? g.activeDemand : 0}</span></td>
+            <td class="text-center"><span class="badge bg-light text-dark border">${g.verifiedProvidersCount}</span></td>
+            <td class="text-center"><span class="badge ${g.onlineProvidersCount > 0 ? 'badge-soft-success' : 'badge-soft-danger'}">${g.onlineProvidersCount}</span></td>
+            <td class="text-end">${renderSupplyBadge(g.supplyStatus)}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // 7. Render Provider Performance Section
+    function renderProviderPerformanceSection(pp) {
+      if (!pp) return;
+
+      // 1. Highest Rated
+      const topRated = pp.topRated || [];
+      $('topRatedProvidersBody').innerHTML = !topRated.length
+        ? '<tr><td colspan="6" class="text-center text-muted py-3">No verified providers registered.</td></tr>'
+        : topRated.map(p => `
+          <tr>
+            <td class="fw-semibold text-dark">${esc(p.businessName)}</td>
+            <td class="text-muted">${esc(p.ownerName)}</td>
+            <td class="text-center">
+              <span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>${p.rating != null ? p.rating.toFixed(1) : '5.0'}</span>
+            </td>
+            <td class="text-center">${p.reviewCount || 0} reviews</td>
+            <td class="text-center"><span class="badge badge-soft-success">${p.completedBookings || 0} jobs</span></td>
+            <td class="text-end">
+              <a href="/admin/providers/${p.providerId}/details" class="btn btn-outline-secondary btn-sm py-0.5 px-2">Inspect</a>
+            </td>
+          </tr>
+        `).join('');
+
+      // 2. Most Booked
+      const mostBooked = pp.mostBooked || [];
+      $('mostBookedProvidersBody').innerHTML = !mostBooked.length
+        ? '<tr><td colspan="6" class="text-center text-muted py-3">No bookings recorded in this timeframe.</td></tr>'
+        : mostBooked.map(p => `
+          <tr>
+            <td class="fw-semibold text-dark">${esc(p.businessName)}</td>
+            <td class="text-muted">${esc(p.ownerName)}</td>
+            <td class="text-center"><span class="badge bg-primary rounded-pill">${p.totalBookings} bookings</span></td>
+            <td class="text-center">${p.completedBookings} completed</td>
+            <td class="text-center"><span class="badge badge-soft-primary">${p.activeBookings} active</span></td>
+            <td class="text-end">
+              <a href="/admin/bookings.html?providerId=${p.providerId}" class="btn btn-outline-primary btn-sm py-0.5 px-2">Bookings</a>
+            </td>
+          </tr>
+        `).join('');
+
+      // 3. Most Completed
+      const mostCompleted = pp.mostCompleted || [];
+      $('mostCompletedProvidersBody').innerHTML = !mostCompleted.length
+        ? '<tr><td colspan="5" class="text-center text-muted py-3">No completed bookings in this timeframe.</td></tr>'
+        : mostCompleted.map(p => `
+          <tr>
+            <td class="fw-semibold text-dark">${esc(p.businessName)}</td>
+            <td class="text-muted">${esc(p.ownerName)}</td>
+            <td class="text-center"><span class="badge bg-success rounded-pill">${p.completedBookings} jobs</span></td>
+            <td class="text-center fw-bold text-success">${p.completionRate}%</td>
+            <td class="text-end">
+              <a href="/admin/bookings.html?providerId=${p.providerId}&status=COMPLETED" class="btn btn-outline-success btn-sm py-0.5 px-2">Jobs</a>
+            </td>
+          </tr>
+        `).join('');
+
+      // 4. Cancellation Rates
+      const cancellation = pp.cancellationRates || [];
+      $('cancellationProvidersBody').innerHTML = !cancellation.length
+        ? '<tr><td colspan="6" class="text-center text-muted py-3">Zero cancellations recorded in this timeframe.</td></tr>'
+        : cancellation.map(p => `
+          <tr>
+            <td class="fw-semibold text-dark">${esc(p.businessName)}</td>
+            <td class="text-muted">${esc(p.ownerName)}</td>
+            <td class="text-center">${p.totalBookings}</td>
+            <td class="text-center text-danger fw-bold">${p.cancelledBookings}</td>
+            <td class="text-center"><span class="badge badge-soft-danger">${p.cancellationRate}%</span></td>
+            <td class="text-end">
+              <a href="/admin/bookings.html?providerId=${p.providerId}&status=CANCELLED" class="btn btn-outline-danger btn-sm py-0.5 px-2">Inspect</a>
+            </td>
+          </tr>
+        `).join('');
+
+      // 5. Inactive Providers
+      const inactive = pp.inactiveProviders || [];
+      $('inactiveProvidersBody').innerHTML = !inactive.length
+        ? '<tr><td colspan="6" class="text-center text-muted py-3">All verified providers have active appointments.</td></tr>'
+        : inactive.map(p => `
+          <tr>
+            <td class="fw-semibold text-dark">${esc(p.businessName)}</td>
+            <td class="text-muted">${esc(p.ownerName)}</td>
+            <td class="text-center"><span class="badge badge-soft-success">${p.verificationStatus}</span></td>
+            <td class="text-center">${p.availability ? '<span class="text-success fw-bold">Online</span>' : '<span class="text-muted">Offline</span>'}</td>
+            <td class="text-center">${p.lifetimeBookings || 0} lifetime</td>
+            <td class="text-end">
+              <a href="/admin/providers/${p.providerId}/details" class="btn btn-outline-secondary btn-sm py-0.5 px-2">Profile</a>
+            </td>
+          </tr>
+        `).join('');
+    }
+
+    // Setup Event Listeners
+    function setupEventListeners() {
+      // Period buttons
+      $('periodBtnGroup').addEventListener('click', e => {
+        const btn = e.target.closest('.period-btn');
+        if (!btn) return;
+        const period = btn.dataset.period;
+        if (period === 'custom') {
+          $('customDateRangeInputs').classList.remove('d-none');
+          return;
+        }
+        $('customDateRangeInputs').classList.add('d-none');
+        document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentPeriod = period;
+        currentFromDate = null;
+        currentToDate = null;
+        loadAnalytics();
+      });
+
+      // Apply custom range
+      $('btnApplyCustomRange').addEventListener('click', () => {
+        const from = $('inputFromDate').value;
+        const to = $('inputToDate').value;
+        if (!from || !to) {
+          alert('Please select both Start Date and End Date.');
+          return;
+        }
+        if (new Date(from) > new Date(to)) {
+          alert('Start Date cannot be after End Date.');
+          return;
+        }
+        document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+        $('btnCustomPeriod').classList.add('active');
+        currentPeriod = 'custom';
+        currentFromDate = from;
+        currentToDate = to;
+        loadAnalytics();
+      });
+
+      // Refresh
+      $('btnRefreshAnalytics').addEventListener('click', loadAnalytics);
+      $('btnRetryAnalytics').addEventListener('click', loadAnalytics);
+
+      // Chart type toggles
+      $('btnChartModeLine').addEventListener('click', () => {
+        chartType = 'line';
+        $('btnChartModeLine').classList.add('active');
+        $('btnChartModeBar').classList.remove('active');
+        loadAnalytics();
+      });
+      $('btnChartModeBar').addEventListener('click', () => {
+        chartType = 'bar';
+        $('btnChartModeBar').classList.add('active');
+        $('btnChartModeLine').classList.remove('active');
+        loadAnalytics();
+      });
+    }
+
+    // Initialize
+    (async () => {
+      setupEventListeners();
+      await loadAnalytics();
+    })();
+  </script>
+</body>
+</html>

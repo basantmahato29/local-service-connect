@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manage Services &amp; Sub-Services · Local Service Connect</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<div id="nav"></div>
+
+<div class="container-xl py-4 py-lg-5">
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+      <h1 class="h3 fw-bold mb-1">Service Categories &amp; Sub-Services Management</h1>
+      <p class="text-muted mb-0">Organize canonical parent categories and manage hierarchical sub-services across the marketplace.</p>
+    </div>
+    <a href="/admin/dashboard.html" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-speedometer2 me-1"></i> Dashboard
+    </a>
+  </div>
+
+  <div id="msg" class="alert d-none"></div>
+
+  <!-- Parent Category Form -->
+  <form id="f" class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+      <h2 class="h6 fw-bold mb-3 text-dark d-flex align-items-center gap-2" id="formTitle">
+        <i class="bi bi-plus-circle text-primary"></i> Add New Service Category
+      </h2>
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label small fw-semibold text-muted mb-1" for="name">Service Name</label>
+          <input id="name" class="form-control" placeholder="e.g. Cleaning Services" required maxlength="100">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small fw-semibold text-muted mb-1" for="description">Short Description</label>
+          <input id="description" class="form-control" placeholder="Brief description of service offerings" maxlength="255">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small fw-semibold text-muted mb-1" for="icon">Icon Class</label>
+          <input id="icon" class="form-control" placeholder="bi-stars" title="A Bootstrap Icons class (e.g. bi-stars, bi-lightning)">
+        </div>
+        <div class="col-md-1">
+          <label class="form-label small fw-semibold text-muted mb-1" for="status">Status</label>
+          <select id="status" class="form-select">
+            <option>ACTIVE</option>
+            <option>INACTIVE</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-primary w-100" id="save">Add Service</button>
+        </div>
+      </div>
+      <div class="mt-2">
+        <button type="button" id="cancel" class="btn btn-link btn-sm text-muted text-decoration-none d-none">
+          <i class="bi bi-x me-1"></i>Cancel editing
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Categories Table -->
+  <div class="card border-0 shadow-sm table-card mb-5">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="width: 50px;"></th>
+            <th>Category Name</th>
+            <th>Description</th>
+            <th style="width: 140px;">Sub-Services</th>
+            <th style="width: 100px;">Status</th>
+            <th class="text-end" style="width: 310px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="6" class="text-muted text-center py-4">Loading services...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Sub-Services Management for Selected Category -->
+<div class="modal fade" id="subModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <div>
+          <h5 class="modal-title fw-bold" id="subModalTitle">
+            <i class="bi bi-list-nested text-primary me-2"></i>Manage Sub-Services
+          </h5>
+          <div class="small text-muted" id="subModalSubtitle">Category: Loading...</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div id="subMsg" class="alert d-none"></div>
+
+        <!-- Add / Edit Sub-Service Form -->
+        <div class="card border mb-4 bg-light-subtle">
+          <div class="card-body p-3">
+            <h6 class="fw-bold mb-3 text-dark d-flex align-items-center gap-2" id="subFormTitle">
+              <i class="bi bi-plus-circle text-success"></i> Add New Sub-Service
+            </h6>
+            <form id="subForm" class="row g-2 align-items-end">
+              <div class="col-md-3">
+                <label class="form-label small fw-semibold mb-1" for="subName">Sub-Service Name</label>
+                <input id="subName" class="form-control form-control-sm" placeholder="e.g. Sofa Cleaning" required maxlength="150">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small fw-semibold mb-1" for="subPrice">Base Price (₹)</label>
+                <input id="subPrice" type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="699" required>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small fw-semibold mb-1" for="subDuration">Duration</label>
+                <input id="subDuration" class="form-control form-control-sm" placeholder="e.g. 60 mins" maxlength="50">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-semibold mb-1" for="subImage">Image URL</label>
+                <input id="subImage" class="form-control form-control-sm" placeholder="https://images.unsplash.com/..." maxlength="255">
+              </div>
+              <div class="col-md-2">
+                <button class="btn btn-success btn-sm w-100" id="subSaveBtn">Add Sub-Service</button>
+              </div>
+              <div class="col-12 mt-2">
+                <label class="form-label small fw-semibold mb-1" for="subDesc">Detailed Description / Inclusions</label>
+                <input id="subDesc" class="form-control form-control-sm" placeholder="Detailed scope, process steps and inclusions...">
+              </div>
+              <div class="col-12 mt-2 d-flex align-items-center justify-content-between">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="subEnabled" checked>
+                  <label class="form-check-label small" for="subEnabled">Enabled / Active for customers</label>
+                </div>
+                <button type="button" id="subCancelBtn" class="btn btn-link btn-sm text-muted text-decoration-none d-none">
+                  <i class="bi bi-x me-1"></i>Cancel editing
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Sub-Services List Table -->
+        <h6 class="fw-bold mb-2 text-dark">Existing Sub-Services in this Category</h6>
+        <div class="table-responsive border rounded-3 bg-white">
+          <table class="table align-middle table-sm mb-0">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 50px;">Img</th>
+                <th>Sub-Service Name</th>
+                <th>Price</th>
+                <th>Duration</th>
+                <th>Description</th>
+                <th style="width: 90px;">Status</th>
+                <th class="text-end" style="width: 170px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="subRows">
+              <tr><td colspan="7" class="text-muted text-center py-3">Loading sub-services...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script>
+const me = Auth.require('ADMIN'); adminNav('services');
+const $ = id => document.getElementById(id);
+let list = [], editId = null;
+let currentParentService = null;
+let currentSubList = [], subEditId = null;
+
+function msg(t, ok = false) { 
+  const m = $('msg'); 
+  m.className = 'alert alert-' + (ok ? 'success' : 'danger'); 
+  m.textContent = t; 
+  m.classList.remove('d-none'); 
+}
+
+function subMsg(t, ok = false) {
+  const m = $('subMsg');
+  m.className = 'alert alert-' + (ok ? 'success' : 'danger');
+  m.textContent = t;
+  m.classList.remove('d-none');
+}
+
+function reset() { 
+  editId = null; 
+  $('f').reset(); 
+  $('formTitle').innerHTML = '<i class="bi bi-plus-circle text-primary"></i> Add New Service Category'; 
+  $('save').textContent = 'Add Service'; 
+  $('cancel').classList.add('d-none'); 
+}
+
+function subReset() {
+  subEditId = null;
+  $('subForm').reset();
+  $('subEnabled').checked = true;
+  $('subFormTitle').innerHTML = '<i class="bi bi-plus-circle text-success"></i> Add New Sub-Service';
+  $('subSaveBtn').textContent = 'Add Sub-Service';
+  $('subCancelBtn').classList.add('d-none');
+}
+
+async function load() {
+  try {
+    list = await api('/admin/services');
+    $('rows').innerHTML = list.map(s => {
+      const subCount = s.subServices ? s.subServices.length : 0;
+      return `<tr>
+        <td class="text-center"><i class="bi ${esc(s.icon || 'bi-tools')} fs-4 text-primary"></i></td>
+        <td>
+          <strong>${esc(s.name)}</strong>
+        </td>
+        <td class="small text-muted">${esc(s.description || '-')}</td>
+        <td>
+          <span class="badge ${subCount > 0 ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-light text-muted border'} px-2 py-1">
+            <i class="bi bi-list-nested me-1"></i>${subCount} Sub-Services
+          </span>
+        </td>
+        <td><span class="badge text-bg-${s.status === 'ACTIVE' ? 'success' : 'secondary'}">${s.status}</span></td>
+        <td class="text-end text-nowrap">
+          <button class="btn btn-outline-info btn-sm me-1" data-a="manage-subs" data-id="${s.id}">
+            <i class="bi bi-list-nested me-1"></i>Sub-Services
+          </button>
+          <button class="btn btn-outline-primary btn-sm me-1" data-a="edit" data-id="${s.id}">Edit</button>
+          <button class="btn btn-outline-secondary btn-sm me-1" data-a="toggle" data-id="${s.id}">${s.status === 'ACTIVE' ? 'Disable' : 'Enable'}</button>
+          <button class="btn btn-outline-danger btn-sm" data-a="delete" data-id="${s.id}">Delete</button>
+        </td></tr>`;
+    }).join('') || '<tr><td colspan="6" class="text-muted text-center py-4">No services yet</td></tr>';
+  } catch (e) { msg(e.message); }
+}
+
+$('f').addEventListener('submit', async e => {
+  e.preventDefault();
+  const body = { name: $('name').value, description: $('description').value || null, icon: $('icon').value || null, status: $('status').value };
+  try {
+    await api(editId ? '/admin/services/' + editId : '/admin/services', { method: editId ? 'PUT' : 'POST', body });
+    msg(editId ? 'Service category updated successfully' : 'Service category added successfully', true); 
+    reset();
+  } catch (ex) { msg(ex.message); }
+  load();
+});
+
+$('cancel').addEventListener('click', reset);
+
+$('rows').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const s = list.find(x => String(x.id) === b.dataset.id);
+  if (!s) return;
+
+  if (b.dataset.a === 'manage-subs') {
+    openSubModal(s);
+    return;
+  }
+
+  if (b.dataset.a === 'edit') {
+    editId = s.id; 
+    $('name').value = s.name; 
+    $('description').value = s.description || ''; 
+    $('icon').value = s.icon || ''; 
+    $('status').value = s.status;
+    $('formTitle').innerHTML = '<i class="bi bi-pencil-square text-primary"></i> Edit Service: ' + esc(s.name); 
+    $('save').textContent = 'Save Changes'; 
+    $('cancel').classList.remove('d-none'); 
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
+  try {
+    if (b.dataset.a === 'toggle') {
+      await api('/admin/services/' + s.id, { 
+        method: 'PUT', 
+        body: { name: s.name, description: s.description, icon: s.icon, status: s.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' } 
+      });
+      msg(`Service "${s.name}" status updated`, true);
+    } else if (b.dataset.a === 'delete') {
+      if (!confirm(`Delete "${s.name}" and all associated sub-services? This cannot be undone.`)) return;
+      await api('/admin/services/' + s.id, { method: 'DELETE' }); 
+      msg('Service category deleted', true);
+    }
+  } catch (ex) { msg(ex.message); }
+  load();
+});
+
+// Manage Sub-Services Modal Functions
+async function openSubModal(service) {
+  currentParentService = service;
+  $('subModalTitle').innerHTML = `<i class="bi ${esc(service.icon || 'bi-tools')} text-primary me-2"></i>Manage Sub-Services: ${esc(service.name)}`;
+  $('subModalSubtitle').textContent = `Parent Category ID: ${service.id} • Status: ${service.status}`;
+  $('subMsg').classList.add('d-none');
+  subReset();
+  new bootstrap.Modal($('subModal')).show();
+  await loadSubServices(service.id);
+}
+
+async function loadSubServices(serviceId) {
+  $('subRows').innerHTML = '<tr><td colspan="7" class="text-muted text-center py-3">Loading sub-services...</td></tr>';
+  try {
+    currentSubList = await api(`/admin/services/${serviceId}/subservices`);
+    renderSubRows(currentSubList);
+  } catch (ex) {
+    subMsg(ex.message);
+  }
+}
+
+function renderSubRows(subs) {
+  $('subRows').innerHTML = subs.map(sub => `
+    <tr>
+      <td>
+        <img src="${esc(sub.imageUrl || '/img/service-placeholder.svg')}" alt="" class="rounded" style="width: 36px; height: 36px; object-fit: cover;" onerror="this.onerror=null;this.src='/img/service-placeholder.svg';">
+      </td>
+      <td><strong>${esc(sub.name)}</strong></td>
+      <td class="fw-semibold text-dark">₹${sub.basePrice}</td>
+      <td class="text-muted small">${esc(sub.duration || '-')}</td>
+      <td class="small text-muted" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${esc(sub.description || '')}">
+        ${esc(sub.description || '-')}
+      </td>
+      <td>
+        <span class="badge text-bg-${sub.enabled ? 'success' : 'secondary'}">${sub.enabled ? 'Enabled' : 'Disabled'}</span>
+      </td>
+      <td class="text-end text-nowrap">
+        <button class="btn btn-outline-primary btn-sm me-1" data-sub-a="edit" data-id="${sub.id}">Edit</button>
+        <button class="btn btn-outline-secondary btn-sm me-1" data-sub-a="toggle" data-id="${sub.id}">${sub.enabled ? 'Disable' : 'Enable'}</button>
+        <button class="btn btn-outline-danger btn-sm" data-sub-a="delete" data-id="${sub.id}">Delete</button>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="7" class="text-muted text-center py-4">No sub-services configured for this category yet. Add one above!</td></tr>';
+}
+
+$('subForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!currentParentService) return;
+
+  const body = {
+    name: $('subName').value.trim(),
+    description: $('subDesc').value.trim() || null,
+    basePrice: parseFloat($('subPrice').value) || 0,
+    duration: $('subDuration').value.trim() || null,
+    imageUrl: $('subImage').value.trim() || null,
+    enabled: $('subEnabled').checked,
+    displayOrder: 0
+  };
+
+  try {
+    if (subEditId) {
+      await api(`/admin/subservices/${subEditId}`, { method: 'PUT', body });
+      subMsg('Sub-service updated successfully', true);
+    } else {
+      await api(`/admin/services/${currentParentService.id}/subservices`, { method: 'POST', body });
+      subMsg('Sub-service added successfully', true);
+    }
+    subReset();
+    await loadSubServices(currentParentService.id);
+    load(); // Refresh parent categories count
+  } catch (ex) {
+    subMsg(ex.message);
+  }
+});
+
+$('subCancelBtn').addEventListener('click', subReset);
+
+$('subRows').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const sub = currentSubList.find(x => String(x.id) === b.dataset.id);
+  if (!sub) return;
+
+  if (b.dataset.subA === 'edit') {
+    subEditId = sub.id;
+    $('subName').value = sub.name;
+    $('subPrice').value = sub.basePrice;
+    $('subDuration').value = sub.duration || '';
+    $('subImage').value = sub.imageUrl || '';
+    $('subDesc').value = sub.description || '';
+    $('subEnabled').checked = sub.enabled !== false;
+    $('subFormTitle').innerHTML = '<i class="bi bi-pencil-square text-primary"></i> Edit Sub-Service: ' + esc(sub.name);
+    $('subSaveBtn').textContent = 'Save Changes';
+    $('subCancelBtn').classList.remove('d-none');
+    return;
+  }
+
+  try {
+    if (b.dataset.subA === 'toggle') {
+      await api(`/admin/subservices/${sub.id}`, {
+        method: 'PUT',
+        body: {
+          name: sub.name,
+          description: sub.description,
+          basePrice: sub.basePrice,
+          duration: sub.duration,
+          imageUrl: sub.imageUrl,
+          enabled: !sub.enabled,
+          displayOrder: sub.displayOrder
+        }
+      });
+      subMsg(`Sub-service "${sub.name}" status updated`, true);
+    } else if (b.dataset.subA === 'delete') {
+      if (!confirm(`Delete sub-service "${sub.name}"?`)) return;
+      await api(`/admin/subservices/${sub.id}`, { method: 'DELETE' });
+      subMsg('Sub-service deleted successfully', true);
+    }
+    await loadSubServices(currentParentService.id);
+    load();
+  } catch (ex) {
+    subMsg(ex.message);
+  }
+});
+
+if (me) load();
+</script>
+</body>
+</html>

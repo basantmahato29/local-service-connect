@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Services &amp; Sub-Services · Local Service Connect</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <style>
+    .sticky-sidebar {
+      position: sticky;
+      top: 92px;
+      z-index: 10;
+    }
+    .subservice-section-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+    .details-link {
+      color: #7c3aed;
+      font-weight: 600;
+      font-size: 0.88rem;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .details-link:hover {
+      color: #6d28d9;
+    }
+    .view-details-modal .modal-header {
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .step-badge-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #eef2ff;
+      color: #4f46e5;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+<div id="nav"></div>
+
+<div class="container py-4 py-lg-5">
+  <!-- Top Category Switcher Ribbon -->
+  <div class="mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <span class="small fw-bold text-muted text-uppercase tracking-wider">
+        <i class="bi bi-grid-fill text-primary me-1"></i> Browse Service Categories
+      </span>
+      <span class="small text-muted d-none d-md-inline">Click any category to explore sub-services &amp; videos</span>
+    </div>
+    <div class="category-pill-ribbon" id="categoryRibbon">
+      <!-- Injected dynamically from allServices & SUB_SERVICES_DATA -->
+    </div>
+  </div>
+
+  <div id="err" class="alert alert-danger d-none mb-3"></div>
+
+  <!-- Main Urban Company 2-Column Layout -->
+  <div class="row g-4 g-lg-5" id="mainServiceLayout">
+    <!-- Left Column: Title, Rating, and "Select a service" Thumbnail Grid -->
+    <div class="col-lg-4 col-xl-4">
+      <div class="sticky-sidebar">
+        <!-- Main Service Title & Rating -->
+        <div class="mb-4">
+          <h1 class="display-6 fw-bold mb-2 text-dark" id="heroServiceTitle">Sofa &amp; Carpet Cleaning</h1>
+          <div class="uc-rating-badge" id="heroServiceRating">
+            <span class="uc-star-icon"><i class="bi bi-star-fill"></i></span>
+            <span class="text-dark fw-bold" id="heroRatingScore">4.86</span>
+            <span class="text-muted fw-normal" id="heroBookingCount">(3.1 M bookings)</span>
+          </div>
+          <p class="text-muted small mt-2 mb-0" id="heroServiceDesc">
+            Deep vacuuming, wet shampooing and anti-allergen treatment for upholstery and carpets.
+          </p>
+        </div>
+
+        <!-- "Select a service" Thumbnail Card -->
+        <div class="service-selector-card mb-4">
+          <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+            <span class="small fw-bold text-dark text-uppercase tracking-wide">
+              Select a service
+            </span>
+            <span class="badge bg-light text-muted border small" id="subServiceCountBadge">5 Options</span>
+          </div>
+
+          <div class="selector-grid" id="subServiceSelectorGrid">
+            <!-- Dynamically populated thumbnail buttons -->
+          </div>
+        </div>
+
+        <!-- Trust & Guarantee Card -->
+        <div class="card border-0 shadow-sm p-3 mb-4 rounded-3" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #e2e8f0 !important;">
+          <h6 class="fw-bold mb-2 text-dark d-flex align-items-center gap-1">
+            <i class="bi bi-patch-check-fill text-primary"></i> Local Service Connect Guarantee
+          </h6>
+          <ul class="list-unstyled small text-muted mb-0 d-flex flex-column gap-2">
+            <li><i class="bi bi-check2 text-success fw-bold me-1"></i> <strong>100% Verified</strong> background-checked specialists</li>
+            <li><i class="bi bi-check2 text-success fw-bold me-1"></i> <strong>4-Digit Secure OTP</strong> required before service start</li>
+            <li><i class="bi bi-check2 text-success fw-bold me-1"></i> Standard transparent rates with zero hidden fees</li>
+            <li><i class="bi bi-check2 text-success fw-bold me-1"></i> Free revisit if not 100% satisfied</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Sub-Services with Video Showcase, Inclusions & Providers -->
+    <div class="col-lg-8 col-xl-8">
+      <!-- Sub-services List Container -->
+      <div id="subServicesContainer">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Dedicated Section: Verified Service Providers for this Service -->
+      <section class="mt-5 pt-4 border-top" id="categoryProvidersSection">
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+          <div>
+            <h3 class="h4 fw-bold mb-1 text-dark">
+              <i class="bi bi-people-fill text-primary me-2"></i>Verified Specialists for <span id="provSecServiceName">this Service</span>
+            </h3>
+            <p class="text-muted small mb-0">Browse top-rated professionals near your location and book instantly.</p>
+          </div>
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-semibold" id="provSecCount">
+            Loading...
+          </span>
+        </div>
+
+        <div class="row g-3" id="categoryProvidersList">
+          <div class="col-12 py-4 text-center text-muted">
+            <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+            Loading verified professionals...
+          </div>
+        </div>
+      </section>
+
+      <!-- Customer Reviews & Results Showcase -->
+      <section class="mt-5 pt-4 border-top" id="categoryReviewsSection">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <h3 class="h4 fw-bold mb-1 text-dark">
+              <i class="bi bi-chat-heart-fill text-danger me-2"></i>Real Customer Reviews &amp; Results
+            </h3>
+            <p class="text-muted small mb-0">What customers say after experiencing this service.</p>
+          </div>
+        </div>
+
+        <div class="row g-3" id="categoryReviewsList">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- Sub-Service Details Modal ("View details") -->
+<div class="modal fade view-details-modal" id="subServiceDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header p-4">
+        <div>
+          <h5 class="modal-title fw-bold text-dark mb-1" id="modalSubName">Sub-Service Details</h5>
+          <div class="small text-muted" id="modalSubMeta">Price &bull; Duration</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-4">
+          <h6 class="fw-bold text-primary mb-2"><i class="bi bi-check-circle-fill me-1"></i> What is Included</h6>
+          <ul class="inclusions-list" id="modalInclusionsList"></ul>
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold text-danger mb-2"><i class="bi bi-x-circle-fill me-1"></i> What is Excluded</h6>
+          <ul class="inclusions-list text-muted" id="modalExclusionsList"></ul>
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold text-dark mb-3"><i class="bi bi-signpost-split-fill text-primary me-1"></i> 4-Step Standard Service Process</h6>
+          <div class="d-flex flex-column gap-3" id="modalStepsList"></div>
+        </div>
+      </div>
+      <div class="modal-footer bg-light p-3">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary fw-bold px-4" id="btnModalAddSub">
+          <i class="bi bi-plus-circle me-1"></i> Book This Service
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Instant Booking Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-light border-bottom p-3 px-4">
+        <div>
+          <h5 class="modal-title fw-bold text-dark mb-0">
+            <i class="bi bi-calendar2-check-fill text-primary me-2"></i>Book Service
+          </h5>
+          <div class="small text-muted">Complete your booking with verified local professionals</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form id="serviceBookingForm">
+        <div class="modal-body p-4">
+          <!-- Service & Sub-service Selection summary -->
+          <div class="card p-3 mb-3 border-0 rounded-3 shadow-sm" style="background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%); border: 1.5px solid #c7d2fe !important;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div>
+                <span class="badge bg-primary me-2" id="bookModalCategory">Service</span>
+                <span class="fw-bold text-dark fs-6" id="bookModalSubName">Sub-Service</span>
+              </div>
+              <div class="fw-bold text-dark fs-5" id="bookModalPrice">₹499 approx.</div>
+            </div>
+          </div>
+
+          <div id="bookMsg" class="alert alert-danger d-none mb-3"></div>
+
+          <!-- Provider selection (Optional: pick specific provider or auto-match nearest) -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Choose Provider</label>
+            <select id="bookModalProvider" class="form-select">
+              <option value="">Auto-match fastest verified provider nearby</option>
+            </select>
+          </div>
+
+          <!-- Normal vs Quick Service -->
+          <div class="btn-group w-100 mb-3" role="group">
+            <input type="radio" class="btn-check" name="modalBookingType" id="bTypeNormal" value="NORMAL" checked>
+            <label class="btn btn-outline-primary py-2 fw-semibold" for="bTypeNormal">
+              <i class="bi bi-calendar-check me-1"></i> Scheduled Booking
+            </label>
+            <input type="radio" class="btn-check" name="modalBookingType" id="bTypeQuick" value="QUICK_SERVICE">
+            <label class="btn btn-outline-danger py-2 fw-semibold" for="bTypeQuick">
+              <i class="bi bi-lightning-charge-fill me-1"></i> Quick Service (~10 min Target)
+            </label>
+          </div>
+
+          <!-- Schedule Row (Hidden if Quick Service) -->
+          <div id="bookScheduleRow" class="row g-2 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label small fw-semibold">Service Date</label>
+              <input id="bookDate" type="date" class="form-control" required>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label small fw-semibold">Preferred Time</label>
+              <input id="bookTime" type="time" class="form-control" required>
+            </div>
+          </div>
+
+          <!-- Address & Pinpoint Location -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">
+              <i class="bi bi-geo-alt-fill text-danger me-1"></i>Service Address (Flat, Street, Area)
+            </label>
+            <div class="input-group mb-2">
+              <input id="bookAddress" class="form-control" placeholder="House/Flat number, building or landmark, Ranchi" required>
+              <button type="button" class="btn btn-outline-secondary" id="btnBookGps" title="Detect GPS location">
+                <i class="bi bi-crosshair"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Additional Notes (Optional)</label>
+            <textarea id="bookNotes" class="form-control" rows="2" placeholder="e.g. 3-seater sofa + 1 recliner, 2nd floor, elevator available"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer bg-light border-top p-3 px-4">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary fw-bold px-4" id="btnSubmitBooking">
+            <i class="bi bi-check2-circle me-1"></i> Confirm &amp; Get 4-Digit OTP
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer class="site py-4 mt-5">
+  <div class="container d-flex flex-wrap justify-content-between gap-3">
+    <div>
+      <strong class="text-white">Local Service Connect</strong>
+      <div class="small">Local services, booked directly &amp; simply.</div>
+    </div>
+    <div class="small d-flex gap-3 flex-wrap">
+      <a href="/services.html">Services Catalog</a>
+      <a href="/providers.html">Find Providers</a>
+      <a href="/register.html?role=provider">Become a Provider</a>
+      <a href="/login.html">Log in</a>
+    </div>
+    <div class="small">&copy; <span id="yr"></span> Local Service Connect</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/maps.js"></script>
+<script src="/js/subservices.js"></script>
+<script>
+navbar();
+const $ = id => document.getElementById(id);
+$('yr').textContent = new Date().getFullYear();
+
+let allBackendServices = [];
+let currentCategoryName = "Cleaning Services";
+let currentBackendService = null;
+let currentSubServiceData = null;
+let activeSelectedSub = null;
+let categoryProviders = [];
+
+// Default dates
+const today = new Date().toISOString().split('T')[0];
+$('bookDate').value = today;
+$('bookDate').min = today;
+const nextHour = new Date(Date.now() + 45 * 60000);
+$('bookTime').value = nextHour.toTimeString().slice(0, 5);
+
+// Booking type toggle inside modal
+document.querySelectorAll('input[name=modalBookingType]').forEach(r => {
+  r.addEventListener('change', () => {
+    const isQuick = $('bTypeQuick').checked;
+    $('bookScheduleRow').classList.toggle('d-none', isQuick);
+    $('bookDate').required = !isQuick;
+    $('bookTime').required = !isQuick;
+  });
+});
+
+// GPS detect in booking modal
+$('btnBookGps').addEventListener('click', async () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      $('bookAddress').value = `GPS: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}, Ranchi`;
+    }, () => {
+      alert('Could not detect location. Please type your area.');
+    });
+  }
+});
+
+/**
+ * Render Category Ribbon on Top
+ */
+function renderCategoryRibbon() {
+  const ribbon = $('categoryRibbon');
+  const categories = [
+    { key: "Cleaning Services", label: "Cleaning Services", icon: "bi-stars" },
+    { key: "Electrician Services", label: "Electrician", icon: "bi-lightning-charge" },
+    { key: "Plumbing Services", label: "Plumbing", icon: "bi-droplet" },
+    { key: "AC and Appliance Repair", label: "AC & Appliances", icon: "bi-snow" },
+    { key: "Salon and Grooming", label: "Salon & Grooming", icon: "bi-scissors" },
+    { key: "Vehicle Services", label: "Vehicle Services", icon: "bi-car-front" },
+    { key: "Laundry and Dry Cleaning", label: "Laundry & Dry Clean", icon: "bi-basket" },
+    { key: "Carpenter Services", label: "Carpentry", icon: "bi-hammer" },
+    { key: "Painting Services", label: "Painting", icon: "bi-brush" },
+    { key: "Pest Control", label: "Pest Control", icon: "bi-shield-shaded" },
+    { key: "Moving and Shifting", label: "Moving & Shifting", icon: "bi-truck" },
+    { key: "Gardening and Home Maintenance", label: "Gardening & Maint.", icon: "bi-tree" }
+  ];
+
+  ribbon.innerHTML = categories.map(c => `
+    <button type="button" class="category-pill-item ${c.key.toLowerCase() === currentCategoryName.toLowerCase() ? 'active' : ''}" data-cat="${c.key}">
+      <i class="bi ${c.icon}"></i>
+      <span>${esc(c.label)}</span>
+    </button>
+  `).join('');
+
+  document.querySelectorAll('.category-pill-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.category-pill-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectCategory(btn.dataset.cat);
+    });
+  });
+}
+
+/**
+ * Select and load a category's sub-services, video, providers, and reviews
+ */
+async function selectCategory(catKey) {
+  currentCategoryName = catKey;
+  currentSubServiceData = getSubServicesData(catKey);
+
+  // Match backend service
+  currentBackendService = allBackendServices.find(s => 
+    s.name.toLowerCase() === catKey.toLowerCase() ||
+    catKey.toLowerCase().includes(s.name.toLowerCase()) ||
+    s.name.toLowerCase().includes("clean") && catKey === "Cleaner"
+  ) || allBackendServices[0];
+
+  // Update Hero Section on Left
+  $('heroServiceTitle').textContent = currentSubServiceData.categoryTitle || currentCategoryName;
+  $('heroRatingScore').textContent = currentSubServiceData.rating || "4.86";
+  $('heroBookingCount').textContent = `(${currentSubServiceData.totalBookings || '2.5 M bookings'})`;
+  $('heroServiceDesc').textContent = currentSubServiceData.description || "Verified doorstep local services.";
+  $('provSecServiceName').textContent = currentSubServiceData.categoryTitle || currentCategoryName;
+
+  // 1. Render "Select a service" Thumbnail Grid in Left Sidebar
+  renderSubServiceSelector(currentSubServiceData.subServices);
+
+  // 2. Render Sub-services Showcase in Right Column
+  renderSubServicesShowcase(currentSubServiceData.subServices);
+
+  // 3. Render Reviews
+  renderReviews(currentSubServiceData.reviews || []);
+
+  // 4. Fetch and render Verified Providers for this Category
+  loadCategoryProviders();
+}
+
+/**
+ * Render "Select a service" 3-column thumbnail grid (matching Urban Company screenshot)
+ */
+function renderSubServiceSelector(subServices) {
+  $('subServiceCountBadge').textContent = `${subServices.length} Options`;
+  const grid = $('subServiceSelectorGrid');
+
+  grid.innerHTML = subServices.map((sub, idx) => `
+    <button type="button" class="subservice-thumb-btn ${idx === 0 ? 'active' : ''}" data-target="sub-${sub.id}" data-subname="${esc(sub.name)}">
+      <img src="${esc(sub.thumbnail)}" class="subservice-thumb-img" alt="${esc(sub.name)}" loading="lazy" onerror="this.onerror=null;this.src='/img/service-placeholder.svg';">
+      <span class="subservice-thumb-label">${esc(sub.shortName || sub.name)}</span>
+    </button>
+  `).join('');
+
+  document.querySelectorAll('.subservice-thumb-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.subservice-thumb-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const targetEl = document.getElementById(btn.dataset.target);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      filterCategoryProvidersBySub(btn.dataset.subname);
+    });
+  });
+}
+
+function filterCategoryProvidersBySub(subName) {
+  if (!subName || !categoryProviders.length) return;
+  const lower = subName.toLowerCase();
+  const matched = categoryProviders.filter(p => {
+    if (p.subServices && p.subServices.some(s => s.name && s.name.toLowerCase().includes(lower))) return true;
+    if (p.description && p.description.toLowerCase().includes(lower)) return true;
+    if (p.businessName && p.businessName.toLowerCase().includes(lower)) return true;
+    return false;
+  });
+  renderProviderCards(matched.length ? matched : categoryProviders, matched.length ? subName : null);
+}
+
+/**
+ * Render Sub-services with Video Player, Pricing, Inclusions, and "Add" Button
+ */
+function renderSubServicesShowcase(subServices) {
+  const container = $('subServicesContainer');
+
+  container.innerHTML = subServices.map((sub, idx) => `
+    <div class="subservice-showcase-card" id="sub-${sub.id}">
+      <h2 class="subservice-section-title">${esc(sub.name)}</h2>
+
+      <!-- Interactive Video / Photo Showcase Player -->
+      <div class="video-preview-wrapper" id="vbox-${sub.id}">
+        <video id="vid-${sub.id}" preload="metadata" poster="${esc(sub.thumbnail)}" loop playsinline>
+          <source src="${esc(sub.videoUrl)}" type="video/mp4">
+        </video>
+        <div class="video-play-overlay" id="vplay-${sub.id}" onclick="toggleVideoPlay('vid-${sub.id}', 'vplay-${sub.id}')">
+          <i class="bi bi-play-fill"></i>
+        </div>
+        <div class="video-controls-bar">
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-danger rounded-pill px-2 py-1"><i class="bi bi-camera-video-fill me-1"></i>Process Preview</span>
+            <span class="small opacity-75">${esc(sub.duration)}</span>
+          </div>
+          <button type="button" class="video-mute-btn" onclick="toggleMute('vid-${sub.id}', this)" title="Mute/Unmute">
+            <i class="bi bi-volume-mute-fill"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Subservice Details Row -->
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div>
+          <h3 class="h5 fw-bold text-dark mb-1">${esc(sub.name)}</h3>
+          <div class="d-flex align-items-center gap-2">
+            <span class="uc-rating-badge" style="font-size: 0.85rem;">
+              <span class="uc-star-icon" style="width:16px;height:16px;font-size:0.65rem;"><i class="bi bi-star-fill"></i></span>
+              <span class="text-dark fw-bold">${sub.rating}</span>
+            </span>
+            <span class="text-muted small">(${esc(sub.reviewsCount)})</span>
+          </div>
+        </div>
+
+        <button type="button" class="subservice-add-btn" onclick="openAddBookingModal('${sub.id}')">
+          Add
+        </button>
+      </div>
+
+      <!-- Price & Duration -->
+      <div class="fw-bold text-dark mb-3">
+        Starts at ₹${sub.price} <span class="text-muted fw-normal">&bull; ${esc(sub.duration)}</span>
+      </div>
+
+      <hr class="my-3 text-muted opacity-25">
+
+      <!-- Inclusions Bullet Points -->
+      <ul class="inclusions-list mb-3">
+        ${sub.inclusions.map(inc => `<li>${esc(inc)}</li>`).join('')}
+      </ul>
+
+      <!-- View details modal trigger -->
+      <div>
+        <span class="details-link" onclick="openSubDetailsModal('${sub.id}')">
+          View details
+        </span>
+      </div>
+    </div>
+  `).join('');
+}
+
+/**
+ * Toggle Video Play/Pause
+ */
+function toggleVideoPlay(vidId, playBtnId) {
+  const vid = document.getElementById(vidId);
+  const playBtn = document.getElementById(playBtnId);
+  if (!vid) return;
+
+  if (vid.paused) {
+    vid.play().then(() => {
+      playBtn.style.opacity = '0';
+      playBtn.style.pointerEvents = 'none';
+    }).catch(err => console.log('Autoplay blocked:', err));
+  } else {
+    vid.pause();
+    playBtn.style.opacity = '1';
+    playBtn.style.pointerEvents = 'auto';
+  }
+
+  vid.addEventListener('ended', () => {
+    playBtn.style.opacity = '1';
+    playBtn.style.pointerEvents = 'auto';
+  });
+}
+
+/**
+ * Toggle Mute/Unmute
+ */
+function toggleMute(vidId, btn) {
+  const vid = document.getElementById(vidId);
+  if (!vid) return;
+  vid.muted = !vid.muted;
+  btn.innerHTML = vid.muted ? '<i class="bi bi-volume-mute-fill"></i>' : '<i class="bi bi-volume-up-fill"></i>';
+}
+
+/**
+ * Open Step-by-Step Subservice Details Modal
+ */
+function openSubDetailsModal(subId) {
+  const sub = currentSubServiceData.subServices.find(s => s.id === subId);
+  if (!sub) return;
+
+  activeSelectedSub = sub;
+  $('modalSubName').textContent = sub.name;
+  $('modalSubMeta').textContent = `Starts at ₹${sub.price} • Estimated Duration: ${sub.duration} • Rating: ${sub.rating} ★`;
+
+  $('modalInclusionsList').innerHTML = sub.inclusions.map(i => `<li>${esc(i)}</li>`).join('');
+  $('modalExclusionsList').innerHTML = (sub.exclusions || ["Major structural modifications"]).map(e => `<li>${esc(e)}</li>`).join('');
+
+  $('modalStepsList').innerHTML = (sub.steps || [
+    "Expert arrival & pre-service inspection",
+    "Surface preparation & high-suction vacuuming",
+    "Eco-friendly deep application & scrubbing",
+    "Moisture extraction & post-service inspection"
+  ]).map((step, idx) => `
+    <div class="d-flex align-items-center gap-3 p-2 bg-light rounded-3">
+      <span class="step-badge-num">${idx + 1}</span>
+      <span class="small fw-semibold text-dark">${esc(step)}</span>
+    </div>
+  `).join('');
+
+  $('btnModalAddSub').onclick = () => {
+    bootstrap.Modal.getInstance($('subServiceDetailsModal')).hide();
+    openAddBookingModal(subId);
+  };
+
+  new bootstrap.Modal($('subServiceDetailsModal')).show();
+}
+
+/**
+ * Open Booking Modal for Sub-Service
+ */
+function openAddBookingModal(subId, preselectedProviderId = null) {
+  const sub = currentSubServiceData.subServices.find(s => s.id === subId) || currentSubServiceData.subServices[0];
+  activeSelectedSub = sub;
+
+  $('bookModalCategory').textContent = currentBackendService ? currentBackendService.name : currentCategoryName;
+  $('bookModalSubName').textContent = sub.name;
+  $('bookModalPrice').textContent = `₹${sub.price} approx.`;
+  $('bookNotes').value = `[Selected Sub-Service: ${sub.name}] `;
+
+  // Populate providers select
+  const provSelect = $('bookModalProvider');
+  provSelect.innerHTML = '<option value="">Auto-match fastest verified provider nearby</option>' +
+    categoryProviders.map(p => `
+      <option value="${p.id}" ${preselectedProviderId == p.id ? 'selected' : ''}>
+        ${esc(p.businessName)} (₹${p.approxPrice || sub.price} • ${p.rating || 4.8}★)
+      </option>
+    `).join('');
+
+  new bootstrap.Modal($('bookingModal')).show();
+}
+
+/**
+ * Handle Booking Form Submission
+ */
+$('serviceBookingForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = $('btnSubmitBooking');
+  const msgEl = $('bookMsg');
+  msgEl.classList.add('d-none');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Confirming Booking...';
+
+  // Check login
+  const u = Auth.get();
+  if (!u.token) {
+    alert('Please log in to confirm your booking.');
+    location.href = '/login.html?redirect=' + encodeURIComponent(location.pathname + location.search);
+    return;
+  }
+
+  try {
+    const isQuick = $('bTypeQuick').checked;
+    const provIdVal = $('bookModalProvider').value;
+    const finalProviderId = provIdVal ? Number(provIdVal) : (categoryProviders[0] ? categoryProviders[0].id : 1);
+
+    const bookingPayload = {
+      providerId: finalProviderId,
+      serviceId: currentBackendService ? currentBackendService.id : 1,
+      subServiceName: activeSelectedSub ? activeSelectedSub.name : null,
+      bookingType: isQuick ? 'QUICK_SERVICE' : 'NORMAL',
+      bookingDate: isQuick ? null : $('bookDate').value,
+      bookingTime: isQuick ? null : ($('bookTime').value + ':00'),
+      address: $('bookAddress').value.trim() || 'Ranchi',
+      area: 'Ranchi',
+      notes: $('bookNotes').value.trim()
+    };
+
+    const res = await api('/bookings', {
+      method: 'POST',
+      body: bookingPayload
+    });
+
+    bootstrap.Modal.getInstance($('bookingModal')).hide();
+    location.href = '/booking-status.html?id=' + res.id;
+
+  } catch (err) {
+    msgEl.textContent = err.message || 'Booking submission failed. Please try again.';
+    msgEl.classList.remove('d-none');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Confirm &amp; Get 4-Digit OTP';
+  }
+});
+
+/**
+ * Load Providers for current Category
+ */
+async function loadCategoryProviders() {
+  const countBadge = $('provSecCount');
+
+  try {
+    const sId = currentBackendService ? currentBackendService.id : null;
+    const providers = await api('/providers' + (sId ? `?serviceId=${sId}` : ''));
+    categoryProviders = providers;
+    await Favorites.loadCache();
+    renderProviderCards(providers, null);
+  } catch (err) {
+    countBadge.textContent = "0 Specialists";
+    $('categoryProvidersList').innerHTML = '<div class="col-12 py-3 text-muted small">Could not load providers.</div>';
+  }
+}
+
+function renderProviderCards(providers, activeSubFilter) {
+  const container = $('categoryProvidersList');
+  const countBadge = $('provSecCount');
+  
+  if (activeSubFilter) {
+    countBadge.textContent = `${providers.length} Matching "${activeSubFilter}"`;
+  } else {
+    countBadge.textContent = `${providers.length} Verified Specialist${providers.length === 1 ? '' : 's'}`;
+  }
+
+  if (!providers.length) {
+    container.innerHTML = `
+      <div class="col-12 py-4 text-center text-muted bg-white rounded-3 border">
+        <i class="bi bi-people fs-2 text-secondary mb-2 d-block"></i>
+        We have verified partners on standby. Click "Add" above to auto-dispatch the nearest specialist.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = providers.map(p => {
+    const initial = (p.businessName ? p.businessName.charAt(0) : 'P').toUpperCase();
+    return `
+      <div class="col-md-6">
+        <div class="card h-100 provider-card shadow-sm p-3">
+          <div class="d-flex align-items-start gap-3 mb-2 position-relative">
+            ${p.profileImage ? `
+              <img src="${esc(p.profileImage)}" alt="${esc(p.businessName)}" class="provider-avatar rounded-3" style="width: 44px; height: 44px; object-fit: cover;" onerror="this.onerror=null;this.src='/img/default-provider.svg';">
+            ` : `
+              <div class="provider-avatar">${esc(initial)}</div>
+            `}
+            <div class="flex-grow-1 min-w-0" style="padding-right: 76px;">
+              <div class="d-flex align-items-center gap-1 flex-wrap">
+                <a href="/provider-profile.html?id=${p.id}" class="text-decoration-none text-dark">
+                  <h4 class="h6 mb-0 fw-bold text-truncate hover-primary">${esc(p.businessName)}</h4>
+                </a>
+                <span class="verified-badge"><i class="bi bi-patch-check-fill text-success"></i> Verified</span>
+              </div>
+              <div class="mt-1">
+                ${p.availability ? '<span class="badge bg-success-subtle text-success border border-success-subtle small"><span class="pulse-dot me-1"></span>Online</span>' : '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle small">Available</span>'}
+              </div>
+            </div>
+            <!-- Action Buttons: Share and Favorite -->
+            <div class="position-absolute top-0 end-0 d-flex align-items-center gap-1">
+              <button type="button" class="btn-share-action" style="width:34px;height:34px;font-size:0.9rem;" onclick='ShareProvider.openShareModal(${JSON.stringify({id: p.id, businessName: p.businessName, formattedAddress: p.formattedAddress, profileImage: p.profileImage})})' title="Share Provider" aria-label="Share provider">
+                <i class="bi bi-share-fill"></i>
+              </button>
+              <button type="button" class="btn-fav-action ${Favorites.isFavorite(p.id) ? 'active' : ''}" style="width:34px;height:34px;font-size:0.95rem;" data-fav-provider="${p.id}" onclick="Favorites.toggle(${p.id}, this)" title="${Favorites.isFavorite(p.id) ? 'Remove from favorites' : 'Add to favorites'}" aria-label="${Favorites.isFavorite(p.id) ? 'Remove from favorites' : 'Add to favorites'}">
+                <i class="bi ${Favorites.isFavorite(p.id) ? 'bi-heart-fill text-danger' : 'bi-heart'}"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between mb-2 small">
+            <div>${stars(p.rating, p.reviewCount)}</div>
+            <span class="fw-bold text-dark">₹${esc(p.approxPrice || '350')} approx.</span>
+          </div>
+
+          <p class="text-muted small mb-3 flex-grow-1" style="font-size:0.8rem; display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+            ${esc(p.description || 'Experienced verified local professional.')}
+          </p>
+
+          <div class="d-flex gap-2">
+            <a href="/provider-profile.html?id=${p.id}" class="btn btn-outline-secondary btn-sm flex-fill fw-semibold">
+              <i class="bi bi-person-badge me-1"></i> View Profile
+            </a>
+            <button type="button" class="btn btn-primary btn-sm flex-fill fw-semibold" onclick="openAddBookingModal('${currentSubServiceData.subServices[0].id}', ${p.id})">
+              <i class="bi bi-calendar2-check-fill me-1"></i> Book
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/**
+ * Render Customer Reviews
+ */
+function renderReviews(reviews) {
+  const container = $('categoryReviewsList');
+  if (!reviews || !reviews.length) {
+    container.innerHTML = '<div class="col-12 text-muted small py-3">No reviews yet for this service category.</div>';
+    return;
+  }
+
+  container.innerHTML = reviews.map(r => `
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 border-0 shadow-sm dashboard-card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="text-warning small">${starText(r.rating)}</div>
+          <span class="badge bg-success-subtle text-success border border-success-subtle small"><i class="bi bi-check-circle-fill me-1"></i>Verified Booking</span>
+        </div>
+        <p class="small text-dark mb-2 flex-grow-1">"${esc(r.comment)}"</p>
+        <div class="d-flex justify-content-between align-items-center small text-muted pt-2 border-top">
+          <strong class="text-dark">${esc(r.author)}</strong>
+          <span>${esc(r.date)}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Initial bootstrap
+(async () => {
+  try {
+    allBackendServices = await api('/services');
+
+    // Parse URL param if any (e.g. ?serviceId=... or ?category=...)
+    const params = new URLSearchParams(location.search);
+    const sId = params.get('serviceId');
+    const catParam = params.get('category');
+
+    if (sId) {
+      const match = allBackendServices.find(s => String(s.id) === String(sId));
+      if (match) {
+        currentCategoryName = match.name;
+      }
+    } else if (catParam) {
+      currentCategoryName = catParam;
+    }
+
+    renderCategoryRibbon();
+    await selectCategory(currentCategoryName);
+
+  } catch (err) {
+    console.error('Initialization error:', err);
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Notification Center - Local Service Connect</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .notif-card {
+      transition: all 0.2s ease;
+      border-left: 4px solid transparent;
+    }
+    .notif-card.unread {
+      background-color: #f8faff;
+      border-left-color: #3b82f6;
+    }
+    .notif-card.urgent {
+      border-left-color: #ef4444;
+      background-color: #fff9f9;
+    }
+    .notif-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .priority-badge-urgent {
+      background-color: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #fca5a5;
+    }
+    .priority-badge-high {
+      background-color: #ffedd5;
+      color: #ea580c;
+      border: 1px solid #fdba74;
+    }
+    .priority-badge-normal {
+      background-color: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div id="nav"></div>
+
+  <div class="container-xl py-3 pb-5">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+      <div>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-1 small">
+            <li class="breadcrumb-item"><a href="/admin/dashboard.html">Admin Console</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Notifications</li>
+          </ol>
+        </nav>
+        <h2 class="h3 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+          <i class="bi bi-bell-fill text-danger"></i> Admin Notification Center
+          <span class="badge bg-danger rounded-pill fs-6 d-none" id="headerUnreadBadge">0 unread</span>
+        </h2>
+        <p class="text-muted small mb-0">Platform event alerts, verification submissions, booking requests, and Quick Service dispatches</p>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-xs" onclick="loadNotifications()">
+          <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+        </button>
+        <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 shadow-xs fw-semibold" id="btnPageMarkAllRead" onclick="markAllNotificationsRead()">
+          <i class="bi bi-check2-all me-1"></i> Mark All as Read
+        </button>
+      </div>
+    </div>
+
+    <!-- Alert / Toast Container -->
+    <div id="pageAlert" class="alert d-none shadow-sm rounded-3 mb-4" role="alert"></div>
+
+    <!-- Metrics Strip -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="text-muted small fw-semibold">Unread Notifications</span>
+              <h3 class="fw-bold text-danger mb-0 mt-1" id="statUnread">0</h3>
+            </div>
+            <div class="p-2.5 rounded-circle bg-danger-subtle text-danger fs-5">
+              <i class="bi bi-bell"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="text-muted small fw-semibold">Urgent &amp; High Priority</span>
+              <h3 class="fw-bold text-warning-emphasis mb-0 mt-1" id="statUrgent">0</h3>
+            </div>
+            <div class="p-2.5 rounded-circle bg-warning-subtle text-warning-emphasis fs-5">
+              <i class="bi bi-exclamation-triangle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="text-muted small fw-semibold">Quick Service Alerts</span>
+              <h3 class="fw-bold text-primary mb-0 mt-1" id="statQuickService">0</h3>
+            </div>
+            <div class="p-2.5 rounded-circle bg-primary-subtle text-primary fs-5">
+              <i class="bi bi-lightning-charge"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="text-muted small fw-semibold">Total Event Log</span>
+              <h3 class="fw-bold text-dark mb-0 mt-1" id="statTotal">0</h3>
+            </div>
+            <div class="p-2.5 rounded-circle bg-light text-secondary fs-5">
+              <i class="bi bi-inbox"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters & Search Toolbar -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+      <div class="row g-2 align-items-center">
+        <div class="col-12 col-md-4">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control bg-light border-start-0" id="filterSearch" placeholder="Search notification title, message, ref...">
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <select class="form-select form-select-sm" id="filterType">
+            <option value="ALL">All Event Types</option>
+            <option value="NEW_PROVIDER_REGISTRATION">New Provider Registrations</option>
+            <option value="PROVIDER_VERIFICATION_SUBMITTED">Verification Submissions</option>
+            <option value="NEW_BOOKING_REQUEST">New Booking Requests</option>
+            <option value="QUICK_SERVICE_ALERT">Quick Service Alerts</option>
+            <option value="QUICK_SERVICE_NO_PROVIDER">Quick Service: No Provider</option>
+            <option value="QUICK_SERVICE_UNASSIGNED">Quick Service: Unassigned</option>
+            <option value="QUICK_SERVICE_DISPATCH">Quick Service Dispatches</option>
+            <option value="BOOKING_CANCELLED">Booking Cancellations</option>
+            <option value="CUSTOMER_COMPLAINT">Customer Low Rating Complaints</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <select class="form-select form-select-sm" id="filterRead">
+            <option value="">All Statuses</option>
+            <option value="false" selected>Unread Only</option>
+            <option value="true">Read Only</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <select class="form-select form-select-sm" id="filterPriority">
+            <option value="ALL">All Priorities</option>
+            <option value="URGENT">Urgent</option>
+            <option value="HIGH">High</option>
+            <option value="NORMAL">Normal</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-1 text-end">
+          <button type="button" class="btn btn-outline-secondary btn-sm w-100 rounded-pill" onclick="resetFilters()">
+            Reset
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications List Container -->
+    <div id="notificationsContainer">
+      <div class="text-center py-5 text-muted">
+        <span class="spinner-border spinner-border-sm text-primary me-2"></span>
+        <span>Loading notifications...</span>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-between align-items-center mt-4 d-none" id="paginationBar">
+      <span class="text-muted small" id="pageInfo">Showing 0 of 0</span>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" id="btnPrevPage" onclick="changePage(-1)" disabled>
+          <i class="bi bi-chevron-left me-1"></i>Previous
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" id="btnNextPage" onclick="changePage(1)" disabled>
+          Next<i class="bi bi-chevron-right ms-1"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script>
+    const me = Auth.require('ADMIN');
+    adminNav('notifications');
+
+    const $ = id => document.getElementById(id);
+
+    // State
+    let currentPage = 0;
+    const pageSize = 15;
+    let totalPages = 1;
+    let searchDebounce = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Wire input listeners
+      $('filterSearch').addEventListener('input', () => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => {
+          currentPage = 0;
+          loadNotifications();
+        }, 350);
+      });
+
+      $('filterType').addEventListener('change', () => { currentPage = 0; loadNotifications(); });
+      $('filterRead').addEventListener('change', () => { currentPage = 0; loadNotifications(); });
+      $('filterPriority').addEventListener('change', () => { currentPage = 0; loadNotifications(); });
+
+      // Initial load
+      loadNotifications();
+      loadUnreadCount();
+
+      // Listen for SSE admin notifications
+      window.addEventListener('lsc:admin-notification', (e) => {
+        loadNotifications();
+        loadUnreadCount();
+      });
+    });
+
+    function resetFilters() {
+      $('filterSearch').value = '';
+      $('filterType').value = 'ALL';
+      $('filterRead').value = '';
+      $('filterPriority').value = 'ALL';
+      currentPage = 0;
+      loadNotifications();
+    }
+
+    async function loadUnreadCount() {
+      try {
+        const res = await api('/admin/notifications/unread-count');
+        const count = res ? (res.unreadCount || 0) : 0;
+        $('statUnread').textContent = count;
+        if (count > 0) {
+          $('headerUnreadBadge').textContent = `${count} unread`;
+          $('headerUnreadBadge').classList.remove('d-none');
+        } else {
+          $('headerUnreadBadge').classList.add('d-none');
+        }
+      } catch {}
+    }
+
+    async function loadNotifications() {
+      const container = $('notificationsContainer');
+      const search = $('filterSearch').value.trim();
+      const type = $('filterType').value;
+      const readVal = $('filterRead').value;
+      const priority = $('filterPriority').value;
+
+      let url = `/admin/notifications?page=${currentPage}&size=${pageSize}`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+      if (type && type !== 'ALL') url += `&type=${encodeURIComponent(type)}`;
+      if (readVal !== '') url += `&read=${readVal === 'true'}`;
+      if (priority && priority !== 'ALL') url += `&priority=${encodeURIComponent(priority)}`;
+
+      try {
+        const res = await api(url);
+        const items = Array.isArray(res) ? res : (res && res.content ? res.content : []);
+        const totalElements = res && typeof res.totalElements === 'number' ? res.totalElements : items.length;
+        totalPages = res && typeof res.totalPages === 'number' ? res.totalPages : 1;
+
+        $('statTotal').textContent = totalElements;
+
+        renderNotifications(items);
+        renderPagination(totalElements);
+        loadUnreadCount();
+      } catch (err) {
+        container.innerHTML = `
+          <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+            <i class="bi bi-exclamation-octagon text-danger fs-1 mb-2"></i>
+            <h5 class="fw-bold">Failed to load notifications</h5>
+            <p class="text-muted small">${esc(err.message || 'Server connection error')}</p>
+            <div>
+              <button class="btn btn-outline-primary btn-sm rounded-pill px-4" onclick="loadNotifications()">Retry</button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function renderNotifications(items) {
+      const container = $('notificationsContainer');
+      if (!items || items.length === 0) {
+        container.innerHTML = `
+          <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+            <i class="bi bi-bell-slash text-muted fs-1 mb-2"></i>
+            <h5 class="fw-bold text-dark">No Notifications Found</h5>
+            <p class="text-muted small mb-0">No platform event notifications match your current filter criteria.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Count metrics
+      let urgentCount = 0;
+      let quickCount = 0;
+      items.forEach(n => {
+        if (n.priority === 'URGENT' || n.priority === 'HIGH') urgentCount++;
+        if (n.bookingType === 'QUICK_SERVICE' || (n.type && n.type.startsWith('QUICK_SERVICE'))) quickCount++;
+      });
+      $('statUrgent').textContent = urgentCount;
+      $('statQuickService').textContent = quickCount;
+
+      container.innerHTML = items.map(n => {
+        const isUnread = !n.read;
+        const priority = n.priority || 'NORMAL';
+        const isUrgent = priority === 'URGENT';
+        const isHigh = priority === 'HIGH';
+
+        // Type icon and styling
+        let iconHtml = '<i class="bi bi-bell-fill text-primary"></i>';
+        let typeBadgeClass = 'bg-primary-subtle text-primary border border-primary-subtle';
+        let typeLabel = (n.type || 'NOTIFICATION').replace(/_/g, ' ');
+
+        if (n.type && n.type.startsWith('QUICK_SERVICE')) {
+          iconHtml = '<i class="bi bi-lightning-charge-fill text-danger"></i>';
+          typeBadgeClass = 'bg-danger-subtle text-danger border border-danger-subtle';
+        } else if (n.type === 'PROVIDER_VERIFICATION_SUBMITTED') {
+          iconHtml = '<i class="bi bi-patch-check-fill text-warning"></i>';
+          typeBadgeClass = 'bg-warning-subtle text-warning-emphasis border border-warning-subtle';
+        } else if (n.type === 'NEW_PROVIDER_REGISTRATION') {
+          iconHtml = '<i class="bi bi-person-plus-fill text-info"></i>';
+          typeBadgeClass = 'bg-info-subtle text-info border border-info-subtle';
+        } else if (n.type === 'CUSTOMER_COMPLAINT' || n.type === 'REVIEW_ALERT') {
+          iconHtml = '<i class="bi bi-exclamation-triangle-fill text-danger"></i>';
+          typeBadgeClass = 'bg-danger-subtle text-danger border border-danger-subtle';
+        } else if (n.type === 'BOOKING_CANCELLED') {
+          iconHtml = '<i class="bi bi-x-circle-fill text-secondary"></i>';
+          typeBadgeClass = 'bg-secondary-subtle text-secondary border border-secondary-subtle';
+        }
+
+        const priorityBadgeClass = isUrgent ? 'priority-badge-urgent' : (isHigh ? 'priority-badge-high' : 'priority-badge-normal');
+        const timeAgoStr = n.createdAt ? formatTimeAgo(n.createdAt) : '';
+        const exactTimeStr = n.createdAt ? new Date(n.createdAt).toLocaleString() : '';
+
+        // Target navigation link
+        let targetActionBtn = '';
+        if (n.targetUrl) {
+          targetActionBtn = `
+            <a href="${esc(n.targetUrl)}" class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-xs fw-semibold" onclick="markAsReadSilently(${n.id})">
+              <i class="bi bi-arrow-up-right-circle me-1"></i>View Record
+            </a>
+          `;
+        } else if (n.bookingId) {
+          targetActionBtn = `
+            <a href="/admin/bookings.html?bookingId=${n.bookingId}" class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-xs fw-semibold" onclick="markAsReadSilently(${n.id})">
+              <i class="bi bi-journal-text me-1"></i>View Booking
+            </a>
+          `;
+        }
+
+        return `
+          <div class="card notif-card border-0 shadow-sm rounded-4 p-3.5 mb-2.5 bg-white ${isUnread ? 'unread' : ''} ${isUrgent ? 'urgent' : ''}">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+              <div class="d-flex align-items-start gap-3 flex-grow-1">
+                <div class="p-2 rounded-circle bg-light fs-5 mt-1 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                  ${iconHtml}
+                </div>
+                <div class="flex-grow-1">
+                  <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                    <span class="badge ${typeBadgeClass} rounded-pill px-2.5 py-0.5" style="font-size: 0.72rem;">${esc(typeLabel)}</span>
+                    <span class="badge ${priorityBadgeClass} rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">${esc(priority)}</span>
+                    ${isUnread ? '<span class="badge bg-primary text-white rounded-pill px-2 py-0.5" style="font-size: 0.68rem;">NEW</span>' : ''}
+                    <span class="text-muted small ms-auto text-nowrap" title="${esc(exactTimeStr)}" style="font-size: 0.75rem;">
+                      <i class="bi bi-clock me-1"></i>${esc(timeAgoStr)}
+                    </span>
+                  </div>
+                  <h6 class="fw-bold text-dark mb-1">${esc(n.title || 'Notification')}</h6>
+                  <p class="text-muted small mb-2 text-break">${esc(n.message || '')}</p>
+
+                  <div class="d-flex flex-wrap align-items-center gap-2" style="font-size: 0.75rem;">
+                    ${n.bookingId ? `<span class="badge bg-light text-dark border">#BK-${n.bookingId}</span>` : ''}
+                    ${n.serviceName ? `<span class="badge bg-light text-secondary border"><i class="bi bi-tools me-1"></i>${esc(n.serviceName)}</span>` : ''}
+                    ${n.location ? `<span class="badge bg-light text-secondary border"><i class="bi bi-geo-alt me-1"></i>${esc(n.location)}</span>` : ''}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="d-flex flex-column align-items-end gap-1.5 flex-shrink-0">
+                ${targetActionBtn}
+                <button type="button" class="btn btn-light btn-sm rounded-pill px-2.5 py-1 text-secondary border shadow-xs" style="font-size: 0.72rem;" onclick="toggleReadState(${n.id}, ${!n.read})">
+                  <i class="bi bi-${n.read ? 'envelope' : 'envelope-open'} me-1"></i>${n.read ? 'Mark Unread' : 'Mark Read'}
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderPagination(total) {
+      const bar = $('paginationBar');
+      if (total <= pageSize) {
+        bar.classList.add('d-none');
+        return;
+      }
+      bar.classList.remove('d-none');
+      const start = currentPage * pageSize + 1;
+      const end = Math.min((currentPage + 1) * pageSize, total);
+      $('pageInfo').textContent = `Showing ${start} to ${end} of ${total} notifications`;
+
+      $('btnPrevPage').disabled = currentPage <= 0;
+      $('btnNextPage').disabled = currentPage >= totalPages - 1;
+    }
+
+    function changePage(delta) {
+      currentPage = Math.max(0, Math.min(totalPages - 1, currentPage + delta));
+      loadNotifications();
+    }
+
+    async function toggleReadState(id, willRead) {
+      try {
+        await api(`/admin/notifications/${id}/toggle-read?read=${willRead}`, { method: 'PUT' });
+        loadNotifications();
+      } catch (err) {
+        showPageAlert(err.message || 'Could not update read status', false);
+      }
+    }
+
+    async function markAsReadSilently(id) {
+      try {
+        await api(`/admin/notifications/${id}/read`, { method: 'PUT' });
+      } catch {}
+    }
+
+    async function markAllNotificationsRead() {
+      try {
+        await api('/admin/notifications/read-all', { method: 'PUT' });
+        showPageAlert('All administrator notifications marked as read.', true);
+        loadNotifications();
+      } catch (err) {
+        showPageAlert(err.message || 'Could not mark all as read', false);
+      }
+    }
+
+    function showPageAlert(text, ok = false) {
+      const el = $('pageAlert');
+      if (!el) return;
+      el.className = `alert alert-${ok ? 'success' : 'danger'} alert-dismissible fade show shadow-sm rounded-3 mb-4`;
+      el.innerHTML = `
+        <div class="d-flex align-items-center justify-content-between">
+          <div><i class="bi bi-${ok ? 'check-circle-fill text-success' : 'exclamation-octagon-fill text-danger'} me-2"></i>${esc(text)}</div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      `;
+      el.classList.remove('d-none');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
+

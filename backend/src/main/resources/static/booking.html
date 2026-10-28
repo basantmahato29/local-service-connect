@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book a Service · Local Service Connect</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <style>
+    #bookingPickerMap { height: 350px; width: 100%; border-radius: 8px; }
+    .pac-container { z-index: 1060 !important; }
+  </style>
+</head>
+<body>
+<div id="nav"></div>
+<div class="container py-4 py-lg-5" style="max-width: 960px;">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">Book a Service</h1>
+    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1.5 rounded-pill fw-semibold">
+      <i class="bi bi-shield-check me-1"></i>Verified Specialists
+    </span>
+  </div>
+
+  <div class="btn-group w-100 mb-3" role="group">
+    <input type="radio" class="btn-check" name="type" id="tn" value="NORMAL" checked>
+    <label class="btn btn-outline-primary py-2 fw-semibold" for="tn"><i class="bi bi-calendar-event me-2"></i> Normal Booking</label>
+    <input type="radio" class="btn-check" name="type" id="tq" value="QUICK_SERVICE">
+    <label class="btn btn-outline-danger py-2 fw-semibold" for="tq"><i class="bi bi-lightning-charge-fill me-2"></i> Quick Service (10 min Target)</label>
+  </div>
+
+  <div id="quickHint" class="alert alert-warning d-none">
+    <i class="bi bi-stopwatch-fill me-2"></i><strong>Need urgent assistance?</strong> We match verified providers who are currently online and cover your location. A response within about 10 minutes is our target, not a guarantee.
+  </div>
+
+  <div id="msg" class="alert d-none"></div>
+
+  <form id="f" class="row g-2 mb-4 bg-white p-3 rounded-3 shadow-sm border">
+    <div class="col-md-3">
+      <label class="form-label small fw-semibold">Service Category</label>
+      <select id="svc" class="form-select" required>
+        <option value="">Select category</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small fw-semibold">Sub-Service (Specific)</label>
+      <select id="subSvc" class="form-select">
+        <option value="">All Sub-Services</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label small fw-semibold">Your Location / Neighborhood</label>
+      <div class="input-group">
+        <input id="area" class="form-control" placeholder="Search locality or area, e.g. Lalpur" required>
+        <button type="button" class="btn btn-outline-secondary" id="btnGpsLoc" title="Detect GPS location">
+          <i class="bi bi-crosshair" id="gpsIcon"></i>
+          <span class="spinner-border spinner-border-sm d-none" id="gpsSpinner" role="status"></span>
+        </button>
+        <button type="button" class="btn btn-outline-secondary" id="btnBookingMap" title="Choose on map" data-bs-toggle="modal" data-bs-target="#bookingMapModal">
+          <i class="bi bi-geo-alt"></i>
+        </button>
+      </div>
+      <div id="locStatusBadge" class="small text-success mt-1 d-none">
+        <i class="bi bi-check-circle-fill"></i> Coordinates set (<span id="locCoordText"></span>)
+      </div>
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+      <button class="btn btn-primary w-100">
+        <i class="bi bi-search me-1"></i> Find
+      </button>
+    </div>
+  </form>
+
+  <div id="list" class="row g-3 mb-4"></div>
+
+  <!-- Booking Confirmation Form -->
+  <form id="confirm" class="card border-0 shadow-sm dashboard-card d-none">
+    <div class="card-body p-4">
+      <h2 class="h5 mb-3 text-primary"><i class="bi bi-check2-circle me-2"></i>Confirm booking with <span id="pickedName" class="text-dark fw-bold"></span></h2>
+      <div id="when" class="row g-3 mb-3">
+        <div class="col-sm-6"><label class="form-label fw-semibold">Service Date</label><input id="date" type="date" class="form-control"></div>
+        <div class="col-sm-6"><label class="form-label fw-semibold">Preferred Time</label><input id="time" type="time" class="form-control"></div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Exact Service Address</label>
+        <input id="address" class="form-control" required maxlength="255" placeholder="Door / Flat / Street address">
+      </div>
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Notes for the provider (optional)</label>
+        <textarea id="notes" class="form-control" rows="2" maxlength="500" placeholder="Describe the issue or any specific requirements"></textarea>
+      </div>
+      <button id="confirmBtn" class="btn btn-success px-4 py-2">
+        <i class="bi bi-check-lg me-1"></i> Confirm &amp; Send Booking
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Map Picker Modal -->
+<div class="modal fade" id="bookingMapModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Select Service Location</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted mb-2">Drag the marker to pinpoint where the service is needed.</p>
+        <div id="bookingPickerMap"></div>
+        <div class="mt-2 small text-muted">
+          Location: <strong id="bookingModalAddr" class="text-dark">Move marker to update</strong>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btnConfirmBookingMap" data-bs-dismiss="modal">Set Location</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/maps.js"></script>
+<script>
+const me = Auth.require('CUSTOMER'); navbar();
+const $ = id => document.getElementById(id), q = new URLSearchParams(location.search);
+let results = [], picked = null, allServicesList = [];
+let bookingLat = null;
+let bookingLng = null;
+let bookingFormattedAddress = null;
+let pickerMapObj = null;
+let tempLoc = null;
+
+const typeVal = () => document.querySelector('input[name=type]:checked').value;
+const quick = () => typeVal() === 'QUICK_SERVICE';
+function msg(t, ok = false) { const m = $('msg'); m.className = 'alert alert-' + (ok ? 'success' : 'danger'); m.textContent = t; }
+
+function applyType() {
+  $('quickHint').classList.toggle('d-none', !quick());
+  $('when').classList.toggle('d-none', quick());
+  $('confirm').classList.add('d-none');
+  $('list').innerHTML = '';
+  $('msg').className = 'alert d-none';
+  picked = null;
+}
+document.querySelectorAll('input[name=type]').forEach(r => r.addEventListener('change', applyType));
+
+function setCoordinates(lat, lng, formattedAddress) {
+  bookingLat = lat;
+  bookingLng = lng;
+  bookingFormattedAddress = formattedAddress;
+  if (bookingLat && bookingLng) {
+    $('locStatusBadge').classList.remove('d-none');
+    $('locCoordText').textContent = `${bookingLat.toFixed(4)}, ${bookingLng.toFixed(4)}`;
+  }
+}
+
+async function updateSubServicesDropdown(preselectSub = null) {
+  const svcId = $('svc').value;
+  const subSelect = $('subSvc');
+  subSelect.innerHTML = '<option value="">All Sub-Services</option>';
+  if (!svcId) return;
+
+  const svc = allServicesList.find(s => String(s.id) === String(svcId));
+  let subs = (svc && svc.subServices && svc.subServices.length) ? svc.subServices : [];
+
+  if (!subs.length) {
+    try {
+      subs = await api(`/services/${svcId}/subservices`);
+    } catch (e) {
+      console.warn('Could not load subservices from API:', e);
+    }
+  }
+
+  if (subs && subs.length) {
+    subSelect.innerHTML += subs.map(s => 
+      `<option value="${esc(s.name)}" data-id="${s.id}">${esc(s.name)} (₹${s.basePrice || s.price} • ${esc(s.duration || '30 mins')})</option>`
+    ).join('');
+  }
+
+  if (preselectSub) {
+    for (const opt of subSelect.options) {
+      if (opt.value.toLowerCase() === preselectSub.toLowerCase()) {
+        opt.selected = true;
+        break;
+      }
+    }
+  }
+}
+
+$('svc').addEventListener('change', () => updateSubServicesDropdown());
+
+async function find() {
+  $('msg').className = 'alert d-none'; $('confirm').classList.add('d-none');
+  const serviceId = $('svc').value;
+  const subService = $('subSvc').value;
+  const area = $('area').value.trim();
+
+  try {
+    const params = new URLSearchParams();
+    params.set('serviceId', serviceId);
+    if (subService) params.set('subService', subService);
+    if (area) params.set('area', area);
+    params.set('type', typeVal());
+    if (bookingLat && bookingLng) {
+      params.set('latitude', bookingLat);
+      params.set('longitude', bookingLng);
+    }
+
+    results = await api(`/providers/matching?` + params);
+    $('list').innerHTML = results.map(p => `
+      <div class="col-md-6">
+        <div class="card h-100 border-0 shadow-sm dashboard-card">
+          <div class="card-body p-4 d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <h2 class="h5 mb-0 fw-bold">${esc(p.businessName)} <i class="bi bi-patch-check-fill text-primary" title="Verified"></i></h2>
+              ${p.availability ? '<span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-dot"></i> Available</span>' : ''}
+            </div>
+            <div class="mb-2 d-flex align-items-center gap-2">
+              ${stars(p.rating, p.reviewCount)}
+              ${p.distanceKm != null ? `<span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class="bi bi-geo-alt-fill me-1"></i>${p.distanceKm} km away</span>` : ''}
+            </div>
+            <p class="small text-muted mb-1">${esc(p.experienceYears || 0)} yrs experience${p.approxPrice != null ? ' · Approx. ₹' + esc(p.approxPrice) : ''}</p>
+            ${p.formattedAddress ? `<p class="small text-muted mb-2"><i class="bi bi-geo-alt me-1"></i>${esc(p.formattedAddress)}</p>` : ''}
+            ${quick() ? '<p class="small text-danger mb-2"><i class="bi bi-stopwatch"></i> Target response: within 10 minutes</p>' : ''}
+            <button class="btn btn-primary btn-sm pick mt-auto" data-id="${p.id}">${quick() ? 'Request Quick Service' : 'Select Provider'}</button>
+          </div>
+        </div>
+      </div>`).join('')
+      || `<div class="col-12 py-4 text-center text-muted">${quick() ? 'No providers are available right now for Quick Service in this area.<br>Try Normal Booking to schedule ahead.' : 'No verified providers serve this location yet.'}</div>`;
+  } catch (e) { msg(e.message); }
+}
+
+$('f').addEventListener('submit', e => { e.preventDefault(); find(); });
+
+$('list').addEventListener('click', e => {
+  const id = e.target.dataset.id; if (!id) return;
+  picked = results.find(p => String(p.id) === id);
+  $('pickedName').textContent = picked.businessName;
+  $('confirm').classList.remove('d-none');
+  $('confirm').scrollIntoView({ behavior: 'smooth' });
+});
+
+$('confirm').addEventListener('submit', async e => {
+  e.preventDefault(); $('confirmBtn').disabled = true;
+  const chosenSub = $('subSvc').value;
+  const rawNotes = $('notes').value.trim();
+  const notesText = chosenSub ? (rawNotes ? `[Sub-service: ${chosenSub}] ${rawNotes}` : `[Sub-service: ${chosenSub}]`) : (rawNotes || null);
+
+  try {
+    const b = await api('/bookings', { method: 'POST', body: {
+      providerId: picked.id,
+      serviceId: Number($('svc').value),
+      subServiceName: chosenSub || null,
+      bookingType: typeVal(),
+      bookingDate: quick() ? null : $('date').value || null,
+      bookingTime: quick() ? null : ($('time').value ? $('time').value + ':00' : null),
+      address: $('address').value,
+      area: $('area').value.trim(),
+      notes: notesText,
+      formattedAddress: bookingFormattedAddress || $('address').value,
+      latitude: bookingLat,
+      longitude: bookingLng
+    } });
+    location.href = '/booking-status.html?id=' + b.id;
+  } catch (ex) {
+    msg(ex.message);
+    $('confirmBtn').disabled = false;
+    if (quick()) find();
+  }
+});
+
+// GPS Button
+$('btnGpsLoc').addEventListener('click', async () => {
+  const icon = $('gpsIcon'), spinner = $('gpsSpinner');
+  icon.classList.add('d-none'); spinner.classList.remove('d-none');
+  try {
+    const loc = await LSC_MAPS.getCurrentLocation();
+    setCoordinates(loc.lat, loc.lng, loc.formattedAddress);
+    if (loc.formattedAddress) {
+      $('area').value = loc.area || loc.formattedAddress;
+      if (!$('address').value) $('address').value = loc.formattedAddress;
+    }
+    msg('Location detected via GPS', true);
+    if ($('svc').value) find();
+  } catch (e) {
+    msg(e.message, false);
+  } finally {
+    icon.classList.remove('d-none'); spinner.classList.add('d-none');
+  }
+});
+
+// Map modal setup
+const bookingMapModalEl = document.getElementById('bookingMapModal');
+bookingMapModalEl.addEventListener('shown.bs.modal', () => {
+  const initLat = bookingLat || 23.3441;
+  const initLng = bookingLng || 85.3096;
+  if (!pickerMapObj) {
+    pickerMapObj = LSC_MAPS.createLocationPickerMap('bookingPickerMap', {
+      initialLat: initLat,
+      initialLng: initLng,
+      draggable: true,
+      onLocationChange: (loc) => {
+        tempLoc = loc;
+        $('bookingModalAddr').textContent = loc.formattedAddress || `${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`;
+      }
+    });
+  } else {
+    pickerMapObj.setLocation(initLat, initLng);
+    google.maps.event.trigger(pickerMapObj.map, 'resize');
+    pickerMapObj.map.setCenter({ lat: initLat, lng: initLng });
+  }
+});
+
+$('btnConfirmBookingMap').addEventListener('click', () => {
+  if (tempLoc) {
+    setCoordinates(tempLoc.lat, tempLoc.lng, tempLoc.formattedAddress);
+    if (tempLoc.area) $('area').value = tempLoc.area;
+    else if (tempLoc.formattedAddress) $('area').value = tempLoc.formattedAddress;
+    if (!$('address').value && tempLoc.formattedAddress) $('address').value = tempLoc.formattedAddress;
+    if ($('svc').value) find();
+  }
+});
+
+(async () => {
+  if (!me) return;
+  const [svcs, prof] = await Promise.all([api('/services'), api('/customer/profile')]);
+  allServicesList = svcs;
+  $('svc').innerHTML += svcs.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  $('svc').value = q.get('serviceId') || '';
+
+  // Use query params or profile defaults
+  $('area').value = q.get('area') || prof.area || '';
+  $('address').value = prof.formattedAddress || prof.address || '';
+  $('date').min = new Date().toISOString().slice(0, 10);
+  if (q.get('type') === 'QUICK_SERVICE') { $('tq').checked = true; }
+
+  if (prof.latitude && prof.longitude) {
+    setCoordinates(prof.latitude, prof.longitude, prof.formattedAddress);
+  }
+
+  // Update subservices dropdown if service is already selected
+  if ($('svc').value) {
+    await updateSubServicesDropdown(q.get('subService') || null);
+  }
+
+  // Setup Places autocomplete
+  const mapRes = await LSC_MAPS.loadGoogleMaps();
+  if (mapRes.configured) {
+    LSC_MAPS.setupPlacesAutocomplete($('area'), (placeData) => {
+      setCoordinates(placeData.lat, placeData.lng, placeData.formattedAddress);
+      if (placeData.area) $('area').value = placeData.area;
+      if (!$('address').value && placeData.formattedAddress) $('address').value = placeData.formattedAddress;
+      if ($('svc').value) find();
+    });
+    LSC_MAPS.setupPlacesAutocomplete($('address'), (placeData) => {
+      setCoordinates(placeData.lat, placeData.lng, placeData.formattedAddress);
+    });
+  }
+
+  applyType();
+  if ($('svc').value && ($('area').value || bookingLat)) find();
+})().catch(e => msg(e.message));
+</script>
+</body>
+</html>

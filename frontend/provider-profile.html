@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title id="pageMetaTitle">Provider Profile · Local Service Connect</title>
+  <meta id="pageMetaDesc" name="description" content="Connect with verified local service professionals for plumbing, electrical, cleaning, and more on Local Service Connect.">
+  <link id="pageCanonicalLink" rel="canonical" href="">
+  
+  <!-- Open Graph / Facebook / WhatsApp -->
+  <meta property="og:type" content="profile">
+  <meta id="ogTitle" property="og:title" content="Provider Profile · Local Service Connect">
+  <meta id="ogDesc" property="og:description" content="Verified doorstep services in Ranchi with guaranteed pricing and secure 4-digit OTP.">
+  <meta id="ogUrl" property="og:url" content="">
+  <meta id="ogImage" property="og:image" content="">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <style>
+    .profile-hero {
+      background: linear-gradient(135deg, #312e81 0%, #4338ca 50%, #6366f1 100%);
+      color: #ffffff;
+      border-radius: var(--radius-2xl);
+      padding: 2.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .profile-hero::after {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .profile-large-avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 22px;
+      object-fit: cover;
+      border: 3.5px solid #ffffff;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      background: #4f46e5;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .profile-nav-pills {
+      background: #f8fafc;
+      padding: 0.35rem;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-light);
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+    .profile-nav-pills .nav-link {
+      border-radius: var(--radius-pill);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 0.45rem 1.15rem;
+      transition: all var(--transition-fast);
+      border: none;
+    }
+    .profile-nav-pills .nav-link.active {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+    }
+    .subservice-profile-card {
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-light);
+      background: #ffffff;
+      transition: all var(--transition-fast);
+      overflow: hidden;
+    }
+    .subservice-profile-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: #cbd5e1;
+    }
+    .subservice-card-img {
+      height: 160px;
+      width: 100%;
+      object-fit: cover;
+    }
+    .star-btn {
+      font-size: 1.5rem;
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: color 0.15s ease-in-out;
+    }
+    .star-btn.active, .star-btn:hover, .star-btn.hover {
+      color: #f59e0b;
+    }
+  </style>
+</head>
+<body>
+<div id="nav"></div>
+
+<div class="container py-4 py-lg-5">
+  <!-- Breadcrumb Navigation -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
+      <li class="breadcrumb-item"><a href="/providers.html" class="text-decoration-none">Providers</a></li>
+      <li class="breadcrumb-item active text-dark fw-semibold" id="breadcrumbName" aria-current="page">Loading profile...</li>
+    </ol>
+  </nav>
+
+  <div id="err" class="alert alert-danger d-none"></div>
+
+  <!-- Loading State -->
+  <div id="loader" class="text-center py-5 text-muted">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-2 mb-0 fw-semibold">Loading specialist profile &amp; portfolio...</p>
+  </div>
+
+  <!-- Main Profile Content (hidden until loaded) -->
+  <div id="content" class="d-none">
+
+    <!-- Provider Self-Preview Banner -->
+    <div id="providerSelfBanner" class="alert alert-info border-0 shadow-sm d-none align-items-center justify-content-between p-3 mb-4 rounded-3">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-eye-fill fs-5 text-primary"></i>
+        <span><strong>Preview Mode:</strong> You are viewing your public business profile as seen by customers.</span>
+      </div>
+      <a href="/provider/profile" class="btn btn-sm btn-primary fw-bold px-3">
+        <i class="bi bi-pencil-square me-1"></i> Edit My Profile
+      </a>
+    </div>
+
+    <!-- Section A: Provider Header Card -->
+    <div class="profile-hero mb-4">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-4">
+        <div class="d-flex align-items-center gap-3 gap-md-4 flex-wrap flex-sm-nowrap">
+          <div id="avatarContainer">
+            <!-- Large Image or Initial Avatar -->
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              <span id="availBadge"></span>
+              <span id="verifBadge"></span>
+            </div>
+            <h1 class="display-6 fw-bold mb-1 text-white" id="bizName">--</h1>
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+              <div id="bizRating" class="text-warning">--</div>
+              <span class="text-white-50" id="reviewCountText">(0 reviews)</span>
+              <span class="text-white-50">•</span>
+              <span class="text-white small" id="primaryServiceText">--</span>
+            </div>
+            <div class="d-flex align-items-center gap-3 text-white-50 small flex-wrap">
+              <span><i class="bi bi-geo-alt-fill text-danger me-1"></i><span id="baseLocationText">Ranchi</span></span>
+              <span><i class="bi bi-briefcase-fill text-warning me-1"></i><span id="completedJobsText">-- completed jobs</span></span>
+              <span><i class="bi bi-clock-fill text-info me-1"></i><span id="workingHoursText">Mon - Sun: 8:00 AM - 8:00 PM</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Starting Rate Box & Hero Actions -->
+        <div class="d-flex flex-column align-items-md-end gap-2">
+          <div class="text-md-end bg-white bg-opacity-10 p-3 p-md-4 rounded-4 backdrop-blur border border-white border-opacity-20 w-100">
+            <div class="small text-white-50 fw-semibold text-uppercase tracking-wider">Starting Rate</div>
+            <div class="h2 fw-bold mb-0 text-white" id="approxPrice">₹--</div>
+            <div class="small text-white-50 mt-1" id="rateSubtext">Zero hidden charges</div>
+          </div>
+          <div class="d-flex align-items-center gap-2 mt-1">
+            <button type="button" id="btnHeroFavorite" class="btn btn-outline-light btn-fav-hero" data-fav-provider="" title="Add to favorites" aria-label="Add to favorites">
+              <i class="bi bi-heart"></i> <span class="fav-btn-text">Add to Favorites</span>
+            </button>
+            <button type="button" id="btnHeroShare" class="btn btn-light btn-fav-hero text-dark fw-semibold" title="Share provider profile" aria-label="Share provider profile">
+              <i class="bi bi-share-fill text-primary"></i> <span>Share Provider</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Navigation Anchors -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <div class="profile-nav-pills">
+        <a href="#aboutSec" class="nav-link active">About</a>
+        <a href="#servicesSec" class="nav-link">Sub-Services (<span id="navSubCount">0</span>)</a>
+        <a href="#portfolioSec" class="nav-link">Before &amp; After</a>
+        <a href="#videosSec" class="nav-link">Work Videos</a>
+        <a href="#reviewsSec" class="nav-link">Reviews</a>
+      </div>
+      <a href="/providers.html" class="btn btn-outline-secondary btn-sm fw-semibold">
+        <i class="bi bi-arrow-left me-1"></i> Back to Providers
+      </a>
+    </div>
+
+    <!-- 2-Column Main Layout: Left = Profile Details, Right = Sticky Booking Panel -->
+    <div class="row g-4 g-lg-5">
+      <!-- Left Column: Details, Sub-services, Before/After, Videos, Reviews -->
+      <div class="col-lg-8">
+
+        <!-- Section A continued: About the Specialist -->
+        <div class="card border-0 shadow-sm dashboard-card p-4 mb-4" id="aboutSec">
+          <h2 class="h5 fw-bold mb-3 text-dark"><i class="bi bi-person-lines-fill text-primary me-2"></i>Professional Overview</h2>
+          <p class="text-muted leading-relaxed mb-4" id="bizDesc">--</p>
+
+          <h3 class="h6 fw-bold mb-2 text-dark">Verified Service Categories</h3>
+          <div id="servicesList" class="d-flex flex-wrap gap-2 mb-4"></div>
+
+          <h3 class="h6 fw-bold mb-2 text-dark">Service Areas Covered in Ranchi</h3>
+          <div id="areasList" class="d-flex flex-wrap gap-2 mb-3"></div>
+
+          <!-- Trust Badges -->
+          <div class="row g-2 mt-2 pt-3 border-top text-center text-sm-start">
+            <div class="col-sm-4 d-flex align-items-center gap-2">
+              <span class="text-primary fs-4"><i class="bi bi-shield-check"></i></span>
+              <div class="small"><strong class="d-block text-dark">Background Checked</strong><span class="text-muted">ID verified technician</span></div>
+            </div>
+            <div class="col-sm-4 d-flex align-items-center gap-2">
+              <span class="text-success fs-4"><i class="bi bi-patch-check"></i></span>
+              <div class="small"><strong class="d-block text-dark">4-Digit Secure OTP</strong><span class="text-muted">Service start verification</span></div>
+            </div>
+            <div class="col-sm-4 d-flex align-items-center gap-2">
+              <span class="text-warning fs-4"><i class="bi bi-tools"></i></span>
+              <div class="small"><strong class="d-block text-dark">Standard Pricing</strong><span class="text-muted">Itemized transparent bill</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section B: Services & Sub-Services Offered by THIS Provider -->
+        <section class="mb-5 pt-2" id="servicesSec">
+          <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div>
+              <h2 class="h4 fw-bold mb-1 text-dark">
+                <i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i>Sub-Services Offered
+              </h2>
+              <p class="text-muted small mb-0">Select any sub-service to review details and book with this specialist.</p>
+            </div>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-semibold" id="subServiceCountBadge">
+              0 Packages
+            </span>
+          </div>
+
+          <div class="row g-3" id="providerSubServicesGrid">
+            <!-- Dynamically populated sub-services -->
+          </div>
+        </section>
+
+        <!-- Section C: Before-and-After Comparison Gallery -->
+        <section class="mb-5 pt-2" id="portfolioSec">
+          <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div>
+              <h2 class="h4 fw-bold mb-1 text-dark">
+                <i class="bi bi-images text-primary me-2"></i>Before &amp; After Transformation Gallery
+              </h2>
+              <p class="text-muted small mb-0">Drag the center slider left and right to interactively inspect actual work results.</p>
+            </div>
+          </div>
+
+          <!-- Project Switcher Tabs -->
+          <div class="d-flex gap-2 overflow-x-auto pb-2 mb-3" id="portfolioTabsContainer" style="scrollbar-width: thin;">
+            <!-- Injected dynamically -->
+          </div>
+
+          <!-- Active Interactive Comparison Slider Card -->
+          <div class="card border-0 shadow-sm dashboard-card p-3 p-md-4 mb-3">
+            <div class="ba-slider-container" id="baSlider">
+              <div class="ba-slider-after">
+                <img id="baAfterImg" src="" alt="After Cleaned Transformation">
+                <span class="ba-badge-label ba-badge-after"><i class="bi bi-check-circle-fill me-1"></i>After Work</span>
+              </div>
+              <div class="ba-slider-before" id="baBeforeWrapper">
+                <img id="baBeforeImg" src="" alt="Before Work">
+                <span class="ba-badge-label ba-badge-before"><i class="bi bi-exclamation-circle-fill me-1"></i>Before Work</span>
+              </div>
+              <div class="ba-slider-handle" id="baHandle">
+                <i class="bi bi-arrows-expand-vertical" style="transform: rotate(90deg);"></i>
+              </div>
+            </div>
+
+            <!-- Project Meta & Details -->
+            <div class="mt-3 d-flex justify-content-between align-items-start flex-wrap gap-2">
+              <div>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-1" id="baSubServiceBadge">Service</span>
+                <h3 class="h5 fw-bold text-dark mb-1" id="baTitle">--</h3>
+                <p class="text-muted small mb-0" id="baDesc">--</p>
+              </div>
+              <div class="text-sm-end">
+                <span class="small text-muted d-block"><i class="bi bi-calendar-event me-1"></i>Completed: <strong id="baDate" class="text-dark">--</strong></span>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-2" id="btnFullscreenBa">
+                  <i class="bi bi-arrows-fullscreen me-1"></i> Fullscreen Preview
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section D: Work Videos Gallery -->
+        <section class="mb-5 pt-2" id="videosSec">
+          <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div>
+              <h2 class="h4 fw-bold mb-1 text-dark">
+                <i class="bi bi-play-circle-fill text-danger me-2"></i>Work Videos &amp; Live Demonstrations
+              </h2>
+              <p class="text-muted small mb-0">Watch this specialist in action at real customer locations.</p>
+            </div>
+          </div>
+
+          <div class="row g-3" id="providerVideosGrid">
+            <!-- Dynamically populated video cards -->
+          </div>
+        </section>
+
+        <!-- Section E: Customer Reviews & Ratings -->
+        <section class="mb-5 pt-2" id="reviewsSec">
+          <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div>
+              <h2 class="h4 fw-bold mb-1 text-dark">
+                <i class="bi bi-chat-quote-fill text-warning me-2"></i>Verified Customer Reviews &amp; Ratings
+              </h2>
+              <p class="text-muted small mb-0">Read genuine feedback from verified doorstep bookings.</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <label class="small text-muted mb-0 fw-semibold">Sort:</label>
+              <select id="reviewSortSelect" class="form-select form-select-sm" style="width: auto;">
+                <option value="newest">Newest First</option>
+                <option value="highest">Highest Rating</option>
+                <option value="lowest">Lowest Rating</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Overall Rating Summary Card with Distribution Progress Bars -->
+          <div class="card border-0 shadow-sm dashboard-card p-4 mb-4">
+            <div class="row g-4 align-items-center">
+              <div class="col-md-4 text-center border-end-md">
+                <div class="display-4 fw-bold text-dark mb-0" id="summaryScore">--</div>
+                <div class="text-warning fs-5 mb-1" id="summaryStars">★★★★★</div>
+                <div class="small text-muted" id="summaryCount">Based on 0 verified reviews</div>
+                <span class="badge bg-success-subtle text-success border border-success-subtle mt-2 px-2 py-1 small">
+                  <i class="bi bi-patch-check-fill me-1"></i>100% Genuine Bookings
+                </span>
+              </div>
+              <div class="col-md-8">
+                <div class="rating-bar-container">
+                  <span class="rating-bar-label">5 Star</span>
+                  <div class="rating-bar-bg"><div class="rating-bar-fill" id="bar5" style="width: 0%;"></div></div>
+                  <span class="rating-bar-pct" id="pct5">0%</span>
+                </div>
+                <div class="rating-bar-container">
+                  <span class="rating-bar-label">4 Star</span>
+                  <div class="rating-bar-bg"><div class="rating-bar-fill" id="bar4" style="width: 0%;"></div></div>
+                  <span class="rating-bar-pct" id="pct4">0%</span>
+                </div>
+                <div class="rating-bar-container">
+                  <span class="rating-bar-label">3 Star</span>
+                  <div class="rating-bar-bg"><div class="rating-bar-fill" id="bar3" style="width: 0%;"></div></div>
+                  <span class="rating-bar-pct" id="pct3">0%</span>
+                </div>
+                <div class="rating-bar-container">
+                  <span class="rating-bar-label">2 Star</span>
+                  <div class="rating-bar-bg"><div class="rating-bar-fill" id="bar2" style="width: 0%;"></div></div>
+                  <span class="rating-bar-pct" id="pct2">0%</span>
+                </div>
+                <div class="rating-bar-container">
+                  <span class="rating-bar-label">1 Star</span>
+                  <div class="rating-bar-bg"><div class="rating-bar-fill" id="bar1" style="width: 0%;"></div></div>
+                  <span class="rating-bar-pct" id="pct1">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer Review Submission Box (Only visible if customer has completed unreviewed booking) -->
+          <div id="eligibleReviewBox" class="card border-0 shadow-sm dashboard-card p-4 mb-4 d-none border-primary" style="background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);">
+            <h3 class="h6 fw-bold text-primary mb-1">
+              <i class="bi bi-pencil-square me-1"></i>Write a Verified Review for your recent service
+            </h3>
+            <p class="small text-muted mb-3">You completed a service with this specialist. Share your experience to help local neighbors.</p>
+            
+            <div id="revMsg" class="alert d-none mb-3"></div>
+
+            <form id="eligibleReviewForm">
+              <input type="hidden" id="revBookingId">
+              <div class="mb-3">
+                <label class="form-label small fw-bold">Your Rating:</label>
+                <div class="d-flex gap-2" id="starRatingSelector">
+                  <i class="bi bi-star-fill star-btn" data-value="1"></i>
+                  <i class="bi bi-star-fill star-btn" data-value="2"></i>
+                  <i class="bi bi-star-fill star-btn" data-value="3"></i>
+                  <i class="bi bi-star-fill star-btn" data-value="4"></i>
+                  <i class="bi bi-star-fill star-btn active" data-value="5"></i>
+                </div>
+                <input type="hidden" id="selectedStarValue" value="5">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small fw-bold" for="revComment">Detailed Feedback:</label>
+                <textarea id="revComment" class="form-control" rows="3" placeholder="How was the punctuality, cleanliness, quality of service and professionalism?" required></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-sm fw-semibold px-4" id="btnSubmitReview">
+                <i class="bi bi-send-fill me-1"></i> Submit Verified Review
+              </button>
+            </form>
+          </div>
+
+          <!-- Reviews List Container -->
+          <div class="d-flex flex-column gap-3" id="providerReviewsList">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Right Column: Sticky Booking Panel (Section G) -->
+      <div class="col-lg-4">
+        <div class="sticky-booking-panel p-4">
+          <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+            <div>
+              <h2 class="h5 fw-bold text-dark mb-0">
+                <i class="bi bi-calendar2-check-fill text-primary me-2"></i>Book Specialist
+              </h2>
+              <span class="small text-muted" id="bookingPanelSub">Direct doorstep appointment</span>
+            </div>
+            <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold">
+              <span class="pulse-dot me-1"></span>Available
+            </span>
+          </div>
+
+          <div id="bookMsg" class="alert d-none mb-3"></div>
+
+          <form id="profileBookingForm">
+            <!-- Sub-Service Package Dropdown -->
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-dark" for="panelSubSelect">
+                <i class="bi bi-list-check text-primary me-1"></i>Select Sub-Service Package
+              </label>
+              <select id="panelSubSelect" class="form-select form-select-sm" required>
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <!-- Price & Duration Summary Box -->
+            <div class="card p-3 mb-3 border-0 rounded-3 shadow-sm" style="background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%); border: 1.5px solid #c7d2fe !important;">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <span class="small text-muted d-block">Estimated Price</span>
+                  <span class="fw-bold text-dark fs-5" id="panelPriceText">₹499 approx.</span>
+                </div>
+                <div class="text-end">
+                  <span class="small text-muted d-block">Estimated Time</span>
+                  <span class="fw-bold text-primary small" id="panelDurationText">~40 mins</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Normal vs Quick Service Toggle -->
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-dark mb-1">Booking Type</label>
+              <div class="btn-group w-100" role="group">
+                <input type="radio" class="btn-check" name="panelBookingType" id="panelTypeNormal" value="NORMAL" checked>
+                <label class="btn btn-outline-primary btn-sm py-2 fw-semibold" for="panelTypeNormal">
+                  <i class="bi bi-calendar-event me-1"></i> Scheduled
+                </label>
+                <input type="radio" class="btn-check" name="panelBookingType" id="panelTypeQuick" value="QUICK_SERVICE">
+                <label class="btn btn-outline-danger btn-sm py-2 fw-semibold" for="panelTypeQuick">
+                  <i class="bi bi-lightning-fill me-1"></i> Quick (~10 min)
+                </label>
+              </div>
+            </div>
+
+            <!-- Schedule Row (Hidden for Quick Service) -->
+            <div id="panelScheduleRow" class="row g-2 mb-3">
+              <div class="col-sm-6">
+                <label class="form-label small fw-semibold" for="panelDate">Service Date</label>
+                <input id="panelDate" type="date" class="form-control form-control-sm" required>
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label small fw-semibold" for="panelTime">Time Slot</label>
+                <input id="panelTime" type="time" class="form-control form-control-sm" required>
+              </div>
+            </div>
+
+            <!-- Quick Service Notice -->
+            <div id="panelQuickNotice" class="alert alert-warning small py-2 d-none mb-3">
+              <i class="bi bi-lightning-charge-fill text-warning me-1"></i>
+              <strong>Quick Service:</strong> Specialist will be dispatched immediately with a target arrival time of ~10-15 minutes.
+            </div>
+
+            <!-- Address Input with GPS auto-detect -->
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-dark" for="panelAddress">
+                <i class="bi bi-geo-alt-fill text-danger me-1"></i>Your Service Address
+              </label>
+              <div class="input-group input-group-sm mb-1">
+                <input id="panelAddress" class="form-control" placeholder="House/Flat No., Street, Area (e.g. Lalpur)" required>
+                <button type="button" class="btn btn-outline-secondary" id="btnPanelGps" title="Detect GPS location">
+                  <i class="bi bi-crosshair" id="panelGpsIcon"></i>
+                  <span class="spinner-border spinner-border-sm d-none" id="panelGpsSpinner" role="status"></span>
+                </button>
+              </div>
+              <div class="small text-muted" id="panelLocStatus"></div>
+            </div>
+
+            <!-- Special Notes -->
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark" for="panelNotes">Additional Notes (Optional)</label>
+              <textarea id="panelNotes" class="form-control form-control-sm" rows="2" placeholder="e.g. 2nd floor, lift available, specific requirements..."></textarea>
+            </div>
+
+            <!-- Confirm Button -->
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" id="btnPanelConfirm">
+              <i class="bi bi-check2-circle me-1" id="panelConfirmIcon"></i>
+              <span class="spinner-border spinner-border-sm d-none me-1" id="panelConfirmSpinner" role="status"></span>
+              Confirm &amp; Get 4-Digit OTP
+            </button>
+            <div class="text-center small text-muted mt-2">
+              <i class="bi bi-shield-lock-fill text-success me-1"></i>4-Digit OTP shared upon arrival. Pay after service completion.
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sub-Service Details Modal -->
+<div class="modal fade" id="subServiceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header p-4 bg-light border-bottom">
+        <div>
+          <h5 class="modal-title fw-bold text-dark mb-1" id="mSubTitle">Package Details</h5>
+          <div class="small text-muted" id="mSubMeta">Starts at ₹499 • 40 mins</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-4">
+          <h6 class="fw-bold text-primary mb-2"><i class="bi bi-check-circle-fill me-1"></i> Inclusions</h6>
+          <ul class="inclusions-list" id="mInclusionsList"></ul>
+        </div>
+        <div class="mb-4">
+          <h6 class="fw-bold text-danger mb-2"><i class="bi bi-x-circle-fill me-1"></i> Exclusions</h6>
+          <ul class="inclusions-list text-muted" id="mExclusionsList"></ul>
+        </div>
+        <div class="mb-3">
+          <h6 class="fw-bold text-dark mb-3"><i class="bi bi-signpost-split-fill text-primary me-1"></i> 4-Step Standard Service Process</h6>
+          <div class="d-flex flex-column gap-3" id="mStepsList"></div>
+        </div>
+      </div>
+      <div class="modal-footer bg-light p-3">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary fw-bold px-4" id="btnModalSelectSub">
+          <i class="bi bi-calendar2-check-fill me-1"></i> Book This Service
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Fullscreen Video Modal -->
+<div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 bg-dark shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title text-white fw-bold fs-6" id="vModalTitle">Work Demonstration</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-3">
+        <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
+          <video id="modalVideoPlayer" controls playsinline></video>
+        </div>
+        <p class="text-white-50 small mt-2 mb-0" id="vModalDesc"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="site py-4 mt-5">
+  <div class="container d-flex flex-wrap justify-content-between gap-3">
+    <div>
+      <strong class="text-white">Local Service Connect</strong>
+      <div class="small">Local services, booked directly &amp; simply.</div>
+    </div>
+    <div class="small d-flex gap-3 flex-wrap">
+      <a href="/services.html">Services Catalog</a>
+      <a href="/providers.html">Find Providers</a>
+      <a href="/register.html?role=provider">Become a Provider</a>
+      <a href="/login.html">Log in</a>
+    </div>
+    <div class="small">&copy; <span id="yr"></span> Local Service Connect</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/maps.js"></script>
+<script src="/js/subservices.js"></script>
+<script>
+navbar();
+const $ = id => document.getElementById(id);
+$('yr').textContent = new Date().getFullYear();
+
+const params = new URLSearchParams(location.search);
+let providerId = params.get('id');
+
+// Global State
+let providerData = null;
+let providerReviews = [];
+let activePortfolioIdx = 0;
+let eligibleBooking = null;
+
+// Default date setup
+const today = new Date().toISOString().split('T')[0];
+$('panelDate').value = today;
+$('panelDate').min = today;
+const nextHour = new Date(Date.now() + 45 * 60000);
+$('panelTime').value = nextHour.toTimeString().slice(0, 5);
+
+// Booking Type Radio Toggle
+document.querySelectorAll('input[name=panelBookingType]').forEach(r => {
+  r.addEventListener('change', () => {
+    const isQuick = $('panelTypeQuick').checked;
+    $('panelScheduleRow').classList.toggle('d-none', isQuick);
+    $('panelQuickNotice').classList.toggle('d-none', !isQuick);
+    $('panelDate').required = !isQuick;
+    $('panelTime').required = !isQuick;
+  });
+});
+
+// GPS Auto-detect for Booking Address
+$('btnPanelGps').addEventListener('click', () => {
+  const icon = $('panelGpsIcon'), spinner = $('panelGpsSpinner');
+  icon.classList.add('d-none'); spinner.classList.remove('d-none');
+
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by your browser.');
+    icon.classList.remove('d-none'); spinner.classList.add('d-none');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      icon.classList.remove('d-none'); spinner.classList.add('d-none');
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      try {
+        if (window.LSC_MAPS && typeof LSC_MAPS.reverseGeocode === 'function') {
+          const geo = await LSC_MAPS.reverseGeocode(lat, lng);
+          $('panelAddress').value = geo.formattedAddress || `GPS Pinned (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+        } else {
+          $('panelAddress').value = `GPS Pinned (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+        }
+        $('panelLocStatus').textContent = `GPS Pinned: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      } catch (e) {
+        $('panelAddress').value = `GPS Pinned Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+        $('panelLocStatus').textContent = `Coordinates: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      }
+    },
+    (err) => {
+      icon.classList.remove('d-none'); spinner.classList.add('d-none');
+      alert('Could not detect location: ' + err.message);
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+});
+
+/**
+ * Main Profile Loader
+ */
+async function loadProfile() {
+  const err = $('err');
+  const loader = $('loader');
+  const content = $('content');
+
+  // If no ?id= param but user is a logged-in provider, load own public profile
+  if (!providerId) {
+    const curU = Auth.get();
+    if (curU && curU.token && curU.role === 'PROVIDER') {
+      try {
+        const myP = await api('/provider/profile');
+        if (myP && myP.id) {
+          providerId = myP.id;
+          history.replaceState(null, '', `/provider-profile.html?id=${providerId}`);
+        }
+      } catch (e) {
+        // Fall through to error
+      }
+    }
+  }
+
+  if (!providerId) {
+    showError(err, 'No provider ID specified. Please select a provider from the directory.');
+    loader.classList.add('d-none');
+    return;
+  }
+
+  try {
+    const [p, revs] = await Promise.all([
+      api('/providers/' + providerId),
+      api('/reviews/provider/' + providerId).catch(() => [])
+    ]);
+
+    providerData = p;
+    providerReviews = revs;
+
+    loader.classList.add('d-none');
+    content.classList.remove('d-none');
+
+    // Check if viewing own profile
+    const curU = Auth.get();
+    if (curU && curU.token && curU.role === 'PROVIDER') {
+      try {
+        const myP = await api('/provider/profile');
+        if (myP && myP.id === p.id) {
+          const banner = $('providerSelfBanner');
+          if (banner) {
+            banner.classList.remove('d-none');
+            banner.classList.add('d-flex');
+          }
+          $('btnPanelConfirm').textContent = 'Preview Only (Your Business Profile)';
+          $('btnPanelConfirm').disabled = true;
+          $('btnPanelConfirm').classList.replace('btn-primary', 'btn-secondary');
+        }
+      } catch (e) {
+        // Continue
+      }
+    }
+
+    // Page title & breadcrumb
+    document.title = `${p.businessName} · Detailed Profile & Services · Local Service Connect`;
+    $('breadcrumbName').textContent = p.businessName;
+
+    // Social & Canonical metadata
+    const canonical = ShareProvider.getCanonicalUrl(p.id);
+    if ($('pageCanonicalLink')) $('pageCanonicalLink').href = canonical;
+    if ($('ogTitle')) $('ogTitle').setAttribute('content', `${p.businessName} · Verified Professional · Local Service Connect`);
+    if ($('ogDesc')) $('ogDesc').setAttribute('content', p.description || `Book ${p.businessName} for verified doorstep service in Ranchi.`);
+    if ($('ogUrl')) $('ogUrl').setAttribute('content', canonical);
+    if ($('ogImage') && p.profileImage) $('ogImage').setAttribute('content', p.profileImage);
+
+    // Setup Favorite and Share action buttons in Hero
+    const heroFavBtn = $('btnHeroFavorite');
+    if (heroFavBtn) {
+      heroFavBtn.setAttribute('data-fav-provider', p.id);
+      Favorites.loadCache().then(() => {
+        Favorites.updateButtons(p.id, Favorites.isFavorite(p.id), false);
+      });
+      heroFavBtn.onclick = () => {
+        Favorites.toggle(p.id, heroFavBtn);
+      };
+    }
+
+    const heroShareBtn = $('btnHeroShare');
+    if (heroShareBtn) {
+      heroShareBtn.onclick = () => {
+        ShareProvider.openShareModal(p);
+      };
+    }
+
+    // Header Details
+    $('bizName').textContent = p.businessName;
+    $('bizDesc').textContent = p.description || 'Experienced and verified local service professional.';
+    $('approxPrice').textContent = p.approxPrice != null ? `₹${p.approxPrice}` : 'On Request';
+    $('bizRating').innerHTML = stars(p.rating, p.reviewCount);
+    $('reviewCountText').textContent = `(${p.reviewCount || 0} reviews)`;
+
+    // Genuine completed jobs count without fabrication
+    const completedCount = p.completedJobsCount != null ? p.completedJobsCount : 0;
+    $('completedJobsText').textContent = completedCount > 0 ? `${completedCount} completed jobs` : 'Verified Partner';
+    $('workingHoursText').textContent = p.workingHours || 'Mon - Sun: 8:00 AM - 8:00 PM';
+    $('baseLocationText').textContent = p.formattedAddress || (p.areas && p.areas.length ? p.areas.map(a => a.area).join(', ') : 'Ranchi');
+
+    const primaryService = p.services && p.services.length ? p.services[0].name : 'Local Service';
+    $('primaryServiceText').textContent = primaryService;
+
+    // Avatar / Profile Image
+    if (p.profileImage) {
+      $('avatarContainer').innerHTML = `<img src="${esc(p.profileImage)}" alt="${esc(p.businessName)}" class="profile-large-avatar" onerror="this.onerror=null;this.src='/img/default-provider.svg';">`;
+    } else {
+      const initial = (p.businessName ? p.businessName.charAt(0) : 'P').toUpperCase();
+      $('avatarContainer').innerHTML = `<div class="profile-large-avatar">${esc(initial)}</div>`;
+    }
+
+    // Availability Badge
+    $('availBadge').innerHTML = p.availability
+      ? '<span class="badge bg-success text-white"><span class="pulse-dot me-1"></span> Online &amp; Ready</span>'
+      : '<span class="badge bg-secondary text-white">Currently Busy</span>';
+
+    // Verification Badge
+    if (p.verificationStatus === 'VERIFIED' || p.isDemo) {
+      $('verifBadge').innerHTML = `
+        <span class="badge bg-white text-primary fw-bold" title="Identity & Police Verified Partner">
+          <i class="bi bi-patch-check-fill text-primary me-1"></i>Verified Specialist
+        </span>
+      `;
+    } else {
+      $('verifBadge').innerHTML = '';
+    }
+
+    // Services & Areas Badges
+    $('servicesList').innerHTML = (p.services || []).map(s => 
+      `<span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 fs-6 fw-semibold">
+        <i class="bi ${esc(s.icon || 'bi-gear')} me-1"></i> ${esc(s.name)}
+      </span>`
+    ).join('') || '<span class="text-muted small">No specific services listed.</span>';
+
+    $('areasList').innerHTML = (p.areas || []).map(a => 
+      `<span class="badge bg-light text-dark border px-3 py-2 fw-normal">
+        <i class="bi bi-geo-alt-fill text-danger me-1"></i> ${esc(a.area)}${a.city ? ', ' + esc(a.city) : ''}
+      </span>`
+    ).join('') || '<span class="text-muted small">All over Ranchi</span>';
+
+    // 1. Render Specific Sub-Services
+    renderSubServices(p.subServices || []);
+
+    // 2. Render Before & After Transformations
+    renderPortfolio(p.portfolioItems || []);
+
+    // 3. Render Work Videos
+    renderVideos(p.workVideos || []);
+
+    // 4. Render Reviews & Summary Breakdown
+    renderReviews(providerReviews, p.rating, p.reviewCount);
+
+    // 5. Populate Sticky Booking Panel Sub-services
+    populateBookingPanel(p.subServices || []);
+
+    // 6. Check if current logged-in customer has an eligible completed booking for review
+    checkEligibleReview();
+
+    // 7. If customer is logged in, preload their saved address into booking panel
+    const curCust = Auth.get();
+    if (curCust && curCust.token && curCust.role === 'CUSTOMER') {
+      try {
+        const cProf = await api('/customer/profile');
+        if (cProf && (cProf.formattedAddress || cProf.address)) {
+          $('panelAddress').value = cProf.formattedAddress || cProf.address;
+        }
+      } catch (e) {
+        // Silently skip if customer has no saved profile address yet
+      }
+    }
+
+  } catch (e) {
+    showError(err, e.message || 'Could not load provider profile.');
+    loader.classList.add('d-none');
+  }
+}
+
+/**
+ * Render Provider Sub-Services
+ */
+function renderSubServices(subServices) {
+  $('navSubCount').textContent = subServices.length;
+  $('subServiceCountBadge').textContent = `${subServices.length} Packages`;
+  const container = $('providerSubServicesGrid');
+
+  if (!subServices.length) {
+    container.innerHTML = '<div class="col-12 text-muted small py-3">No specific sub-services listed for this provider yet.</div>';
+    return;
+  }
+
+  container.innerHTML = subServices.map(sub => `
+    <div class="col-md-6">
+      <div class="subservice-profile-card h-100 d-flex flex-column">
+        <img src="${esc(sub.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80')}" alt="${esc(sub.name)}" class="subservice-card-img" loading="lazy" onerror="this.onerror=null;this.src='/img/service-placeholder.svg';">
+        <div class="p-3 d-flex flex-column flex-grow-1">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <h3 class="h6 fw-bold text-dark mb-0">${esc(sub.name)}</h3>
+              <span class="badge bg-light text-muted border small mt-1">${esc(sub.category || 'Package')}</span>
+            </div>
+            <div class="text-end">
+              <span class="fw-bold text-dark fs-6 d-block">₹${esc(sub.price || '499')}</span>
+              <span class="small text-muted" style="font-size:0.75rem;">• ${esc(sub.duration || '40 mins')}</span>
+            </div>
+          </div>
+
+          <p class="text-muted small mb-3 flex-grow-1" style="font-size:0.82rem; display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+            ${esc(sub.description || 'Doorstep service performed with specialized tools.')}
+          </p>
+
+          <div class="d-flex gap-2 mt-auto pt-2 border-top">
+            <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" onclick="openSubModal('${sub.id}')">
+              View Details
+            </button>
+            <button type="button" class="btn btn-primary btn-sm flex-fill fw-semibold" onclick="selectSubInBookingPanel('${sub.id}')">
+              <i class="bi bi-plus-circle me-1"></i> Book This Service
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/**
+ * Open Sub-Service Modal ("View Details")
+ */
+function openSubModal(subId) {
+  const sub = (providerData.subServices || []).find(s => String(s.id) === String(subId));
+  if (!sub) return;
+
+  $('mSubTitle').textContent = sub.name;
+  $('mSubMeta').textContent = `Starts at ₹${sub.price || 499} • Duration: ${sub.duration || '40 mins'}`;
+
+  // Default Inclusions & Steps
+  const inc = [
+    `Complete inspection & surface assessment`,
+    `Application of eco-friendly, certified solutions`,
+    `High-efficiency tools & deep extraction equipment`,
+    `Post-service cleanup and inspection handover`
+  ];
+  $('mInclusionsList').innerHTML = inc.map(i => `<li>${i}</li>`).join('');
+
+  const exc = [
+    `Major structural alterations or civil work`,
+    `Replacement of unbranded external spare parts`
+  ];
+  $('mExclusionsList').innerHTML = exc.map(e => `<li>${e}</li>`).join('');
+
+  const steps = [
+    { num: 1, title: 'Inspection & Setup', desc: 'Specialist examines area and covers adjacent surfaces.' },
+    { num: 2, title: 'Surface Preparation', desc: 'Pre-treatment applied to breakdown dirt, grease or scale.' },
+    { num: 3, title: 'Deep Extraction & Servicing', desc: 'Core machine operation performed to factory specifications.' },
+    { num: 4, title: 'Sanitization & Handover', desc: 'Area cleaned, inspected with customer, and OTP verified.' }
+  ];
+  $('mStepsList').innerHTML = steps.map(st => `
+    <div class="d-flex align-items-start gap-3">
+      <div class="step-badge-num">${st.num}</div>
+      <div>
+        <strong class="text-dark small d-block">${st.title}</strong>
+        <span class="text-muted small">${st.desc}</span>
+      </div>
+    </div>
+  `).join('');
+
+  $('btnModalSelectSub').onclick = () => {
+    bootstrap.Modal.getInstance($('subServiceModal')).hide();
+    selectSubInBookingPanel(sub.id);
+  };
+
+  new bootstrap.Modal($('subServiceModal')).show();
+}
+
+/**
+ * Select Subservice in Sticky Booking Panel
+ */
+function selectSubInBookingPanel(subId) {
+  $('panelSubSelect').value = subId;
+  updatePanelPriceAndDuration();
+  $('panelSubSelect').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  $('panelSubSelect').classList.add('border-primary');
+  setTimeout(() => $('panelSubSelect').classList.remove('border-primary'), 1500);
+}
+
+/**
+ * Populate Sticky Booking Panel Subservices
+ */
+function populateBookingPanel(subServices) {
+  const select = $('panelSubSelect');
+  if (!subServices.length) {
+    select.innerHTML = '<option value="">Standard Service Callout</option>';
+    return;
+  }
+
+  select.innerHTML = subServices.map(s => 
+    `<option value="${s.id}" data-price="${s.price || 499}" data-duration="${s.duration || '40 mins'}">
+      ${esc(s.name)} (₹${s.price || 499})
+    </option>`
+  ).join('');
+
+  select.addEventListener('change', updatePanelPriceAndDuration);
+  updatePanelPriceAndDuration();
+}
+
+function updatePanelPriceAndDuration() {
+  const select = $('panelSubSelect');
+  const opt = select.options[select.selectedIndex];
+  if (!opt) return;
+
+  const price = opt.dataset.price || '499';
+  const duration = opt.dataset.duration || '40 mins';
+  $('panelPriceText').textContent = `₹${price} approx.`;
+  $('panelDurationText').textContent = `~${duration}`;
+}
+
+/**
+ * Render Before & After Gallery with Interactive Slider
+ */
+function renderPortfolio(portfolioItems) {
+  if (!portfolioItems || !portfolioItems.length) {
+    $('portfolioSec').classList.add('d-none');
+    return;
+  }
+
+  // Tabs
+  $('portfolioTabsContainer').innerHTML = portfolioItems.map((pf, idx) => `
+    <button type="button" class="btn btn-sm ${idx === 0 ? 'btn-primary' : 'btn-outline-secondary'} rounded-pill fw-semibold text-nowrap pf-tab-btn" data-idx="${idx}">
+      ${esc(pf.title || ('Project ' + (idx + 1)))}
+    </button>
+  `).join('');
+
+  document.querySelectorAll('.pf-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.pf-tab-btn').forEach(b => {
+        b.classList.remove('btn-primary');
+        b.classList.add('btn-outline-secondary');
+      });
+      btn.classList.add('btn-primary');
+      btn.classList.remove('btn-outline-secondary');
+      loadPortfolioItem(parseInt(btn.dataset.idx, 10));
+    });
+  });
+
+  loadPortfolioItem(0);
+  initBaSlider();
+}
+
+function loadPortfolioItem(idx) {
+  activePortfolioIdx = idx;
+  const pf = (providerData.portfolioItems || [])[idx];
+  if (!pf) return;
+
+  $('baBeforeImg').src = pf.beforeImageUrl || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80';
+  $('baAfterImg').src = pf.afterImageUrl || 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=800&q=80';
+  $('baTitle').textContent = pf.title;
+  $('baDesc').textContent = pf.description || 'Complete restoration and deep clean.';
+  $('baDate').textContent = pf.completedDate || 'Recent';
+  $('baSubServiceBadge').textContent = pf.subService || 'Work Showcase';
+
+  // Reset handle to center (50%)
+  $('baBeforeWrapper').style.width = '50%';
+  $('baHandle').style.left = '50%';
+}
+
+/**
+ * Initialize Interactive Draggable Before & After Slider
+ */
+function initBaSlider() {
+  const container = $('baSlider');
+  const beforeWrapper = $('baBeforeWrapper');
+  const handle = $('baHandle');
+  let isDragging = false;
+
+  const updateSliderPos = (clientX) => {
+    const rect = container.getBoundingClientRect();
+    let x = clientX - rect.left;
+    if (x < 10) x = 10;
+    if (x > rect.width - 10) x = rect.width - 10;
+    const pct = (x / rect.width) * 100;
+    beforeWrapper.style.width = `${pct}%`;
+    handle.style.left = `${pct}%`;
+  };
+
+  container.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    updateSliderPos(e.clientX);
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    updateSliderPos(e.clientX);
+  });
+  window.addEventListener('mouseup', () => {
+    isDragging = false;
+  });
+
+  // Touch support for mobile
+  container.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    if (e.touches[0]) updateSliderPos(e.touches[0].clientX);
+  }, { passive: true });
+  window.addEventListener('touchmove', (e) => {
+    if (!isDragging || !e.touches[0]) return;
+    updateSliderPos(e.touches[0].clientX);
+  }, { passive: true });
+  window.addEventListener('touchend', () => {
+    isDragging = false;
+  });
+
+  $('btnFullscreenBa').addEventListener('click', () => {
+    const pf = (providerData.portfolioItems || [])[activePortfolioIdx];
+    if (pf && pf.afterImageUrl) {
+      window.open(pf.afterImageUrl, '_blank');
+    }
+  });
+}
+
+/**
+ * Render Work Videos Gallery
+ */
+function renderVideos(videos) {
+  if (!videos || !videos.length) {
+    $('videosSec').classList.add('d-none');
+    return;
+  }
+
+  const container = $('providerVideosGrid');
+  container.innerHTML = videos.map((v, idx) => `
+    <div class="col-md-6">
+      <div class="provider-video-card h-100 d-flex flex-column">
+        <div class="position-relative overflow-hidden cursor-pointer" onclick="playVideoModal(${idx})">
+          <img src="${esc(v.thumbnailUrl || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80')}" alt="${esc(v.title)}" class="w-100" style="height: 190px; object-fit: cover;" loading="lazy">
+          <div class="video-play-overlay">
+            <span class="video-play-icon-btn"><i class="bi bi-play-fill"></i></span>
+          </div>
+          <span class="position-absolute bottom-0 end-0 m-2 badge bg-dark bg-opacity-75 text-white">
+            <i class="bi bi-clock me-1"></i>${esc(v.duration || '0:45')}
+          </span>
+        </div>
+        <div class="p-3 d-flex flex-column flex-grow-1">
+          <span class="badge bg-danger-subtle text-danger border border-danger-subtle align-self-start mb-2 small">${esc(v.subService || 'Work Video')}</span>
+          <h3 class="h6 fw-bold text-dark mb-1">${esc(v.title)}</h3>
+          <p class="text-muted small mb-3 flex-grow-1" style="font-size:0.8rem; display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+            ${esc(v.description || 'Watch doorstep service execution.')}
+          </p>
+          <button type="button" class="btn btn-outline-primary btn-sm fw-semibold w-100" onclick="playVideoModal(${idx})">
+            <i class="bi bi-play-circle-fill me-1"></i> Watch Video Demo
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function playVideoModal(idx) {
+  const v = (providerData.workVideos || [])[idx];
+  if (!v) return;
+
+  $('vModalTitle').textContent = v.title;
+  $('vModalDesc').textContent = v.description;
+  const player = $('modalVideoPlayer');
+  player.src = v.videoUrl || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+  player.play().catch(() => {});
+
+  const modalEl = $('videoModal');
+  modalEl.addEventListener('hidden.bs.modal', () => {
+    player.pause();
+    player.currentTime = 0;
+  }, { once: true });
+
+  new bootstrap.Modal(modalEl).show();
+}
+
+/**
+ * Render Reviews and Breakdown Summary Bars
+ */
+function renderReviews(reviews, avgRating, totalCount) {
+  const score = avgRating ? parseFloat(avgRating).toFixed(1) : '5.0';
+  const total = totalCount || (reviews ? reviews.length : 0);
+
+  $('summaryScore').textContent = score;
+  $('summaryStars').innerHTML = starText(Math.round(parseFloat(score)));
+  $('summaryCount').textContent = `Based on ${total} verified review${total === 1 ? '' : 's'}`;
+
+  // Calculate Rating Distribution
+  const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  (reviews || []).forEach(r => {
+    const star = r.rating || 5;
+    if (counts[star] !== undefined) counts[star]++;
+  });
+
+  const revTotal = reviews && reviews.length ? reviews.length : 1;
+  for (let s = 1; s <= 5; s++) {
+    const count = counts[s] || (s === 5 ? total : 0);
+    const pct = Math.round((count / (total || 1)) * 100);
+    $(`bar${s}`).style.width = `${pct}%`;
+    $(`pct${s}`).textContent = `${pct}%`;
+  }
+
+  renderReviewsList(reviews || []);
+}
+
+function renderReviewsList(reviews) {
+  const container = $('providerReviewsList');
+  if (!reviews || !reviews.length) {
+    container.innerHTML = '<div class="text-muted small py-3 text-center bg-light rounded-3 p-3">No reviews yet for this provider. Be the first to book and leave a review!</div>';
+    return;
+  }
+
+  container.innerHTML = reviews.map(r => {
+    const name = r.customerFirstName || 'Verified Customer';
+    const initial = name.charAt(0).toUpperCase();
+    const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent';
+
+    return `
+    <div class="card border-0 shadow-sm dashboard-card p-4">
+      <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+          <div class="provider-avatar" style="width: 44px; height: 44px; font-size: 1rem; border-radius: 12px; background: #e0e7ff; color: #4338ca;">
+            ${esc(initial)}
+          </div>
+          <div>
+            <h4 class="h6 fw-bold mb-0.5 text-dark">${esc(name)}</h4>
+            <div class="small text-muted" style="font-size: 0.8rem;">${esc(dateStr)}</div>
+          </div>
+        </div>
+        <div class="d-flex flex-column align-items-end align-items-sm-end gap-1">
+          <div class="text-warning small">${starText(r.rating || 5)}</div>
+          <span class="badge bg-success-subtle text-success border border-success-subtle small py-1 px-2" style="font-size:0.72rem;">
+            <i class="bi bi-patch-check-fill me-1"></i>Verified Booking
+          </span>
+        </div>
+      </div>
+
+      <p class="text-dark mb-3" style="font-size: 0.92rem; line-height: 1.6;">
+        "${esc(r.review || 'Great professional doorstep service. Arrived promptly.')}"
+      </p>
+
+      ${r.serviceName ? `
+        <div class="pt-2.5 border-top small text-muted d-flex align-items-center gap-1.5">
+          <i class="bi bi-tools text-primary"></i>
+          <span>Service Booked: <strong class="text-dark">${esc(r.serviceName)}</strong></span>
+        </div>
+      ` : ''}
+    </div>`;
+  }).join('');
+}
+
+// Sort Reviews
+$('reviewSortSelect').addEventListener('change', e => {
+  const val = e.target.value;
+  let sorted = [...providerReviews];
+  if (val === 'highest') {
+    sorted.sort((a, b) => (b.rating || 5) - (a.rating || 5));
+  } else if (val === 'lowest') {
+    sorted.sort((a, b) => (a.rating || 5) - (b.rating || 5));
+  } else {
+    // Newest
+    sorted.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  }
+  renderReviewsList(sorted);
+});
+
+/**
+ * Check if logged-in customer has an eligible completed booking with this provider
+ */
+async function checkEligibleReview() {
+  const u = Auth.get();
+  if (!u || !u.token || u.role !== 'CUSTOMER') return;
+
+  try {
+    const res = await api(`/bookings/eligible-review?providerId=${providerId}`);
+    if (res && res.id) {
+      eligibleBooking = res;
+      $('revBookingId').value = res.id;
+      $('eligibleReviewBox').classList.remove('d-none');
+    }
+  } catch (err) {
+    // Not eligible or already reviewed
+  }
+}
+
+// Star Rating Selector Interactive Logic
+document.querySelectorAll('.star-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const val = parseInt(btn.dataset.value, 10);
+    $('selectedStarValue').value = val;
+    document.querySelectorAll('.star-btn').forEach(b => {
+      const bVal = parseInt(b.dataset.value, 10);
+      b.classList.toggle('active', bVal <= val);
+    });
+  });
+});
+
+// Submit Verified Customer Review
+$('eligibleReviewForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const bookingId = $('revBookingId').value;
+  const rating = parseInt($('selectedStarValue').value, 10);
+  const review = $('revComment').value.trim();
+  const msg = $('revMsg');
+  const btn = $('btnSubmitReview');
+
+  btn.disabled = true;
+  msg.className = 'alert d-none';
+
+  try {
+    await api('/reviews', {
+      method: 'POST',
+      body: { bookingId: Number(bookingId), rating, review }
+    });
+
+    msg.className = 'alert alert-success';
+    msg.textContent = 'Thank you! Your verified review has been posted successfully.';
+    msg.classList.remove('d-none');
+    $('eligibleReviewForm').reset();
+    setTimeout(() => $('eligibleReviewBox').classList.add('d-none'), 3000);
+
+    // Refresh reviews list
+    const updated = await api('/reviews/provider/' + providerId);
+    providerReviews = updated;
+    renderReviews(updated, providerData.rating, (providerData.reviewCount || 0) + 1);
+
+  } catch (err) {
+    msg.className = 'alert alert-danger';
+    msg.textContent = err.message || 'Could not submit review.';
+    msg.classList.remove('d-none');
+    btn.disabled = false;
+  }
+});
+
+/**
+ * Submit Booking from Sticky Panel
+ */
+$('profileBookingForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = $('bookMsg');
+  const btn = $('btnPanelConfirm');
+  const icon = $('panelConfirmIcon');
+  const spinner = $('panelConfirmSpinner');
+
+  msg.className = 'alert d-none';
+  btn.disabled = true;
+  icon.classList.add('d-none');
+  spinner.classList.remove('d-none');
+
+  let user = Auth.get();
+  if (!user || !user.token || user.role !== 'CUSTOMER') {
+    alert('Please log in or register as a customer to book this service.');
+    location.href = `/login.html?redirect=${encodeURIComponent(location.pathname + location.search)}`;
+    return;
+  }
+
+  const subSelect = $('panelSubSelect');
+  const chosenSubOpt = subSelect.options[subSelect.selectedIndex];
+  const chosenSubName = chosenSubOpt ? chosenSubOpt.text : '';
+  const isQuick = $('panelTypeQuick').checked;
+  const primarySvcId = providerData.services && providerData.services[0] ? providerData.services[0].id : 1;
+
+  const notesText = $('panelNotes').value.trim();
+  const finalNotes = chosenSubName ? (notesText ? `[Sub-service: ${chosenSubName}] ${notesText}` : `[Sub-service: ${chosenSubName}]`) : (notesText || null);
+
+  try {
+    const booking = await api('/bookings', {
+      method: 'POST',
+      body: {
+        providerId: Number(providerId),
+        serviceId: Number(primarySvcId),
+        bookingType: isQuick ? 'QUICK_SERVICE' : 'NORMAL',
+        bookingDate: isQuick ? null : $('panelDate').value || null,
+        bookingTime: isQuick ? null : ($('panelTime').value ? $('panelTime').value + ':00' : null),
+        address: $('panelAddress').value.trim(),
+        area: (providerData && providerData.areas && providerData.areas.length ? providerData.areas[0].area : 'Ranchi'),
+        notes: finalNotes
+      }
+    });
+
+    location.href = '/booking-status.html?id=' + booking.id;
+
+  } catch (err) {
+    msg.className = 'alert alert-danger';
+    msg.textContent = err.message || 'Booking failed. Please try again.';
+    msg.classList.remove('d-none');
+    btn.disabled = false;
+    icon.classList.remove('d-none');
+    spinner.classList.add('d-none');
+  }
+});
+
+// Run
+loadProfile();
+</script>
+</body>
+</html>

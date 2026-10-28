@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" width="400" height="260">
+  <defs>
+    <linearGradient id="srvGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="260" fill="url(#srvGrad)" />
+  <circle cx="200" cy="110" r="42" fill="#4f46e5" opacity="0.8" />
+  <path d="M188 95 L212 95 L212 108 L188 108 Z M192 108 L208 108 L208 126 L192 126 Z M182 126 L218 126 L200 142 Z" fill="#ffffff" />
+  <text x="200" y="185" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="600" fill="#f8fafc" text-anchor="middle">Local Service Connect</text>
+  <text x="200" y="210" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" fill="#94a3b8" text-anchor="middle">Doorstep Verified Services • Ranchi</text>
+</svg>

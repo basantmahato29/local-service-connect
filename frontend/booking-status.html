@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Booking Status · Local Service Connect</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<div id="nav"></div>
+<div class="container py-4 py-lg-5" style="max-width: 820px;">
+  <div id="msg" class="alert d-none"></div>
+  <div id="box" class="card border-0 shadow-sm dashboard-card d-none">
+    <div class="card-body p-4 p-md-5">
+      <div class="d-flex justify-content-between align-items-start mb-4 pb-2 border-bottom">
+        <div>
+          <span class="badge bg-light text-muted border mb-1">Booking Reference</span>
+          <h1 class="h3 mb-0 fw-bold">#<span id="bid"></span></h1>
+        </div>
+        <div id="badge" class="fs-6"></div>
+      </div>
+      <div id="alertBox" class="alert d-none"></div>
+      
+      <h5 class="fw-bold mb-3"><i class="bi bi-signpost-split-fill text-primary me-2"></i>Service Progression</h5>
+      <div id="steps" class="stepper-timeline p-3 bg-light rounded-4 border mb-4"></div>
+
+      <!-- Customer OTP Display Card -->
+      <div id="otpSection" class="card border-0 shadow-sm rounded-4 mb-4 d-none" style="background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%); border: 1.5px solid #c7d2fe !important;">
+        <div class="card-body p-4 text-center">
+          <div class="d-flex align-items-center justify-content-center gap-2 mb-2 text-primary">
+            <i class="bi bi-shield-lock-fill fs-4"></i>
+            <h5 class="fw-bold mb-0">Service-Start Verification OTP</h5>
+          </div>
+          <p class="small text-muted mb-3 max-w-sm mx-auto">
+            Share this 4-digit OTP with your service provider <strong>only after they arrive</strong> and you verify their identity.
+          </p>
+          <div id="otpActiveBox">
+            <div class="d-flex justify-content-center align-items-center gap-2 mb-3">
+              <div id="otpDigitContainer" class="d-flex gap-2">
+                <span class="otp-digit-pill">-</span>
+                <span class="otp-digit-pill">-</span>
+                <span class="otp-digit-pill">-</span>
+                <span class="otp-digit-pill">-</span>
+              </div>
+              <button id="copyOtpBtn" class="btn btn-outline-primary btn-sm ms-2" type="button" title="Copy OTP">
+                <i class="bi bi-clipboard me-1" id="copyIcon"></i><span id="copyText">Copy</span>
+              </button>
+            </div>
+            <div id="otpTimerBox" class="small text-muted">
+              <i class="bi bi-clock-history me-1"></i>OTP expires in: <strong id="otpCountdown" class="text-danger fw-bold font-monospace">--:--</strong>
+            </div>
+          </div>
+          <div id="otpExpiredBox" class="d-none">
+            <div class="alert alert-warning py-2 mb-3 small border-0">
+              <i class="bi bi-exclamation-triangle-fill me-1"></i>This OTP has expired. Please generate a new OTP for your provider.
+            </div>
+            <button id="regenOtpBtn" class="btn btn-primary btn-sm">
+              <i class="bi bi-arrow-clockwise me-1"></i>Generate New OTP
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Service Completion Confirmation Card -->
+      <div id="completionSection" class="card border border-success-subtle bg-success bg-opacity-10 shadow-sm rounded-3 mb-4 d-none">
+        <div class="card-body p-4 text-center">
+          <div class="d-flex align-items-center justify-content-center gap-2 mb-2 text-success">
+            <i class="bi bi-check2-circle fs-3"></i>
+            <h5 class="fw-bold mb-0">Service Completion Confirmation</h5>
+          </div>
+          <p class="text-muted small mb-3" id="completionMsg">
+            Your service is currently in progress. Once the provider finishes the work, confirm completion below to release final confirmation and leave a review.
+          </p>
+          <button id="confirmCompletionBtn" class="btn btn-success btn-lg px-4 shadow-sm">
+            <i class="bi bi-check-lg me-1"></i> Confirm Service Completion
+          </button>
+        </div>
+      </div>
+
+      <h5 class="fw-bold mb-3">Booking Details</h5>
+      <dl class="row mb-4 p-3 bg-light rounded-3">
+        <dt class="col-sm-4 text-muted">Service</dt><dd class="col-sm-8 fw-semibold" id="svc"></dd>
+        <dt class="col-sm-4 text-muted">Provider</dt><dd class="col-sm-8 fw-semibold" id="prov"></dd>
+        <dt class="col-sm-4 text-muted d-none" id="phoneDt">Provider Contact</dt><dd class="col-sm-8 fw-semibold text-primary d-none" id="phoneDd"></dd>
+        <dt class="col-sm-4 text-muted">When</dt><dd class="col-sm-8" id="when"></dd>
+        <dt class="col-sm-4 text-muted">Service Address</dt>
+        <dd class="col-sm-8">
+          <span id="addr"></span>
+          <div id="mapLinkBox" class="mt-1 d-none">
+            <a id="mapDirLink" href="#" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 12px;">
+              <i class="bi bi-geo-alt-fill me-1"></i>View on Google Maps
+            </a>
+            <span id="distBadge" class="badge bg-light text-dark border ms-1"></span>
+          </div>
+        </dd>
+        <dt class="col-sm-4 text-muted">Notes</dt><dd class="col-sm-8" id="notes"></dd>
+      </dl>
+
+      <div class="d-flex justify-content-between align-items-center">
+        <a href="/" class="btn btn-outline-secondary">
+          <i class="bi bi-house me-1"></i> Back to Home
+        </a>
+        <button id="cancel" class="btn btn-outline-danger d-none">
+          <i class="bi bi-x-circle me-1"></i> Cancel booking
+        </button>
+      </div>
+
+      <div id="reviewBox" class="d-none border-top pt-4 mt-4">
+        <h5 class="fw-bold mb-2"><i class="bi bi-star-fill text-warning me-2"></i>Rate &amp; Review this Service</h5>
+        <p class="small text-muted mb-2">How was your service experience? Your rating helps other customers.</p>
+        <div id="rateStars" class="fs-2 text-warning mb-3 cursor-pointer"></div>
+        <div class="mb-3">
+          <textarea id="reviewText" class="form-control" rows="3" maxlength="1000" placeholder="Share specific details about the service quality, punctuality, and behavior (optional)"></textarea>
+        </div>
+        <button id="submitReview" class="btn btn-primary">
+          <i class="bi bi-send me-1"></i> Submit Review
+        </button>
+      </div>
+
+      <div id="reviewedNote" class="alert alert-success d-none mt-4 mb-0 d-flex align-items-center">
+        <i class="bi bi-check-circle-fill fs-4 me-2"></i>
+        <div><strong>Review Submitted!</strong> Thank you for reviewing this service provider.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+const me = Auth.get(); if (!me) location.href = '/login.html'; navbar();
+const $ = id => document.getElementById(id), id = new URLSearchParams(location.search).get('id');
+const FLOW = ['PENDING', 'ACCEPTED', 'ON_THE_WAY', 'SERVICE_STARTED', 'AWAITING_COMPLETION', 'COMPLETED'];
+const DONE = ['REJECTED', 'COMPLETED', 'CANCELLED'];
+let timer, otpTimerInterval, currentOtpValue = '';
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+function startOtpCountdown(remainingSeconds) {
+  clearInterval(otpTimerInterval);
+  let sec = remainingSeconds;
+  const update = () => {
+    if (sec <= 0) {
+      clearInterval(otpTimerInterval);
+      $('otpActiveBox').classList.add('d-none');
+      $('otpExpiredBox').classList.remove('d-none');
+      $('otpCountdown').textContent = '00:00';
+    } else {
+      $('otpCountdown').textContent = formatTime(sec);
+      sec--;
+    }
+  };
+  update();
+  otpTimerInterval = setInterval(update, 1000);
+}
+
+async function loadOtp(b) {
+  if (me.role !== 'CUSTOMER' || (b.status !== 'ACCEPTED' && b.status !== 'ON_THE_WAY')) {
+    $('otpSection').classList.add('d-none');
+    clearInterval(otpTimerInterval);
+    return;
+  }
+  try {
+    const data = await api(`/bookings/${id}/otp`);
+    if (data.otp) {
+      currentOtpValue = data.otp;
+      const digits = data.otp.split('');
+      const container = $('otpDigitContainer');
+      if (container) {
+        container.innerHTML = digits.map(d => `<span class="otp-digit-pill">${esc(d)}</span>`).join('');
+      }
+      $('otpActiveBox').classList.remove('d-none');
+      $('otpExpiredBox').classList.add('d-none');
+      $('otpSection').classList.remove('d-none');
+      startOtpCountdown(data.remainingSeconds || 0);
+    } else if (data.expired) {
+      $('otpActiveBox').classList.add('d-none');
+      $('otpExpiredBox').classList.remove('d-none');
+      $('otpSection').classList.remove('d-none');
+    } else {
+      $('otpSection').classList.add('d-none');
+    }
+  } catch (e) {
+    $('otpSection').classList.add('d-none');
+  }
+}
+
+function renderCompletion(b) {
+  const canConfirm = me.role === 'CUSTOMER' && (b.status === 'SERVICE_STARTED' || b.status === 'AWAITING_COMPLETION');
+  $('completionSection').classList.toggle('d-none', !canConfirm);
+  if (canConfirm) {
+    if (b.status === 'AWAITING_COMPLETION') {
+      $('completionMsg').innerHTML = '<span class="badge text-bg-warning me-1">Action Required</span> Your service provider has marked the service finished. Please inspect the work and confirm completion below.';
+    } else {
+      $('completionMsg').textContent = 'Your service is currently in progress. Once the provider finishes the work, confirm completion below to finalize the job and submit a review.';
+    }
+  }
+}
+
+function render(b) {
+  $('bid').textContent = b.id; $('badge').innerHTML = statusBadge(b.status);
+  $('svc').textContent = b.serviceName; $('prov').textContent = b.providerBusinessName || b.businessName || 'Provider';
+  
+  if (b.providerPhone) {
+    $('phoneDt').classList.remove('d-none');
+    $('phoneDd').innerHTML = `<i class="bi bi-telephone-fill me-1"></i> <a href="tel:${esc(b.providerPhone)}" class="text-decoration-none">${esc(b.providerPhone)}</a>`;
+    $('phoneDd').classList.remove('d-none');
+  } else {
+    $('phoneDt').classList.add('d-none');
+    $('phoneDd').classList.add('d-none');
+  }
+
+  $('when').textContent = whenText(b);
+  $('addr').textContent = b.formattedAddress || (b.address + ', ' + b.area);
+  $('notes').textContent = b.notes || '-';
+
+  if (b.latitude && b.longitude) {
+    $('mapDirLink').href = `https://www.google.com/maps/search/?api=1&query=${b.latitude},${b.longitude}`;
+    if (b.distanceKm != null) {
+      $('distBadge').textContent = `${b.distanceKm} km away`;
+      $('distBadge').classList.remove('d-none');
+    } else {
+      $('distBadge').classList.add('d-none');
+    }
+    $('mapLinkBox').classList.remove('d-none');
+  } else {
+    $('mapLinkBox').classList.add('d-none');
+  }
+  const idx = FLOW.indexOf(b.status), a = $('alertBox');
+  a.className = 'alert d-none';
+  if (b.status === 'REJECTED' || b.status === 'CANCELLED') {
+    a.className = 'alert alert-' + (b.status === 'REJECTED' ? 'danger' : 'secondary');
+    a.textContent = b.status === 'REJECTED' ? 'The provider could not take this booking. Please try another provider.' : 'This booking was cancelled.';
+  }
+
+  const STEP_ICONS = {
+    PENDING: 'bi-hourglass-split',
+    ACCEPTED: 'bi-person-check-fill',
+    ON_THE_WAY: 'bi-geo-alt-fill',
+    SERVICE_STARTED: 'bi-tools',
+    AWAITING_COMPLETION: 'bi-check2-circle',
+    COMPLETED: 'bi-patch-check-fill'
+  };
+
+  $('steps').innerHTML = idx < 0 ? '' : FLOW.map((s, i) => {
+    const isDone = i < idx;
+    const isCurrent = i === idx;
+    const stateClass = isDone ? 'completed' : (isCurrent ? 'active' : '');
+    const title = STATUS[s] ? STATUS[s][1] : s;
+    return `
+      <div class="stepper-item ${stateClass}">
+        <div class="stepper-icon">
+          <i class="bi ${isDone ? 'bi-check-lg' : (STEP_ICONS[s] || 'bi-circle')}"></i>
+        </div>
+        <div class="flex-grow-1 pt-1">
+          <div class="fw-bold ${isCurrent ? 'text-primary' : (isDone ? 'text-dark' : 'text-muted')} small">
+            ${esc(title)}
+          </div>
+          <div class="text-muted" style="font-size:0.75rem;">
+            ${isDone ? 'Step Completed' : (isCurrent ? 'Current Stage' : 'Upcoming')}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  $('cancel').classList.toggle('d-none', !(b.status === 'PENDING' || b.status === 'ACCEPTED') || me.role !== 'CUSTOMER');
+  
+  renderCompletion(b);
+  loadOtp(b);
+
+  const canReview = b.status === 'COMPLETED' && me.role === 'CUSTOMER';
+  $('reviewBox').classList.toggle('d-none', !(canReview && !b.reviewed));
+  $('reviewedNote').classList.toggle('d-none', !(canReview && b.reviewed));
+
+  $('box').classList.remove('d-none');
+  clearInterval(timer);
+  if (!DONE.includes(b.status)) timer = setInterval(load, 15000); // live updates
+}
+
+async function load() { 
+  if (!id) {
+    const m = $('msg'); m.className = 'alert alert-danger'; m.textContent = 'No booking ID specified.';
+    return;
+  }
+  try { 
+    render(await api('/bookings/' + encodeURIComponent(id))); 
+  } catch (e) { 
+    clearInterval(timer); 
+    const m = $('msg'); m.className = 'alert alert-danger'; m.textContent = e.message; 
+  } 
+}
+
+$('cancel').addEventListener('click', async () => {
+  if (!confirm('Cancel this booking?')) return;
+  try { render(await api(`/bookings/${id}/cancel`, { method: 'PUT' })); } catch (e) { const m = $('msg'); m.className = 'alert alert-danger'; m.textContent = e.message; }
+});
+
+$('copyOtpBtn').addEventListener('click', async () => {
+  if (!currentOtpValue) return;
+  try {
+    await navigator.clipboard.writeText(currentOtpValue);
+    $('copyText').textContent = 'Copied!';
+    $('copyIcon').className = 'bi bi-check-lg text-success me-1';
+    setTimeout(() => {
+      $('copyText').textContent = 'Copy';
+      $('copyIcon').className = 'bi bi-clipboard me-1';
+    }, 2000);
+  } catch (err) {
+    prompt('Copy OTP:', currentOtpValue);
+  }
+});
+
+$('regenOtpBtn').addEventListener('click', async () => {
+  $('regenOtpBtn').disabled = true;
+  try {
+    await api(`/bookings/${id}/otp/generate`, { method: 'POST' });
+    load();
+  } catch (e) {
+    const m = $('msg'); m.className = 'alert alert-danger'; m.textContent = e.message; m.classList.remove('d-none');
+  } finally {
+    $('regenOtpBtn').disabled = false;
+  }
+});
+
+$('confirmCompletionBtn').addEventListener('click', async () => {
+  if (!confirm('Confirm that the service has been satisfactorily completed?')) return;
+  $('confirmCompletionBtn').disabled = true;
+  try {
+    const updated = await api(`/bookings/${id}/completion/confirm`, { method: 'POST' });
+    const m = $('msg'); m.className = 'alert alert-success'; m.textContent = 'Service completed successfully! Please rate and review your provider below.';
+    m.classList.remove('d-none');
+    render(updated);
+  } catch (e) {
+    const m = $('msg'); m.className = 'alert alert-danger'; m.textContent = e.message; m.classList.remove('d-none');
+    $('confirmCompletionBtn').disabled = false;
+  }
+});
+
+let rating = 0;
+const drawStars = () => $('rateStars').innerHTML = [1, 2, 3, 4, 5].map(n => `<i role="button" class="bi ${n <= rating ? 'bi-star-fill text-warning' : 'bi-star text-muted'} me-1" data-n="${n}"></i>`).join('');
+$('rateStars').addEventListener('click', e => { if (e.target.dataset.n) { rating = Number(e.target.dataset.n); drawStars(); } });
+
+$('submitReview').addEventListener('click', async () => {
+  const m = $('msg');
+  if (!rating) {
+    m.className = 'alert alert-danger';
+    m.textContent = 'Please choose a star rating (1 to 5 stars).';
+    m.classList.remove('d-none');
+    return;
+  }
+  try {
+    $('submitReview').disabled = true;
+    await api('/reviews', {
+      method: 'POST',
+      body: { bookingId: Number(id), rating, review: $('reviewText').value || null }
+    });
+    m.className = 'alert alert-success';
+    m.textContent = 'Thanks for your feedback! Review recorded.';
+    m.classList.remove('d-none');
+    load();
+  } catch (e) {
+    m.className = 'alert alert-danger';
+    m.textContent = e.message;
+    m.classList.remove('d-none');
+  } finally {
+    $('submitReview').disabled = false;
+  }
+});
+
+drawStars();
+load();
+</script></body></html>

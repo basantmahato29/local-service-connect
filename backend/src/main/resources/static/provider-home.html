@@ -1,0 +1,2964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Provider Home · Local Service Connect</title>
+  
+  <!-- Favicon & SEO -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%235b43f5'><path d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>">
+  <meta name="description" content="Local Service Connect Provider Homepage - Connect with nearby customers, manage urgent availability, and grow your local service business.">
+  
+  <!-- Fonts & Core Stylesheets -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       Provider Homepage Design System & Architecture
+       ========================================================================== */
+    :root {
+      --brand-purple: #5B43F5;
+      --brand-purple-hover: #4a34e0;
+      --brand-purple-light: #f5f3ff;
+      --brand-purple-subtle: #ede9fe;
+      --text-navy: #0F172A;
+      --text-muted: #64748B;
+      --text-body: #334155;
+      --surface-white: #ffffff;
+      --surface-subtle: #f8fafc;
+      --border-subtle: #e2e8f0;
+      --border-card: #e2e8f0;
+      --radius-card: 14px;
+      --radius-btn: 10px;
+      --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.03);
+      --shadow-hover: 0 6px 20px -2px rgba(15, 23, 42, 0.08);
+    }
+
+    body {
+      background-color: var(--surface-subtle);
+      color: var(--text-body);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      margin: 0;
+    }
+
+    /* Container Standard: Exactly 1200px Max-Width */
+    .lsc-container {
+      width: 100%;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 24px;
+      padding-right: 24px;
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 991px) {
+      .lsc-container {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+    }
+
+    @media (max-width: 575px) {
+      .lsc-container {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+    }
+
+    /* ==========================================================================
+       1. HERO SECTION (55% Left / 45% Right Grid)
+       ========================================================================== */
+    .provider-hero {
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 48px 0 40px;
+      position: relative;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 55fr 45fr;
+      gap: 48px;
+      align-items: center;
+    }
+
+    @media (max-width: 991px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 36px;
+      }
+    }
+
+    /* Verified Badge: ONLY shown when confirmed by backend */
+    .hero-verified-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+      border-radius: 9999px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      width: fit-content;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-title {
+      font-size: clamp(2.1rem, 3.4vw, 2.75rem);
+      font-weight: 800;
+      line-height: 1.18;
+      letter-spacing: -0.03em;
+      color: var(--text-navy);
+      margin-bottom: 14px;
+    }
+
+    .hero-title .brand-purple {
+      color: var(--brand-purple);
+    }
+
+    .hero-description {
+      font-size: 1.05rem;
+      line-height: 1.65;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin-bottom: 24px;
+    }
+
+    /* ==========================================================================
+       HERO QUICK SERVICE AVAILABILITY CARD (Responsive & Modern)
+       ========================================================================== */
+    /* ==========================================================================
+       HERO QUICK SERVICE AVAILABILITY CARD (Responsive & Modern)
+       ========================================================================== */
+    .hero-availability-card {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 18px 22px;
+      margin-bottom: 22px;
+      width: 100%;
+      max-width: 620px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      box-sizing: border-box;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Online State Styling */
+    .hero-availability-card.card-online {
+      background: #ffffff;
+      border-color: #86efac;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08);
+    }
+
+    /* Offline State Styling */
+    .hero-availability-card.card-offline {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+    }
+
+    .hero-avail-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .hero-avail-icon-bubble {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      flex-shrink: 0;
+      transition: all 0.25s ease;
+    }
+
+    .hero-avail-icon-bubble.online {
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+    }
+
+    .hero-avail-icon-bubble.offline {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+    }
+
+    .hero-avail-content {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .hero-avail-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+      flex-wrap: nowrap;
+    }
+
+    .hero-avail-title {
+      font-weight: 700;
+      font-size: 1.02rem;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+      margin: 0;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+
+    .hero-avail-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .hero-avail-badge.badge-online {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
+    }
+
+    .hero-avail-badge.badge-offline {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+    }
+
+    .hero-avail-desc {
+      font-size: 0.84rem;
+      color: #64748b;
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    .hero-avail-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .hero-avail-status-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+
+    .hero-avail-status-label {
+      font-size: 0.94rem;
+      font-weight: 700;
+      min-width: 50px;
+      line-height: 1;
+      transition: color 0.2s ease;
+    }
+
+    .hero-avail-status-label.status-online {
+      color: #059669;
+    }
+
+    .hero-avail-status-label.status-offline {
+      color: #475569;
+    }
+
+    .hero-switch-wrapper {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      margin: 0;
+      padding: 0;
+    }
+
+    .hero-avail-switch {
+      width: 2.95rem !important;
+      height: 1.6rem !important;
+      cursor: pointer;
+      margin: 0 !important;
+      border: 1.5px solid #cbd5e1 !important;
+      background-color: #e2e8f0 !important;
+      transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      vertical-align: middle;
+    }
+
+    .hero-avail-switch:checked {
+      background-color: #10b981 !important;
+      border-color: #10b981 !important;
+    }
+
+    .hero-avail-switch:focus {
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
+      border-color: #10b981 !important;
+    }
+
+    .hero-avail-switch:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Mobile Responsive Stacking */
+    @media (max-width: 640px) {
+      .hero-availability-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+        padding: 16px;
+      }
+      .hero-avail-left {
+        width: 100%;
+      }
+      .hero-avail-header {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .hero-avail-title {
+        white-space: normal;
+      }
+      .hero-avail-right {
+        width: 100%;
+        justify-content: space-between;
+        padding-top: 12px;
+        border-top: 1px solid #e2e8f0;
+      }
+    }
+
+    /* ==========================================================================
+       Modern Top-Right Availability Toast Notification System
+       ========================================================================== */
+    .availability-toast-container {
+      position: fixed;
+      top: 76px;
+      right: 24px;
+      z-index: 1095;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 380px;
+      width: calc(100vw - 32px);
+    }
+
+    @media (max-width: 640px) {
+      .availability-toast-container {
+        top: 70px;
+        right: 16px;
+        left: 16px;
+        width: auto;
+        max-width: 100%;
+      }
+    }
+
+    .availability-toast {
+      pointer-events: auto;
+      position: relative;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.05);
+      border: 1px solid rgba(226, 232, 240, 0.85);
+      overflow: hidden;
+      transition: all 0.25s ease;
+      animation: toastSlideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .availability-toast.toast-hiding {
+      animation: toastSlideOutRight 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes toastSlideInRight {
+      from {
+        transform: translateX(110%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes toastSlideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(110%);
+        opacity: 0;
+      }
+    }
+
+    .availability-toast.toast-online {
+      border-left: 4px solid #10b981;
+    }
+
+    .availability-toast.toast-offline {
+      border-left: 4px solid #64748b;
+    }
+
+    .availability-toast.toast-error {
+      border-left: 4px solid #ef4444;
+    }
+
+    .availability-toast-body {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+    }
+
+    .toast-icon-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.15rem;
+    }
+
+    .toast-icon-circle.online {
+      background: #ecfdf5;
+      color: #10b981;
+    }
+
+    .toast-icon-circle.offline {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .toast-icon-circle.error {
+      background: #fef2f2;
+      color: #ef4444;
+    }
+
+    .toast-text-group {
+      flex-grow: 1;
+      min-width: 0;
+    }
+
+    .toast-heading {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.3;
+      margin-bottom: 2px;
+    }
+
+    .toast-subtext {
+      font-size: 0.815rem;
+      color: #64748b;
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    .toast-dismiss-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      padding: 4px;
+      line-height: 1;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      transition: all 0.15s ease;
+      margin-left: 4px;
+      flex-shrink: 0;
+    }
+
+    .toast-dismiss-btn:hover {
+      color: #0f172a;
+      background: #f1f5f9;
+    }
+
+    .quick-status-summary-card {
+      background: #ffffff;
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 18px 20px;
+      transition: border-color 0.2s ease;
+    }
+
+    /* Provider Profile Summary Card */
+    .provider-profile-card {
+      background: var(--surface-white);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-card);
+      padding: 16px 20px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 24px;
+      max-width: 540px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .provider-profile-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: var(--shadow-hover);
+    }
+
+    .profile-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f5f9;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .profile-card-identity {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .profile-card-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #5B43F5 0%, #7c3aed 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(91, 67, 245, 0.25);
+    }
+
+    .profile-card-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-card-title-col {
+      min-width: 0;
+      flex-grow: 1;
+    }
+
+    .profile-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .provider-business-name {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-navy);
+      word-break: break-word;
+    }
+
+    .profile-status-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      line-height: 1.3;
+    }
+
+    .profile-status-tag.verified {
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+
+    .profile-status-tag.pending {
+      background: #fffbeb;
+      color: #b45309;
+      border: 1px solid #fde68a;
+    }
+
+    .profile-status-tag.action {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .profile-rating-subtext {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .profile-card-details {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .profile-detail-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.85rem;
+      line-height: 1.45;
+    }
+
+    .profile-detail-icon {
+      color: var(--brand-purple);
+      font-size: 0.95rem;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .profile-detail-content {
+      min-width: 0;
+      flex-grow: 1;
+      word-break: break-word;
+    }
+
+    .profile-detail-label {
+      font-weight: 600;
+      color: #334155;
+      margin-right: 4px;
+    }
+
+    .profile-detail-value {
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    /* Two Differentiated CTA Buttons */
+    .hero-actions-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .btn-hero-primary {
+      height: 48px;
+      padding: 0 24px;
+      border-radius: var(--radius-btn);
+      background: var(--brand-purple);
+      color: #ffffff !important;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: 1px solid var(--brand-purple);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(91, 67, 245, 0.2);
+    }
+
+    .btn-hero-primary:hover {
+      background: var(--brand-purple-hover);
+      border-color: var(--brand-purple-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(91, 67, 245, 0.28);
+    }
+
+    .btn-hero-primary:focus-visible {
+      outline: 2px solid var(--brand-purple);
+      outline-offset: 2px;
+    }
+
+    .btn-hero-secondary {
+      height: 48px;
+      padding: 0 24px;
+      border-radius: var(--radius-btn);
+      background: var(--surface-white);
+      color: var(--text-navy) !important;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: 1.5px solid var(--border-card);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-hero-secondary:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+    }
+
+    .btn-hero-secondary:focus-visible {
+      outline: 2px solid var(--brand-purple);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 575px) {
+      .hero-actions-group {
+        flex-direction: column;
+        width: 100%;
+      }
+      .btn-hero-primary,
+      .btn-hero-secondary {
+        width: 100%;
+      }
+    }
+
+    /* Compact Trust Row */
+    .hero-trust-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .hero-trust-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-trust-item i {
+      font-size: 0.95rem;
+    }
+
+    /* Right Column: Hero Visual Graphic with Contained Badges */
+    .hero-illustration-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .hero-illustration-frame {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #ffffff;
+      border: 1px solid var(--border-card);
+      box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.08);
+      aspect-ratio: 4 / 3;
+    }
+
+    .hero-illustration-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hero-frame-badge {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: 10px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .badge-top-right {
+      top: 12px;
+      right: 12px;
+    }
+
+    .badge-bottom-left {
+      bottom: 12px;
+      left: 12px;
+    }
+
+    .badge-icon-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+
+    .badge-icon-circle.bg-emerald {
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    .badge-icon-circle.bg-amber {
+      background: #fffbeb;
+      color: #d97706;
+    }
+
+    .badge-text-group {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+
+    .badge-heading {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-navy);
+    }
+
+    .badge-sub {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================================================
+       2. BUSINESS PERFORMANCE SECTION
+       ========================================================================== */
+    .performance-section {
+      padding: 36px 0 40px;
+      background: var(--surface-white);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .performance-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .performance-header-text {
+      min-width: 0;
+    }
+
+    .performance-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-navy);
+      margin: 0 0 4px 0;
+      letter-spacing: -0.02em;
+    }
+
+    .performance-subtitle {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .btn-refresh-stats {
+      height: 38px;
+      padding: 0 16px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid var(--border-card);
+      color: #475569;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-refresh-stats:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      color: var(--text-navy);
+    }
+
+    .btn-refresh-stats:focus-visible {
+      outline: 2px solid var(--brand-purple);
+      outline-offset: 2px;
+    }
+
+    .performance-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 991px) {
+      .performance-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+    }
+
+    @media (max-width: 575px) {
+      .performance-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+
+    .performance-card {
+      background: var(--surface-white);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-card);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      min-height: 148px;
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    .performance-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    .card-icon-bubble {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 12px;
+    }
+
+    .bubble-emerald {
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    .bubble-amber {
+      background: #fffbeb;
+      color: #d97706;
+    }
+
+    .bubble-purple {
+      background: var(--brand-purple-light);
+      color: var(--brand-purple);
+    }
+
+    .bubble-blue {
+      background: #eff6ff;
+      color: #2563eb;
+    }
+
+    .card-content-area {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-metric-value {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: var(--text-navy);
+      line-height: 1.2;
+      margin-bottom: 3px;
+    }
+
+    .card-metric-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .card-metric-meta {
+      font-size: 0.78rem;
+      color: #94a3b8;
+    }
+
+    /* ==========================================================================
+       3. QUICK SERVICE DISPATCH AVAILABILITY
+       ========================================================================== */
+    .quick-service-section {
+      padding: 40px 0;
+      background-color: var(--surface-subtle);
+    }
+
+    .quick-service-hub {
+      background: var(--surface-white);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .availability-toggle-box {
+      background: #f8fafc;
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .status-pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+      vertical-align: middle;
+    }
+
+    .status-pulse-dot.online {
+      background-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+      animation: pulseGreen 2s infinite;
+    }
+
+    .status-pulse-dot.offline {
+      background-color: #94a3b8;
+    }
+
+    @keyframes pulseGreen {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+      70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* ==========================================================================
+       4. CUSTOMER OPPORTUNITIES FEED
+       ========================================================================== */
+    .opportunities-section {
+      padding: 48px 0;
+      background: var(--surface-white);
+      border-top: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .opportunity-card {
+      background: #ffffff;
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-card);
+      padding: 22px 24px;
+      margin-bottom: 18px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .opportunity-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .opportunity-card.urgent {
+      border-left: 5px solid #ef4444;
+      background: linear-gradient(180deg, #fffcfc 0%, #ffffff 100%);
+    }
+
+    .opportunity-card.scheduled {
+      border-left: 5px solid #5B43F5;
+      background: #ffffff;
+    }
+
+    .opportunity-notes-box {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 8px 12px;
+      border-left: 3px solid #cbd5e1;
+      margin-bottom: 8px;
+    }
+
+    /* ==========================================================================
+       5. HOW IT WORKS GUIDE
+       ========================================================================== */
+    .how-it-works-section {
+      padding: 48px 0;
+      background-color: var(--surface-subtle);
+    }
+
+    .step-card {
+      background: #ffffff;
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      height: 100%;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .step-card:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .step-number-badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--brand-purple-light);
+      color: var(--brand-purple);
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .step-icon-bubble {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+    }
+
+    /* Skeletons */
+    .skeleton-box {
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: skeletonLoading 1.5s infinite;
+      border-radius: 6px;
+    }
+
+    @keyframes skeletonLoading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ==========================================================================
+       Real-Time Booking Notification Banner (Top of page, below navbar)
+       ========================================================================== */
+    .provider-booking-banner-container {
+      width: 100%;
+      background: linear-gradient(135deg, #ffffff 0%, #fbfaff 100%);
+      border-bottom: 2px solid var(--brand-purple);
+      box-shadow: 0 4px 20px -2px rgba(91, 67, 245, 0.12);
+      position: relative;
+      z-index: 1020;
+      animation: bannerSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes bannerSlideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .provider-booking-banner {
+      padding: 16px 0;
+    }
+
+    .banner-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .banner-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .banner-pulse-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      animation: bannerPulseGlow 2s infinite;
+    }
+
+    .banner-pulse-icon.quick {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .banner-pulse-icon.normal {
+      background: #ede9fe;
+      color: var(--brand-purple);
+    }
+
+    @keyframes bannerPulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(91, 67, 245, 0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(91, 67, 245, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(91, 67, 245, 0); }
+    }
+
+    .banner-heading-text {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-navy);
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .banner-badge {
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .banner-badge.quick {
+      background: #dc2626;
+      color: #ffffff;
+    }
+
+    .banner-badge.normal {
+      background: var(--brand-purple-light);
+      color: var(--brand-purple);
+      border: 1px solid var(--brand-purple-subtle);
+    }
+
+    .banner-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      background: #ffffff;
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 1199px) {
+      .banner-meta-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 767px) {
+      .banner-meta-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 10px 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .banner-meta-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .banner-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .banner-meta-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .banner-meta-val {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-navy);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .banner-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .banner-actions-buttons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .banner-dismiss-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .banner-dismiss-btn:hover {
+      color: var(--text-navy);
+      background: #f1f5f9;
+    }
+
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Dynamic Role-Based Top Navigation Bar (Managed via navbar() in api.js) -->
+  <header id="nav"></header>
+
+  <!-- Real-Time Booking Notification Banner Container (Directly below Navbar) -->
+  <div id="providerBookingBannerContainer" class="provider-booking-banner-container d-none" role="region" aria-label="New Service Booking Alert"></div>
+
+  <!-- Modern Floating Top-Right Availability Toast Notification Container -->
+  <div id="availabilityToastContainer" class="availability-toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <main id="mainContent">
+
+    <!-- 1. HERO SECTION -->
+    <section class="provider-hero" aria-label="Provider Welcome and Overview">
+      <div class="lsc-container">
+        <div class="hero-grid">
+          
+          <!-- Left Column (55%): Copy, Profile Card, Actions & Trust Row -->
+          <div class="hero-left-col">
+            
+            <!-- Verified Partner Label (Shown ONLY when verified) -->
+            <div class="hero-verified-badge d-none" id="heroVerifiedBadge" aria-label="Verified Provider Status">
+              <i class="bi bi-patch-check-fill"></i>
+              <span id="heroVerifiedBadgeText">Verified Service Partner</span>
+            </div>
+
+            <h1 class="hero-title">
+              Grow Your Business with <span class="brand-purple">Local Service Connect</span>
+            </h1>
+
+            <p class="hero-description">
+              Connect with nearby customers, receive service requests, and build your reputation by delivering quality services.
+            </p>
+
+            <!-- Top-Level Availability Control in Hero -->
+            <div class="hero-availability-card card-offline" id="heroAvailabilityCard" role="region" aria-label="Quick Service Availability Controls">
+              <!-- Left: Icon, Title, Description, and Status Badge -->
+              <div class="hero-avail-left">
+                <div class="hero-avail-icon-bubble offline" id="heroAvailIconBubble" aria-hidden="true">
+                  <i class="bi bi-broadcast" id="heroAvailIcon"></i>
+                </div>
+                <div class="hero-avail-content">
+                  <div class="hero-avail-header">
+                    <span class="hero-avail-title">Quick Service Availability</span>
+                    <span class="hero-avail-badge badge-offline" id="heroAvailBadge">Offline</span>
+                  </div>
+                  <p class="hero-avail-desc" id="heroAvailDesc">
+                    Receive urgent service requests in your registered areas.
+                  </p>
+                </div>
+              </div>
+              <!-- Right: Text Label and Toggle Switch -->
+              <div class="hero-avail-right">
+                <div class="hero-avail-status-group" id="heroAvailStatusGroup">
+                  <span class="status-pulse-dot offline" id="heroAvailPulseDot" aria-hidden="true"></span>
+                  <span class="hero-avail-status-label status-offline" id="heroAvailStatusLabel">Offline</span>
+                </div>
+                <div class="hero-switch-wrapper">
+                  <input 
+                    class="form-check-input hero-avail-switch" 
+                    type="checkbox" 
+                    role="switch" 
+                    id="heroAvailabilitySwitch" 
+                    aria-label="Toggle Quick Service Availability"
+                  >
+                  <span class="spinner-border spinner-border-sm text-primary d-none ms-1" id="heroAvailSpinner" role="status" aria-label="Saving availability"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Provider Profile Summary Card -->
+            <div class="provider-profile-card" id="providerProfileCard">
+              <div id="heroProfileError" class="alert alert-danger py-2 px-3 small rounded-3 d-none mb-3" role="alert"></div>
+              <div class="profile-card-header">
+                <div class="profile-card-identity">
+                  <div class="profile-card-avatar" id="heroAvatarCircle">
+                    <span id="heroAvatarInitial">P</span>
+                  </div>
+                  <div class="profile-card-title-col">
+                    <div class="profile-name-row">
+                      <span class="provider-business-name" id="heroBusinessName"><span class="skeleton-box" style="display:inline-block;width:160px;height:22px;vertical-align:middle;"></span></span>
+                      <a href="/provider-dashboard.html?tab=verification" class="profile-status-tag pending text-decoration-none" id="heroVerificationStatus" title="View Verification Status">Checking...</a>
+                    </div>
+                    <div class="profile-rating-subtext" id="heroRatingSubtext">
+                      <i class="bi bi-star-fill text-warning"></i>
+                      <span id="heroRatingText"><span class="skeleton-box" style="display:inline-block;width:90px;height:14px;vertical-align:middle;"></span></span>
+                    </div>
+                  </div>
+                </div>
+                <a href="/provider-dashboard.html?tab=profile" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1.5 flex-shrink-0" id="btnEditSummaryProfile" title="Edit Provider Profile">
+                  <i class="bi bi-pencil-square"></i>
+                  <span>Edit Profile</span>
+                </a>
+              </div>
+
+              <div class="profile-card-details">
+                <div class="profile-detail-row">
+                  <i class="bi bi-tools profile-detail-icon"></i>
+                  <div class="profile-detail-content">
+                    <span class="profile-detail-label">Services:</span>
+                    <div class="profile-detail-value" id="heroCategoriesList"><span class="skeleton-box" style="display:inline-block;width:140px;height:14px;vertical-align:middle;"></span></div>
+                  </div>
+                </div>
+                <div class="profile-detail-row">
+                  <i class="bi bi-geo-alt-fill profile-detail-icon"></i>
+                  <div class="profile-detail-content">
+                    <span class="profile-detail-label">Service Areas:</span>
+                    <div class="profile-detail-value" id="heroAreasList"><span class="skeleton-box" style="display:inline-block;width:130px;height:14px;vertical-align:middle;"></span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Two Clearly Differentiated CTA Buttons -->
+            <div class="hero-actions-group">
+              <a href="#opportunities" class="btn-hero-primary" id="btnHeroOpportunities">
+                <i class="bi bi-search"></i>
+                <span>Find Opportunities</span>
+              </a>
+              <a href="/provider-dashboard.html" class="btn-hero-secondary" id="btnHeroDashboard">
+                <i class="bi bi-speedometer2"></i>
+                <span>Manage Business</span>
+              </a>
+            </div>
+
+            <!-- Compact Trust-Information Row -->
+            <div class="hero-trust-row">
+              <div class="hero-trust-item">
+                <i class="bi bi-check-circle-fill text-success"></i>
+                <span>Direct Customer Matching</span>
+              </div>
+              <div class="hero-trust-item">
+                <i class="bi bi-shield-check text-primary"></i>
+                <span>OTP Arrival Verification</span>
+              </div>
+              <div class="hero-trust-item">
+                <i class="bi bi-lightning-charge-fill text-warning"></i>
+                <span>Urgent Quick Service</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column (45%): Contained Hero Visual Illustration -->
+          <div class="hero-right-col">
+            <div class="hero-illustration-wrapper">
+              <div class="hero-illustration-frame">
+                <img 
+                  src="/img/provider-hero.jpg" 
+                  alt="Verified Professional Local Contractors and Specialists" 
+                  class="hero-illustration-img"
+                  id="heroIllustration"
+                  loading="eager"
+                  onerror="this.src='/img/auth-illustration.jpg'"
+                >
+                
+                <!-- Contained Badge: Top Right -->
+                <div class="hero-frame-badge badge-top-right">
+                  <div class="badge-icon-circle bg-amber">
+                    <i class="bi bi-star-fill"></i>
+                  </div>
+                  <div class="badge-text-group">
+                    <span class="badge-heading" id="heroRatingBadgeText">4.9+ Rated</span>
+                    <span class="badge-sub">Quality Workmanship</span>
+                  </div>
+                </div>
+
+                <!-- Contained Badge: Bottom Left -->
+                <div class="hero-frame-badge badge-bottom-left">
+                  <div class="badge-icon-circle bg-emerald">
+                    <i class="bi bi-shield-check"></i>
+                  </div>
+                  <div class="badge-text-group">
+                    <span class="badge-heading">Verified Network</span>
+                    <span class="badge-sub">Real Customer Leads</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 2. BUSINESS PERFORMANCE SNAPSHOT -->
+    <section class="performance-section" aria-label="Business Performance Metrics">
+      <div class="lsc-container">
+        
+        <div class="performance-header-row">
+          <div class="performance-header-text">
+            <h2 class="performance-title">Business Performance</h2>
+            <p class="performance-subtitle">Live activity metrics and credentials retrieved directly from your account.</p>
+          </div>
+          <button type="button" class="btn-refresh-stats" id="btnRefreshStats" aria-label="Refresh performance data">
+            <i class="bi bi-arrow-clockwise"></i>
+            <span>Refresh</span>
+          </button>
+        </div>
+
+        <div id="performanceErrorAlert" class="alert alert-danger py-2 px-3 small rounded-3 d-none mb-3" role="alert"></div>
+
+        <!-- 4 Compact Info Cards in Responsive Grid -->
+        <div class="performance-grid" id="statsGrid">
+          
+          <!-- Card 1: Profile Status -->
+          <div class="performance-card">
+            <div class="card-icon-bubble bubble-emerald" id="statVerificationIcon">
+              <i class="bi bi-patch-check"></i>
+            </div>
+            <div class="card-content-area">
+              <div class="card-metric-value" id="statVerificationBadge">
+                <span class="skeleton-box" style="display:inline-block;width:95px;height:24px;border-radius:6px;"></span>
+              </div>
+              <div class="card-metric-label">Profile Status</div>
+              <div class="card-metric-meta" id="statVerificationMeta">Verified system record</div>
+            </div>
+          </div>
+
+          <!-- Card 2: Customer Rating -->
+          <div class="performance-card">
+            <div class="card-icon-bubble bubble-amber">
+              <i class="bi bi-star-fill"></i>
+            </div>
+            <div class="card-content-area">
+              <div class="card-metric-value" id="statRatingValue">
+                <span class="skeleton-box" style="display:inline-block;width:75px;height:24px;border-radius:6px;"></span>
+              </div>
+              <div class="card-metric-label">Customer Rating</div>
+              <div class="card-metric-meta" id="statReviewCountMeta">Based on verified reviews</div>
+            </div>
+          </div>
+
+          <!-- Card 3: Completed Jobs -->
+          <div class="performance-card">
+            <div class="card-icon-bubble bubble-purple">
+              <i class="bi bi-check2-circle"></i>
+            </div>
+            <div class="card-content-area">
+              <div class="card-metric-value" id="statCompletedJobs">
+                <span class="skeleton-box" style="display:inline-block;width:60px;height:24px;border-radius:6px;"></span>
+              </div>
+              <div class="card-metric-label">Completed Jobs</div>
+              <div class="card-metric-meta" id="statCompletedMeta">Successfully delivered</div>
+            </div>
+          </div>
+
+          <!-- Card 4: Current Availability -->
+          <div class="performance-card">
+            <div class="card-icon-bubble bubble-blue" id="statAvailabilityIcon">
+              <i class="bi bi-broadcast"></i>
+            </div>
+            <div class="card-content-area">
+              <div class="card-metric-value" id="statAvailabilityText">
+                <span class="skeleton-box" style="display:inline-block;width:90px;height:24px;border-radius:6px;"></span>
+              </div>
+              <div class="card-metric-label">Availability</div>
+              <div class="card-metric-meta" id="statAvailabilityMeta">Urgent dispatch status</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 3. QUICK SERVICE DISPATCH AVAILABILITY CONTROL -->
+    <section class="quick-service-section" aria-label="Urgent Quick Service Controls">
+      <div class="lsc-container">
+        <div class="quick-service-hub">
+          <div class="row align-items-center g-4">
+            
+            <div class="col-lg-7">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2.5 py-1 fw-bold">
+                  <i class="bi bi-lightning-charge-fill me-1"></i>Urgent Dispatch Engine
+                </span>
+                <span class="text-muted small">Real-time GPS dispatching</span>
+              </div>
+              <h3 class="h4 fw-bold text-dark mb-2">Manage Quick Service Availability</h3>
+              <p class="text-muted mb-0" style="font-size: 0.95rem; line-height: 1.6;">
+                When you go online, nearby customers in your registered coverage areas can dispatch you for emergency requests. Arrival estimates are computed using live road networks and verified GPS coordinates.
+              </p>
+            </div>
+
+            <div class="col-lg-5">
+              <div class="quick-status-summary-card p-3 rounded-3 bg-white border shadow-xs" id="lowerSectionSummaryCard">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="status-pulse-dot offline" id="lowerSectionPulseDot"></span>
+                    <strong class="text-dark" id="lowerSectionStatusLabel">Status: Offline</strong>
+                  </div>
+                  <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1" id="lowerSectionStatusBadge">Offline</span>
+                </div>
+                <p class="text-muted small mb-3" id="lowerSectionStatusDesc">
+                  You can toggle your availability instantly at the top of this page or in the navigation bar.
+                </p>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                    <i class="bi bi-arrow-up-circle me-1"></i>Go to Availability Toggle
+                  </button>
+                  <a href="/provider-dashboard.html?tab=areas" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                    <i class="bi bi-geo-alt me-1"></i>Coverage Areas
+                  </a>
+                  <a href="/provider/profile#cardHours" class="btn btn-light btn-sm rounded-pill px-3 border">
+                    <i class="bi bi-clock-history me-1"></i>Working Hours
+                  </a>
+                </div>
+              </div>
+
+              <!-- Live Feedback Alert Box -->
+              <div class="alert alert-warning d-none mt-3 mb-0 py-2.5 px-3 small rounded-3" id="availabilityFeedbackAlert" role="alert">
+                <i class="bi bi-info-circle-fill me-1"></i>
+                <span id="availabilityFeedbackMsg"></span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 4. FIND NEW OPPORTUNITIES & INCOMING REQUESTS -->
+    <section class="opportunities-section" id="opportunities" aria-label="Available Customer Requests">
+      <div class="lsc-container">
+        
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <h2 class="h4 fw-bold text-dark mb-0">Customer Opportunities</h2>
+              <span class="badge bg-primary rounded-pill px-2.5 py-1" id="opportunitiesBadge">0 New</span>
+            </div>
+            <p class="text-muted small mb-0">
+              Service requests awaiting your acceptance, filtered by your registered services and areas.
+            </p>
+          </div>
+
+          <div class="d-flex align-items-center gap-2">
+            <a href="/provider-dashboard.html?tab=requests" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+              <i class="bi bi-list-task me-1"></i>Open Request Center
+            </a>
+          </div>
+        </div>
+
+        <!-- Coverage Tags Filter Preview -->
+        <div class="p-3 bg-light rounded-4 mb-4 border d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="fw-bold small text-dark"><i class="bi bi-funnel-fill text-primary me-1"></i>Matched by:</span>
+            <div id="coverageChipsContainer" class="d-flex gap-1.5 flex-wrap">
+              <span class="badge bg-white text-secondary border">Loading services...</span>
+            </div>
+          </div>
+          <a href="/provider-dashboard.html?tab=services" class="text-decoration-none small fw-semibold text-primary">
+            Edit Services & Areas <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+
+        <!-- Opportunities List Container -->
+        <div id="opportunitiesContainer">
+          <!-- Skeletons rendered during fetch -->
+          <div class="opportunity-card p-4">
+            <div class="d-flex justify-content-between mb-3">
+              <div class="skeleton-box" style="width: 140px; height: 24px;"></div>
+              <div class="skeleton-box" style="width: 100px; height: 24px;"></div>
+            </div>
+            <div class="skeleton-box mb-2" style="width: 60%; height: 20px;"></div>
+            <div class="skeleton-box" style="width: 40%; height: 16px;"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- 5. HOW IT WORKS GUIDE -->
+    <section class="how-it-works-section" id="how-it-works" aria-label="How Provider Platform Works">
+      <div class="lsc-container">
+        <div class="text-center max-w-xl mx-auto mb-5">
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 fw-bold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+            Transparent Workflow
+          </span>
+          <h2 class="h3 fw-bold text-dark mt-2 mb-2">How It Works for Service Providers</h2>
+          <p class="text-muted" style="max-width: 600px; margin: 0 auto;">
+            A simple, professional pathway to expanding your local customer base and building long-term repeat business.
+          </p>
+        </div>
+
+        <div class="row g-4">
+          
+          <!-- Step 1 -->
+          <div class="col-md-4">
+            <div class="step-card">
+              <div class="step-number-badge">1</div>
+              <div class="step-icon-bubble" style="background: #f5f3ff; color: #5B43F5;">
+                <i class="bi bi-person-badge"></i>
+              </div>
+              <h3 class="h5 fw-bold text-dark mb-2">Complete Your Profile</h3>
+              <p class="text-muted small mb-3" style="line-height: 1.6;">
+                List your trade certifications, hourly rates, service areas, and doorstep sub-service packages. Once verified by our administration team, your profile is published to local homeowners.
+              </p>
+              <a href="/provider-dashboard.html?tab=profile" class="text-primary fw-semibold small text-decoration-none">
+                Update Profile <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="col-md-4">
+            <div class="step-card">
+              <div class="step-number-badge">2</div>
+              <div class="step-icon-bubble" style="background: #ecfdf5; color: #059669;">
+                <i class="bi bi-bell-fill"></i>
+              </div>
+              <h3 class="h5 fw-bold text-dark mb-2">Receive Targeted Bookings</h3>
+              <p class="text-muted small mb-3" style="line-height: 1.6;">
+                Customers discover your business based on verified skills and geographical proximity. Receive scheduled appointments or instant Quick Service dispatches directly to your device.
+              </p>
+              <a href="#opportunities" class="text-success fw-semibold small text-decoration-none">
+                View Opportunities <i class="bi bi-arrow-down"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="col-md-4">
+            <div class="step-card">
+              <div class="step-number-badge">3</div>
+              <div class="step-icon-bubble" style="background: #fffbeb; color: #d97706;">
+                <i class="bi bi-trophy-fill"></i>
+              </div>
+              <h3 class="h5 fw-bold text-dark mb-2">Deliver & Grow Reputation</h3>
+              <p class="text-muted small mb-3" style="line-height: 1.6;">
+                Verify arrivals using customer OTPs, deliver excellent workmanship, and earn verified 5-star customer reviews that keep your business at the top of local search rankings.
+              </p>
+              <a href="/provider-dashboard.html?tab=reviews" class="text-warning fw-semibold small text-decoration-none">
+                Customer Reviews <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-top py-4 mt-auto">
+    <div class="lsc-container d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div class="d-flex align-items-center gap-2">
+        <span class="brand-icon-box" style="width: 28px; height: 28px; font-size: 0.85rem;"><i class="bi bi-shield-fill-check"></i></span>
+        <span class="fw-bold text-dark small">Local Service Connect</span>
+        <span class="text-muted small ms-2">© 2026. All rights reserved.</span>
+      </div>
+      <div class="d-flex align-items-center gap-3 small text-muted">
+        <a href="/provider/home" class="text-decoration-none text-muted">Provider Home</a>
+        <a href="/provider-dashboard.html" class="text-decoration-none text-muted">Operations Dashboard</a>
+        <a href="/provider-profile.html" class="text-decoration-none text-muted">Public Profile</a>
+        <button type="button" class="btn btn-link btn-sm text-danger text-decoration-none p-0" onclick="Auth.logout()">
+          <i class="bi bi-box-arrow-right me-1"></i>Logout
+        </button>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- MODAL: ACCEPT OPPORTUNITY CONFIRMATION -->
+  <div class="modal fade" id="acceptOpportunityModal" tabindex="-1" aria-labelledby="acceptOpportunityTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow-lg">
+        <div class="modal-header border-bottom py-3">
+          <h5 class="modal-title fw-bold text-dark" id="acceptOpportunityTitle">
+            <i class="bi bi-check2-circle text-success me-2"></i>Accept Service Request
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body py-4">
+          <p class="text-muted mb-3" id="acceptModalDescription">
+            Are you sure you want to accept this booking request? Once accepted, customer contact details and exact address will be unlocked.
+          </p>
+          <div class="p-3 bg-light rounded-3 border mb-3" id="acceptModalDetailsBox">
+            <!-- Populated via JS -->
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="acceptTermsCheck" checked>
+            <label class="form-check-label small text-muted" for="acceptTermsCheck">
+              I commit to arriving at the scheduled time or dispatching immediately for Quick Service.
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer border-top py-3">
+          <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success rounded-pill px-4 fw-semibold" id="btnConfirmAccept">
+            <i class="bi bi-check2 me-1"></i>Confirm & Accept
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL: DECLINE OPPORTUNITY -->
+  <div class="modal fade" id="declineOpportunityModal" tabindex="-1" aria-labelledby="declineOpportunityTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow-lg">
+        <div class="modal-header border-bottom py-3">
+          <h5 class="modal-title fw-bold text-danger" id="declineOpportunityTitle">
+            <i class="bi bi-x-circle text-danger me-2"></i>Decline Service Request
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body py-4">
+          <p class="text-muted mb-3">
+            Declining this request will cancel the appointment so the customer can find another verified provider.
+          </p>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-dark">Reason for declining (Optional):</label>
+            <select class="form-select form-select-sm rounded-3" id="declineReasonSelect">
+              <option value="Schedule Conflict">Schedule conflict / fully booked</option>
+              <option value="Outside Service Radius">Outside preferred travel distance</option>
+              <option value="Tool / Parts Unavailable">Equipment or specialized parts not currently available</option>
+              <option value="Other">Other commitment</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer border-top py-3">
+          <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Keep Request</button>
+          <button type="button" class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirmDecline">
+            <i class="bi bi-x-lg me-1"></i>Decline Request
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Core Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+
+  <!-- Provider Homepage Application Logic -->
+  <script>
+    (function() {
+      // 1. Strict Role Guard: Ensure user is authenticated as PROVIDER
+      const currentUser = Auth.require('PROVIDER');
+      if (!currentUser) return;
+
+      // Render top navigation immediately
+      navbar();
+
+      // State Management
+      let providerProfile = null;
+      let allBookings = [];
+      let pendingOpportunities = [];
+      let activeTargetBookingId = null;
+
+      // Safe Bootstrap Modal Getters (prevents ReferenceError if bootstrap bundle is loading asynchronously)
+      function getAcceptModal() {
+        if (typeof bootstrap === 'undefined') return null;
+        const el = document.getElementById('acceptOpportunityModal');
+        return el ? (bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el)) : null;
+      }
+      function getDeclineModal() {
+        if (typeof bootstrap === 'undefined') return null;
+        const el = document.getElementById('declineOpportunityModal');
+        return el ? (bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el)) : null;
+      }
+
+      // DOM Elements
+      const heroProfileError = document.getElementById('heroProfileError');
+      const heroVerifiedBadge = document.getElementById('heroVerifiedBadge');
+      const heroBusinessName = document.getElementById('heroBusinessName');
+      const heroVerificationStatus = document.getElementById('heroVerificationStatus');
+      const heroCategoriesList = document.getElementById('heroCategoriesList');
+      const heroAreasList = document.getElementById('heroAreasList');
+      const heroAvatarInitial = document.getElementById('heroAvatarInitial');
+      const heroAvatarCircle = document.getElementById('heroAvatarCircle');
+      const heroRatingText = document.getElementById('heroRatingText');
+      const heroRatingBadgeText = document.getElementById('heroRatingBadgeText');
+
+      const performanceErrorAlert = document.getElementById('performanceErrorAlert');
+      const statVerificationBadge = document.getElementById('statVerificationBadge');
+      const statVerificationMeta = document.getElementById('statVerificationMeta');
+      const statRatingValue = document.getElementById('statRatingValue');
+      const statReviewCountMeta = document.getElementById('statReviewCountMeta');
+      const statCompletedJobs = document.getElementById('statCompletedJobs');
+      const statCompletedMeta = document.getElementById('statCompletedMeta');
+      const statAvailabilityText = document.getElementById('statAvailabilityText');
+      const statAvailabilityMeta = document.getElementById('statAvailabilityMeta');
+
+      const heroAvailabilitySwitch = document.getElementById('heroAvailabilitySwitch');
+
+      const quickAvailabilitySwitch = document.getElementById('quickAvailabilitySwitch');
+      const pulseDot = document.getElementById('pulseDot');
+      const availabilityStatusLabel = document.getElementById('availabilityStatusLabel');
+      const availabilityFeedbackAlert = document.getElementById('availabilityFeedbackAlert');
+      const availabilityFeedbackMsg = document.getElementById('availabilityFeedbackMsg');
+
+      const opportunitiesContainer = document.getElementById('opportunitiesContainer');
+      const opportunitiesBadge = document.getElementById('opportunitiesBadge');
+      const coverageChipsContainer = document.getElementById('coverageChipsContainer');
+
+      // Request lifecycle tracking
+      let currentRequestId = 0;
+      let isLoadingData = false;
+
+      // Section UI State Helpers (STEP 4: Loading / Error / Empty / Success)
+      function setHeroLoading(isLoading) {
+        if (!heroBusinessName) return;
+        if (isLoading) {
+          if (heroProfileError) heroProfileError.classList.add('d-none');
+          heroBusinessName.innerHTML = '<span class="text-muted"><span class="spinner-border spinner-border-sm me-1 text-primary"></span>Loading profile...</span>';
+          if (heroVerificationStatus) {
+            heroVerificationStatus.className = 'profile-status-tag pending';
+            heroVerificationStatus.innerHTML = '<span class="spinner-border spinner-border-sm me-1" style="width:0.65rem;height:0.65rem;"></span>Checking...';
+          }
+          if (heroRatingText) heroRatingText.textContent = 'Loading rating...';
+          if (heroCategoriesList) heroCategoriesList.textContent = 'Loading categories...';
+          if (heroAreasList) heroAreasList.textContent = 'Loading coverage areas...';
+        }
+      }
+
+      function setHeroError(message) {
+        if (heroProfileError) {
+          heroProfileError.classList.remove('d-none');
+          heroProfileError.innerHTML = `
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <div>
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                <strong>Profile unavailable:</strong> ${esc(message || 'Unable to load profile data.')}
+              </div>
+              <button type="button" class="btn btn-outline-danger btn-sm py-0.5 px-2.5 fw-semibold" onclick="window.loadProviderData()">
+                <i class="bi bi-arrow-clockwise me-1"></i>Retry
+              </button>
+            </div>
+          `;
+        }
+        if (heroBusinessName) heroBusinessName.textContent = currentUser.name || 'Provider Account';
+        if (heroVerificationStatus) {
+          heroVerificationStatus.className = 'profile-status-tag action';
+          heroVerificationStatus.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>Unavailable';
+        }
+        if (heroRatingText) heroRatingText.textContent = 'Rating unavailable';
+        if (heroCategoriesList) heroCategoriesList.textContent = 'Categories unavailable';
+        if (heroAreasList) heroAreasList.textContent = 'Coverage areas unavailable';
+      }
+
+      function setPerformanceLoading(isLoading) {
+        if (isLoading) {
+          if (performanceErrorAlert) performanceErrorAlert.classList.add('d-none');
+          if (statVerificationBadge) statVerificationBadge.innerHTML = '<span class="spinner-border spinner-border-sm text-secondary"></span>';
+          if (statVerificationMeta) statVerificationMeta.textContent = 'Checking system record...';
+          if (statRatingValue) statRatingValue.innerHTML = '<span class="spinner-border spinner-border-sm text-secondary"></span>';
+          if (statReviewCountMeta) statReviewCountMeta.textContent = 'Retrieving customer reviews...';
+          if (statCompletedJobs) statCompletedJobs.innerHTML = '<span class="spinner-border spinner-border-sm text-secondary"></span>';
+          if (statCompletedMeta) statCompletedMeta.textContent = 'Calculating fulfilled jobs...';
+          if (statAvailabilityText) statAvailabilityText.innerHTML = '<span class="spinner-border spinner-border-sm text-secondary"></span>';
+          if (statAvailabilityMeta) statAvailabilityMeta.textContent = 'Checking urgent dispatch status...';
+        }
+      }
+
+      function setPerformanceError(message) {
+        if (performanceErrorAlert) {
+          performanceErrorAlert.classList.remove('d-none');
+          performanceErrorAlert.innerHTML = `
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <div>
+                <i class="bi bi-exclamation-circle-fill me-1"></i>
+                <strong>Performance metrics unavailable:</strong> ${esc(message || 'Unable to load activity metrics.')}
+              </div>
+              <button type="button" class="btn btn-outline-danger btn-sm py-0.5 px-2.5 fw-semibold" onclick="window.loadProviderData()">
+                <i class="bi bi-arrow-clockwise me-1"></i>Retry
+              </button>
+            </div>
+          `;
+        }
+        if (statVerificationBadge) statVerificationBadge.innerHTML = '<span class="badge bg-secondary-subtle text-secondary py-1 px-2.5 rounded-pill">Unavailable</span>';
+        if (statVerificationMeta) statVerificationMeta.textContent = 'Could not verify status';
+        if (statRatingValue) statRatingValue.innerHTML = '<span class="text-muted">--</span>';
+        if (statReviewCountMeta) statReviewCountMeta.textContent = 'Reviews unavailable';
+        if (statCompletedJobs) statCompletedJobs.innerHTML = '<span class="text-muted">--</span>';
+        if (statCompletedMeta) statCompletedMeta.textContent = 'Job count unavailable';
+        if (statAvailabilityText) statAvailabilityText.innerHTML = '<span class="badge bg-secondary-subtle text-secondary py-1 px-2.5 rounded-pill">Unavailable</span>';
+        if (statAvailabilityMeta) statAvailabilityMeta.textContent = 'Status unknown';
+      }
+
+      function setOpportunitiesLoading(isLoading) {
+        if (isLoading) {
+          if (opportunitiesBadge) opportunitiesBadge.textContent = 'Checking...';
+          if (coverageChipsContainer) coverageChipsContainer.innerHTML = '<span class="badge bg-white text-secondary border"><span class="spinner-border spinner-border-sm me-1" style="width:0.65rem;height:0.65rem;"></span>Checking matched services...</span>';
+          if (opportunitiesContainer) {
+            opportunitiesContainer.innerHTML = `
+              <div class="opportunity-card p-4 text-center py-5">
+                <div class="spinner-border text-primary mb-2" role="status"></div>
+                <div class="text-muted small fw-semibold">Checking for incoming customer requests...</div>
+              </div>
+            `;
+          }
+        }
+      }
+
+      function setOpportunitiesError(message) {
+        if (opportunitiesBadge) opportunitiesBadge.textContent = 'Error';
+        if (coverageChipsContainer) coverageChipsContainer.innerHTML = '<span class="badge bg-danger-subtle text-danger border border-danger-subtle"><i class="bi bi-exclamation-triangle me-1"></i>Filters unavailable</span>';
+        if (opportunitiesContainer) {
+          opportunitiesContainer.innerHTML = `
+            <div class="card border border-danger-subtle rounded-4 p-4 text-center bg-white shadow-xs">
+              <div class="mx-auto mb-2 text-danger" style="font-size: 2rem;">
+                <i class="bi bi-exclamation-octagon"></i>
+              </div>
+              <h3 class="h6 fw-bold text-dark mb-1">Unable to Load Customer Requests</h3>
+              <p class="text-muted small mb-3 max-w-md mx-auto" style="max-width: 440px;">
+                ${esc(message || 'An error occurred while communicating with the request server.')}
+              </p>
+              <button type="button" class="btn btn-primary btn-sm rounded-pill px-3.5 mx-auto fw-semibold" onclick="window.loadProviderData()">
+                <i class="bi bi-arrow-clockwise me-1"></i>Retry Loading Requests
+              </button>
+            </div>
+          `;
+        }
+      }
+
+      // Final safety cleanup: ensures no spinner ever stays permanently running
+      function clearAllLoadingSpinners() {
+        const spinners = [
+          statVerificationBadge,
+          statRatingValue,
+          statCompletedJobs,
+          statAvailabilityText
+        ];
+        spinners.forEach(el => {
+          if (el && el.innerHTML.includes('spinner-border')) {
+            el.innerHTML = '<span class="text-muted small">--</span>';
+          }
+        });
+        if (heroBusinessName && heroBusinessName.innerHTML.includes('spinner-border')) {
+          heroBusinessName.textContent = currentUser.name || 'Provider Account';
+        }
+        if (heroVerificationStatus && heroVerificationStatus.innerHTML.includes('spinner-border')) {
+          heroVerificationStatus.className = 'profile-status-tag action';
+          heroVerificationStatus.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>Status Unknown';
+        }
+      }
+
+      // Initialize Page (handles both loading and already-interactive/complete readyStates)
+      function initPage() {
+        navbar();
+        loadProviderData();
+        checkPendingBookingBanner();
+        setupEventListeners();
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPage);
+      } else {
+        initPage();
+      }
+
+      function setupEventListeners() {
+        // Refresh Stats Button
+        const btnRefresh = document.getElementById('btnRefreshStats');
+        if (btnRefresh) {
+          btnRefresh.addEventListener('click', () => {
+            btnRefresh.disabled = true;
+            btnRefresh.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Syncing...';
+            loadProviderData().finally(() => {
+              btnRefresh.disabled = false;
+              btnRefresh.innerHTML = '<i class="bi bi-arrow-clockwise"></i><span>Refresh</span>';
+            });
+          });
+        }
+
+        // Hero Availability Toggle Switch
+        if (heroAvailabilitySwitch) {
+          heroAvailabilitySwitch.addEventListener('change', () => {
+            handleAvailabilityToggle(heroAvailabilitySwitch.checked);
+          });
+        }
+
+        // Quick Service Toggle Switch (fallback if present)
+        if (quickAvailabilitySwitch) {
+          quickAvailabilitySwitch.addEventListener('change', () => {
+            handleAvailabilityToggle(quickAvailabilitySwitch.checked);
+          });
+        }
+
+        // Real-time Booking Notification Event Listeners
+        window.addEventListener('lsc:new-booking-notification', (e) => {
+          renderBookingBanner(e.detail);
+          showHeroFeedback('online', `New service booking received: #${e.detail.bookingId || e.detail.id}`);
+          loadProviderData();
+        });
+
+        window.addEventListener('lsc:pending-booking-notification', (e) => {
+          renderBookingBanner(e.detail);
+        });
+
+        window.addEventListener('lsc:booking-updated', (e) => {
+          handleBannerBookingUpdate(e.detail);
+          loadProviderData();
+        });
+
+        // Global sync event listener from navbar or other controls
+        window.addEventListener('lsc:provider-availability-sync', (e) => {
+          const detail = e.detail || {};
+          if (detail.error) {
+            if (typeof window.showAvailabilityToast === 'function') {
+              window.showAvailabilityToast('error', 'Update Failed', detail.error.message || 'Unable to update availability.');
+            }
+          } else if (typeof detail.available === 'boolean') {
+            if (providerProfile) {
+              providerProfile.availability = detail.available;
+              renderPerformanceStats(providerProfile, allBookings);
+            }
+            if (typeof window.showAvailabilityToast === 'function') {
+              if (detail.available) {
+                window.showAvailabilityToast('online', "You're Online!", 'You are now online and can receive Quick Service requests.');
+              } else {
+                window.showAvailabilityToast('offline', "You're Offline!", "You won't receive new Quick Service requests.");
+              }
+            }
+          }
+        });
+
+        // Confirm Accept Action
+        const btnConfirmAccept = document.getElementById('btnConfirmAccept');
+        if (btnConfirmAccept) {
+          btnConfirmAccept.addEventListener('click', executeAcceptBooking);
+        }
+
+        // Confirm Decline Action
+        const btnConfirmDecline = document.getElementById('btnConfirmDecline');
+        if (btnConfirmDecline) {
+          btnConfirmDecline.addEventListener('click', executeDeclineBooking);
+        }
+      }
+
+      // Expose globally for retry buttons
+      window.loadProviderData = loadProviderData;
+
+      // Load all backend profile & bookings data concurrently with complete state handling
+      async function loadProviderData() {
+        if (isLoadingData) return;
+        isLoadingData = true;
+        const requestId = ++currentRequestId;
+
+        // Set all sections to LOADING state
+        setHeroLoading(true);
+        setPerformanceLoading(true);
+        setOpportunitiesLoading(true);
+        clearFeedback();
+
+        let profile = null;
+        let bookings = [];
+        let profileErr = null;
+        let bookingsErr = null;
+
+        try {
+          const profilePromise = api('/provider/profile', { timeout: 10000 })
+            .catch(err => { profileErr = err; return null; });
+          const bookingsPromise = api('/bookings/my', { timeout: 10000 })
+            .catch(err => { bookingsErr = err; return null; });
+
+          const [pRes, bRes] = await Promise.all([profilePromise, bookingsPromise]);
+
+          // Discard response if a newer request was dispatched in the meantime
+          if (requestId !== currentRequestId) return;
+
+          profile = pRes;
+          bookings = Array.isArray(bRes) ? bRes : (bRes ? [bRes] : []);
+
+          // Check if session expired
+          if ((profileErr && profileErr.message && profileErr.message.toLowerCase().includes('expired')) ||
+              (bookingsErr && bookingsErr.message && bookingsErr.message.toLowerCase().includes('expired'))) {
+            showFeedback('error', 'Your session has expired. Redirecting to login...');
+            setTimeout(() => { Auth.logout(); }, 1200);
+            return;
+          }
+
+          // 1. Hero Profile & Identity Section
+          if (profile) {
+            renderHeroAndProfile(profile);
+          } else {
+            setHeroError(profileErr ? profileErr.message : 'Unable to load profile data.');
+          }
+
+          // 2. Business Performance & Availability
+          if (profile) {
+            renderPerformanceStats(profile, bookings);
+            renderAvailabilityStatus(profile.availability, profile.verificationStatus);
+          } else {
+            setPerformanceError(profileErr ? profileErr.message : 'Activity metrics unavailable.');
+          }
+
+          // 3. Customer Opportunities Section
+          if (bookingsErr) {
+            setOpportunitiesError(bookingsErr.message);
+          } else {
+            renderOpportunities(bookings, profile);
+            // If no active banner yet or previous was closed/updated, show latest pending booking
+            if (!activeBannerBooking || activeBannerBooking.bookingStatus !== 'PENDING') {
+              const pendingBooking = bookings.find(b => (b.status || '').toUpperCase() === 'PENDING');
+              if (pendingBooking) {
+                renderBookingBanner({
+                  id: pendingBooking.id,
+                  bookingId: pendingBooking.id,
+                  serviceName: pendingBooking.serviceName,
+                  customerName: pendingBooking.customerName,
+                  location: pendingBooking.formattedAddress || pendingBooking.area,
+                  bookingType: pendingBooking.bookingType,
+                  bookingDate: pendingBooking.bookingDate,
+                  bookingTime: pendingBooking.bookingTime,
+                  bookingStatus: pendingBooking.status,
+                  price: profile ? profile.approxPrice : null
+                });
+              }
+            }
+          }
+
+        } catch (err) {
+          if (requestId !== currentRequestId) return;
+          console.error('Provider homepage fetch error:', err);
+          setHeroError(err.message);
+          setPerformanceError(err.message);
+          setOpportunitiesError(err.message);
+        } finally {
+          if (requestId === currentRequestId) {
+            isLoadingData = false;
+            clearAllLoadingSpinners();
+            const btnRefresh = document.getElementById('btnRefreshStats');
+            if (btnRefresh) {
+              btnRefresh.disabled = false;
+              btnRefresh.innerHTML = '<i class="bi bi-arrow-clockwise"></i><span>Refresh</span>';
+            }
+          }
+        }
+      }
+
+      // 1. Render Hero Personalization & Profile Card (SUCCESS & EMPTY states)
+      function renderHeroAndProfile(profile) {
+        if (!profile) return;
+        if (heroProfileError) heroProfileError.classList.add('d-none');
+
+        const name = profile.businessName || currentUser.name || 'Service Provider';
+        heroBusinessName.textContent = name;
+        
+        const initial = (name.trim().charAt(0) || 'P').toUpperCase();
+        if (heroAvatarInitial) heroAvatarInitial.textContent = initial;
+
+        // Custom avatar photo if exists
+        const avatarPhoto = localStorage.getItem('lsc_avatar_' + currentUser.id) || profile.profileImage;
+        if (avatarPhoto && heroAvatarCircle) {
+          heroAvatarCircle.innerHTML = `<img src="${esc(avatarPhoto)}" class="w-100 h-100 rounded-circle object-fit-cover" alt="${esc(name)}">`;
+        }
+
+        // Verification Pill in Hero (Shown ONLY when verified by backend)
+        const isVerified = (profile.verificationStatus || '').toUpperCase() === 'VERIFIED';
+        const isPending = (profile.verificationStatus || '').toUpperCase() === 'PENDING';
+
+        if (heroVerifiedBadge) {
+          if (isVerified) {
+            heroVerifiedBadge.classList.remove('d-none');
+          } else {
+            heroVerifiedBadge.classList.add('d-none');
+          }
+        }
+
+        if (heroVerificationStatus) {
+          if (isVerified) {
+            heroVerificationStatus.className = 'profile-status-tag verified';
+            heroVerificationStatus.innerHTML = '<i class="bi bi-patch-check-fill me-1"></i>Verified Partner';
+          } else if (isPending) {
+            heroVerificationStatus.className = 'profile-status-tag pending';
+            heroVerificationStatus.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Verification Pending';
+          } else {
+            heroVerificationStatus.className = 'profile-status-tag action';
+            heroVerificationStatus.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>Action Required';
+          }
+        }
+
+        // Services & Areas rendered as readable chips with graceful EMPTY states
+        const services = profile.services || [];
+        const areas = profile.areas || [];
+        
+        if (heroCategoriesList) {
+          if (services.length > 0) {
+            heroCategoriesList.innerHTML = services.map(s => `
+              <span class="badge bg-light text-dark border me-1 mb-1 fw-medium" style="font-size: 0.78rem;">
+                <i class="bi bi-tools text-primary me-1"></i>${esc(s.name)}
+              </span>
+            `).join('');
+          } else {
+            heroCategoriesList.innerHTML = '<span class="text-muted small">No service categories registered yet</span>';
+          }
+        }
+
+        if (heroAreasList) {
+          if (areas.length > 0) {
+            heroAreasList.innerHTML = areas.map(a => `
+              <span class="badge bg-light text-dark border me-1 mb-1 fw-medium" style="font-size: 0.78rem;">
+                <i class="bi bi-geo-alt text-primary me-1"></i>${esc(a.area)}
+              </span>
+            `).join('');
+          } else {
+            heroAreasList.innerHTML = '<span class="text-muted small">No coverage areas registered yet</span>';
+          }
+        }
+
+        // Rating in Hero Profile Card with graceful EMPTY state
+        const reviewCount = profile.reviewCount != null ? Number(profile.reviewCount) : 0;
+        const ratingNum = profile.rating != null ? Number(profile.rating).toFixed(1) : '0.0';
+        
+        if (heroRatingText) {
+          if (reviewCount > 0) {
+            heroRatingText.textContent = `${ratingNum} ★ (${reviewCount} verified review${reviewCount === 1 ? '' : 's'})`;
+          } else {
+            heroRatingText.textContent = 'No customer reviews yet (0.0 ★)';
+          }
+        }
+        if (heroRatingBadgeText) {
+          heroRatingBadgeText.textContent = reviewCount > 0 ? `${ratingNum} ★ Rated` : 'New Provider';
+        }
+      }
+
+      // 2. Render Business Performance Metric Cards (SUCCESS & EMPTY states)
+      function renderPerformanceStats(profile, bookings) {
+        if (performanceErrorAlert) performanceErrorAlert.classList.add('d-none');
+
+        // A. Verification Status Card
+        const vStatus = (profile.verificationStatus || 'PENDING').toUpperCase();
+        if (vStatus === 'VERIFIED') {
+          statVerificationBadge.innerHTML = `<span class="badge bg-success text-white py-1 px-2.5 rounded-pill"><i class="bi bi-patch-check-fill me-1"></i>Verified</span>`;
+          statVerificationMeta.textContent = 'Credentials certified by admin';
+        } else if (vStatus === 'PENDING') {
+          statVerificationBadge.innerHTML = `<span class="badge bg-warning text-dark py-1 px-2.5 rounded-pill"><i class="bi bi-clock-history me-1"></i>Pending</span>`;
+          statVerificationMeta.textContent = 'Under administrative audit';
+        } else {
+          statVerificationBadge.innerHTML = `<span class="badge bg-danger text-white py-1 px-2.5 rounded-pill"><i class="bi bi-x-octagon me-1"></i>${vStatus}</span>`;
+          statVerificationMeta.textContent = 'Please contact support';
+        }
+
+        // B. Rating Card (with EMPTY state)
+        const reviewCount = profile.reviewCount != null ? Number(profile.reviewCount) : 0;
+        const rating = profile.rating != null ? Number(profile.rating).toFixed(1) : '0.0';
+        if (reviewCount > 0) {
+          statRatingValue.innerHTML = `${rating} <span style="font-size: 1.1rem; color: #f59e0b;">★</span>`;
+          statReviewCountMeta.textContent = `Based on ${reviewCount} verified review${reviewCount > 1 ? 's' : ''}`;
+        } else {
+          statRatingValue.innerHTML = `0.0 <span style="font-size: 1.1rem; color: #94a3b8;">★</span>`;
+          statReviewCountMeta.textContent = 'No customer reviews yet';
+        }
+
+        // C. Completed Jobs Card (with EMPTY state)
+        const completedCount = profile.completedJobsCount != null 
+          ? Number(profile.completedJobsCount) 
+          : bookings.filter(b => b.status === 'COMPLETED').length;
+
+        statCompletedJobs.textContent = completedCount;
+        if (completedCount > 0) {
+          statCompletedMeta.textContent = '100% verified fulfillment';
+        } else {
+          statCompletedMeta.textContent = 'No completed jobs yet';
+        }
+
+        // D. Availability Card
+        const isAvail = !!profile.availability;
+        if (isAvail) {
+          statAvailabilityText.innerHTML = `<span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2.5 rounded-pill"><i class="bi bi-broadcast me-1"></i>Online</span>`;
+          statAvailabilityMeta.textContent = 'Receiving urgent local dispatches';
+        } else {
+          statAvailabilityText.innerHTML = `<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle py-1 px-2.5 rounded-pill">Offline</span>`;
+          statAvailabilityMeta.textContent = 'Not receiving urgent requests';
+        }
+      }
+
+      // 3. Render Quick Service Toggle & Pulse
+      function renderAvailabilityStatus(isOnline, verificationStatus) {
+        if (typeof window.syncAllProviderAvailabilityControls === 'function') {
+          window.syncAllProviderAvailabilityControls(isOnline, verificationStatus);
+        }
+      }
+
+      // Handle Quick Service Availability Switch Change (can be triggered by Hero switch, navbar, or programmatic call)
+      async function handleAvailabilityToggle(targetState) {
+        const nextState = typeof targetState === 'boolean'
+          ? targetState
+          : (heroAvailabilitySwitch ? heroAvailabilitySwitch.checked : false);
+
+        try {
+          if (typeof window.updateProviderAvailability === 'function') {
+            const res = await window.updateProviderAvailability(nextState);
+            if (providerProfile) {
+              providerProfile.availability = res.availability;
+              renderPerformanceStats(providerProfile, allBookings);
+            }
+          } else {
+            const res = await api('/provider/availability', {
+              method: 'PUT',
+              body: { available: nextState }
+            });
+            if (providerProfile) {
+              providerProfile.availability = res.availability;
+              renderPerformanceStats(providerProfile, allBookings);
+            }
+            renderAvailabilityStatus(res.availability, providerProfile ? providerProfile.verificationStatus : 'VERIFIED');
+            window.dispatchEvent(new CustomEvent('lsc:provider-availability-sync', {
+              detail: { available: res.availability, res, error: null }
+            }));
+          }
+        } catch (err) {
+          // Failure handling and toggle reversal already dispatched by window.updateProviderAvailability
+          if (typeof window.updateProviderAvailability !== 'function') {
+            window.dispatchEvent(new CustomEvent('lsc:provider-availability-sync', {
+              detail: { available: !nextState, error: err }
+            }));
+          }
+        }
+      }
+
+      // 4. Render Opportunities (Pending Requests)
+      function renderOpportunities(bookings, profile) {
+        // Filter bookings for PENDING status
+        pendingOpportunities = bookings.filter(b => (b.status || '').toUpperCase() === 'PENDING');
+        opportunitiesBadge.textContent = `${pendingOpportunities.length} New`;
+
+        // Render matched service & area chips
+        renderCoverageChips(profile);
+
+        if (pendingOpportunities.length === 0) {
+          opportunitiesContainer.innerHTML = `
+            <div class="card border-0 rounded-4 p-5 text-center bg-white border border-slate-100 shadow-xs">
+              <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; background: #f1f5f9; color: #64748b; font-size: 1.8rem;">
+                <i class="bi bi-inbox"></i>
+              </div>
+              <h3 class="h5 fw-bold text-dark mb-1">No New Requests Waiting</h3>
+              <p class="text-muted small max-w-md mx-auto mb-4" style="max-width: 480px;">
+                You are all caught up! Keep your <strong>Quick Service availability toggled Online</strong> to receive instant doorstep calls, or inspect your ongoing work in the Dashboard.
+              </p>
+              <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
+                <a href="/provider-dashboard.html?tab=active" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                  <i class="bi bi-lightning-charge me-1"></i>View Active Jobs
+                </a>
+                <a href="/provider-dashboard.html?tab=services" class="btn btn-light btn-sm rounded-pill px-3 border">
+                  <i class="bi bi-plus-circle me-1"></i>Expand Service Areas
+                </a>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        // Render opportunity cards
+        opportunitiesContainer.innerHTML = pendingOpportunities.map(b => {
+          const isQuick = b.bookingType === 'QUICK_SERVICE';
+          const serviceName = b.serviceName || 'Standard Service';
+          const customerNotes = b.notes || 'No extra notes provided by customer.';
+          const area = b.area || 'Local Area';
+          const dateStr = b.bookingDate || 'Immediate';
+          const timeStr = b.bookingTime || '';
+          const distanceStr = b.distanceKm != null ? `${Number(b.distanceKm).toFixed(1)} km away` : 'Within service radius';
+
+          return `
+            <div class="opportunity-card ${isQuick ? 'urgent' : 'scheduled'}" id="oppCard-${b.id}">
+              <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <span class="badge ${isQuick ? 'bg-danger text-white' : 'bg-primary-subtle text-primary border border-primary-subtle'} rounded-pill px-3 py-1.5 fw-bold shadow-xs">
+                    ${isQuick ? '<i class="bi bi-lightning-charge-fill me-1"></i>QUICK SERVICE DISPATCH' : '<i class="bi bi-calendar-event me-1"></i>SCHEDULED APPOINTMENT'}
+                  </span>
+                  ${isQuick ? `
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2.5 py-1 fw-bold">
+                      <i class="bi bi-stopwatch-fill me-1"></i>~10 Min Target
+                    </span>
+                  ` : ''}
+                  <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1">
+                    <i class="bi bi-tag-fill text-muted me-1"></i>${esc(serviceName)}
+                  </span>
+                </div>
+                <div class="text-muted small fw-semibold">
+                  <i class="bi bi-geo-alt-fill text-danger me-1"></i>${esc(distanceStr)}
+                </div>
+              </div>
+
+              <div class="row g-3 align-items-center mb-2">
+                <div class="col-md-8">
+                  <h4 class="h6 fw-bold text-dark mb-2">
+                    Customer Request in <span class="text-primary">${esc(area)}</span>
+                  </h4>
+                  <div class="opportunity-notes-box">
+                    <div class="text-muted small fst-italic">
+                      <i class="bi bi-chat-left-quote text-primary me-1.5"></i>"${esc(customerNotes)}"
+                    </div>
+                  </div>
+                  <div class="d-flex align-items-center gap-3 text-muted small flex-wrap mt-2">
+                    <div>
+                      <i class="bi bi-calendar3 text-primary me-1"></i><strong>${esc(dateStr)}</strong> ${timeStr ? `at ${esc(timeStr)}` : ''}
+                    </div>
+                    <div>
+                      <i class="bi bi-shield-lock text-secondary me-1"></i>Exact address protected until acceptance
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-4 text-md-end">
+                  <div class="d-flex align-items-center justify-content-md-end gap-2 flex-wrap">
+                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-semibold" onclick="window.openDeclineModal(${b.id})">
+                      <i class="bi bi-x-lg me-1"></i>Decline
+                    </button>
+                    <button type="button" class="btn btn-success btn-sm rounded-pill px-3.5 fw-bold shadow-xs" onclick="window.openAcceptModal(${b.id})">
+                      <i class="bi bi-check2 me-1"></i>Accept Request
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function renderCoverageChips(profile) {
+        if (!coverageChipsContainer || !profile) return;
+        
+        const services = profile.services || [];
+        const areas = profile.areas || [];
+
+        const sChips = services.map(s => `<span class="badge bg-white text-dark border rounded-pill px-2.5 py-1"><i class="bi bi-tools text-primary me-1"></i>${esc(s.name)}</span>`).join('');
+        const aChips = areas.map(a => `<span class="badge bg-white text-dark border rounded-pill px-2.5 py-1"><i class="bi bi-geo-alt text-primary me-1"></i>${esc(a.area)}</span>`).join('');
+
+        coverageChipsContainer.innerHTML = (sChips + aChips) || '<span class="text-muted small">No services or areas configured yet</span>';
+      }
+
+      // Modal Triggers
+      window.openAcceptModal = function(bookingId) {
+        activeTargetBookingId = bookingId;
+        const booking = allBookings.find(b => b.id === bookingId);
+        const detailsBox = document.getElementById('acceptModalDetailsBox');
+        
+        if (booking && detailsBox) {
+          detailsBox.innerHTML = `
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted small">Service:</span>
+              <strong class="small text-dark">${esc(booking.serviceName || 'Standard Service')}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted small">General Area:</span>
+              <strong class="small text-dark">${esc(booking.area || 'Local Area')}</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted small">Type / Date:</span>
+              <strong class="small text-dark">${esc(booking.bookingType || 'NORMAL')} · ${esc(booking.bookingDate || '')}</strong>
+            </div>
+          `;
+        }
+
+        const modal = getAcceptModal();
+        if (modal) modal.show();
+      };
+
+      window.openDeclineModal = function(bookingId) {
+        activeTargetBookingId = bookingId;
+        const modal = getDeclineModal();
+        if (modal) modal.show();
+      };
+
+      // Execute Booking Acceptance
+      async function executeAcceptBooking() {
+        if (!activeTargetBookingId) return;
+
+        const btn = document.getElementById('btnConfirmAccept');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Accepting...';
+
+        try {
+          await api(`/provider/bookings/${activeTargetBookingId}/accept`, { method: 'PUT' });
+          const modal = getAcceptModal();
+          if (modal) modal.hide();
+
+          showHeroFeedback('online', `Request #${activeTargetBookingId} accepted! Customer contact details and address have been unlocked. View it in your Active Jobs.`);
+          handleBannerBookingUpdate({ bookingId: activeTargetBookingId, status: 'ACCEPTED' });
+          await loadProviderData();
+        } catch (err) {
+          showHeroFeedback('error', 'Failed to accept request: ' + (err.message || 'Error occurred'));
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="bi bi-check2 me-1"></i>Confirm & Accept';
+        }
+      }
+
+      // Execute Booking Rejection
+      async function executeDeclineBooking() {
+        if (!activeTargetBookingId) return;
+
+        const btn = document.getElementById('btnConfirmDecline');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Declining...';
+
+        try {
+          await api(`/provider/bookings/${activeTargetBookingId}/reject`, { method: 'PUT' });
+          const modal = getDeclineModal();
+          if (modal) modal.hide();
+
+          showHeroFeedback('offline', `Request #${activeTargetBookingId} declined. The slot has been released.`);
+          handleBannerBookingUpdate({ bookingId: activeTargetBookingId, status: 'REJECTED' });
+          await loadProviderData();
+        } catch (err) {
+          showHeroFeedback('error', 'Failed to decline request: ' + (err.message || 'Error occurred'));
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="bi bi-x-lg me-1"></i>Decline Request';
+        }
+      }
+
+      // ========================================================================
+      // Provider Homepage Notification Banner Logic
+      // ========================================================================
+      let activeBannerBooking = null;
+
+      function renderBookingBanner(data) {
+        if (!data) return;
+        activeBannerBooking = data;
+        const container = document.getElementById('providerBookingBannerContainer');
+        if (!container) return;
+
+        const isQuick = data.bookingType === 'QUICK_SERVICE';
+        const bookingId = data.bookingId || data.id;
+        const serviceName = data.serviceName || 'Service Request';
+        const customerName = data.customerName || 'Customer';
+        const location = data.location || data.area || data.formattedAddress || 'Local Area';
+        const schedule = isQuick ? 'Immediate (Target ~10 mins)' : ((data.bookingDate || '') + ' ' + (data.bookingTime || ''));
+        const typeStr = isQuick ? 'Quick Service' : 'Normal Booking';
+        const priceStr = data.price != null ? `₹${data.price}` : (providerProfile && providerProfile.approxPrice ? `₹${providerProfile.approxPrice} Approx` : 'Standard Rate');
+        const status = (data.bookingStatus || data.status || 'PENDING').toUpperCase();
+
+        const badgeHtml = isQuick
+          ? `<span class="banner-badge quick"><i class="bi bi-lightning-charge-fill"></i>Quick Service Dispatch</span>`
+          : `<span class="banner-badge normal"><i class="bi bi-calendar2-check-fill"></i>New Booking Request</span>`;
+
+        let actionsHtml = '';
+        if (status === 'PENDING') {
+          actionsHtml = `
+            <div class="banner-actions-buttons" id="bannerActionButtons">
+              <button type="button" class="btn btn-primary btn-sm px-3 py-1.5 fw-bold rounded-pill d-inline-flex align-items-center gap-1.5 shadow-xs" id="btnBannerAccept">
+                <i class="bi bi-check2"></i>
+                <span>Accept</span>
+              </button>
+              <button type="button" class="btn btn-outline-danger btn-sm px-3 py-1.5 fw-semibold rounded-pill d-inline-flex align-items-center gap-1.5" id="btnBannerDecline">
+                <i class="bi bi-x-lg"></i>
+                <span>Reject</span>
+              </button>
+              <button type="button" class="btn btn-light btn-sm px-3 py-1.5 border fw-semibold rounded-pill d-inline-flex align-items-center gap-1.5" id="btnBannerView">
+                <i class="bi bi-eye"></i>
+                <span>View Request</span>
+              </button>
+            </div>
+          `;
+        } else if (status === 'ACCEPTED') {
+          actionsHtml = `
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-success-subtle text-success border border-success-subtle py-1.5 px-3 rounded-pill fw-bold">
+                <i class="bi bi-check-circle-fill me-1"></i>Accepted · Active Job
+              </span>
+              <a href="/provider-dashboard.html?tab=active" class="btn btn-sm btn-outline-primary rounded-pill py-1 px-3">
+                Open Active Jobs &rarr;
+              </a>
+            </div>
+          `;
+        } else if (status === 'REJECTED') {
+          actionsHtml = `
+            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle py-1.5 px-3 rounded-pill fw-semibold">
+              <i class="bi bi-x-circle me-1"></i>Declined
+            </span>
+          `;
+        } else if (status === 'CANCELLED') {
+          actionsHtml = `
+            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle py-1.5 px-3 rounded-pill fw-semibold">
+              <i class="bi bi-slash-circle me-1"></i>Cancelled by Customer
+            </span>
+          `;
+        }
+
+        container.innerHTML = `
+          <div class="provider-booking-banner">
+            <div class="lsc-container">
+              <div class="banner-header-row">
+                <div class="banner-title-group">
+                  <div class="banner-pulse-icon ${isQuick ? 'quick' : 'normal'}">
+                    <i class="bi ${isQuick ? 'bi-lightning-charge-fill' : 'bi-bell-fill'}"></i>
+                  </div>
+                  <h3 class="banner-heading-text">New Service Booking Received</h3>
+                  ${badgeHtml}
+                  <span class="badge bg-light text-dark border ms-1">#BK-${bookingId}</span>
+                </div>
+                <button type="button" class="banner-dismiss-btn" id="btnBannerDismiss" aria-label="Dismiss banner">
+                  <i class="bi bi-x-lg"></i>
+                  <span>Dismiss</span>
+                </button>
+              </div>
+
+              <div class="banner-meta-grid">
+                <div class="banner-meta-item">
+                  <span class="banner-meta-label">Service</span>
+                  <span class="banner-meta-val" title="${esc(serviceName)}">
+                    <i class="bi bi-tools text-primary"></i>${esc(serviceName)}
+                  </span>
+                </div>
+                <div class="banner-meta-item">
+                  <span class="banner-meta-label">Customer</span>
+                  <span class="banner-meta-val" title="${esc(customerName)}">
+                    <i class="bi bi-person-fill text-muted"></i>${esc(customerName)}
+                  </span>
+                </div>
+                <div class="banner-meta-item">
+                  <span class="banner-meta-label">Location</span>
+                  <span class="banner-meta-val" title="${esc(location)}">
+                    <i class="bi bi-geo-alt-fill text-danger"></i>${esc(location)}
+                  </span>
+                </div>
+                <div class="banner-meta-item">
+                  <span class="banner-meta-label">Requested Time</span>
+                  <span class="banner-meta-val" title="${esc(schedule)}">
+                    <i class="bi bi-clock-fill text-primary"></i>${esc(schedule)}
+                  </span>
+                </div>
+                <div class="banner-meta-item">
+                  <span class="banner-meta-label">Booking Type</span>
+                  <span class="banner-meta-val">
+                    <span class="badge ${isQuick ? 'bg-danger' : 'bg-primary-subtle text-primary'} py-0.5 px-2">${typeStr}</span>
+                  </span>
+                </div>
+                <div class="banner-meta-item">
+                  <span class="banner-meta-label">Booking Price</span>
+                  <span class="banner-meta-val text-success">
+                    <i class="bi bi-tag-fill"></i>${esc(priceStr)}
+                  </span>
+                </div>
+              </div>
+
+              <div class="banner-actions-row">
+                <div id="bannerActionSlot">
+                  ${actionsHtml}
+                </div>
+                <div class="text-muted small fst-italic d-none d-md-block">
+                  Respond promptly to maintain top partner ranking
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        container.classList.remove('d-none');
+
+        // Wire banner action buttons
+        const btnAccept = document.getElementById('btnBannerAccept');
+        if (btnAccept) {
+          btnAccept.onclick = () => executeBannerAccept(bookingId);
+        }
+
+        const btnDecline = document.getElementById('btnBannerDecline');
+        if (btnDecline) {
+          btnDecline.onclick = () => {
+            if (typeof window.openDeclineModal === 'function') {
+              window.openDeclineModal(bookingId);
+            }
+          };
+        }
+
+        const btnView = document.getElementById('btnBannerView');
+        if (btnView) {
+          btnView.onclick = () => {
+            const opp = document.getElementById(`oppCard-${bookingId}`);
+            if (opp) {
+              opp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              opp.style.outline = '3px solid #5b43f5';
+              setTimeout(() => { opp.style.outline = ''; }, 3000);
+            } else {
+              const oppSec = document.getElementById('opportunities');
+              if (oppSec) oppSec.scrollIntoView({ behavior: 'smooth' });
+            }
+          };
+        }
+
+        const btnDismiss = document.getElementById('btnBannerDismiss');
+        if (btnDismiss) {
+          btnDismiss.onclick = () => {
+            container.classList.add('d-none');
+          };
+        }
+      }
+
+      async function executeBannerAccept(bookingId) {
+        const btn = document.getElementById('btnBannerAccept');
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Accepting...';
+        }
+        try {
+          await api(`/provider/bookings/${bookingId}/accept`, { method: 'PUT' });
+          const slot = document.getElementById('bannerActionSlot');
+          if (slot) {
+            slot.innerHTML = `
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-success-subtle text-success border border-success-subtle py-1.5 px-3 rounded-pill fw-bold">
+                  <i class="bi bi-check-circle-fill me-1"></i>Accepted! Customer Details Unlocked
+                </span>
+                <a href="/provider-dashboard.html?tab=active" class="btn btn-sm btn-primary rounded-pill py-1 px-3">
+                  Open Active Jobs &rarr;
+                </a>
+              </div>
+            `;
+          }
+          showHeroFeedback('online', `Booking #${bookingId} accepted! View it in Active Jobs.`);
+          await loadProviderData();
+        } catch (err) {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check2"></i><span>Accept</span>';
+          }
+          showHeroFeedback('error', 'Could not accept booking: ' + (err.message || 'Error occurred'));
+        }
+      }
+
+      function handleBannerBookingUpdate(eventData) {
+        if (!activeBannerBooking || !eventData) return;
+        const curId = activeBannerBooking.bookingId || activeBannerBooking.id;
+        if (curId == eventData.bookingId) {
+          activeBannerBooking.bookingStatus = eventData.status;
+          renderBookingBanner(activeBannerBooking);
+        }
+      }
+
+      async function checkPendingBookingBanner() {
+        try {
+          const res = await api('/notifications/latest-pending');
+          if (res && res.bookingId && res.bookingStatus === 'PENDING') {
+            renderBookingBanner(res);
+          }
+        } catch (err) {
+          // Silent fallback
+        }
+      }
+
+      // Helper Feedback Messages
+      function showHeroFeedback(type, message) {
+        if (typeof window.showAvailabilityToast === 'function') {
+          const isError = type === 'error' || type === 'warning' || type === 'danger';
+          const isSuccess = type === 'success' || type === 'online';
+          const toastType = isError ? 'error' : (isSuccess ? 'online' : 'offline');
+          const toastTitle = isError ? 'Update Failed' : (isSuccess ? "You're Online!" : "You're Offline!");
+          window.showAvailabilityToast(toastType, toastTitle, message);
+        }
+      }
+
+      function clearHeroFeedback() {
+        // No inline alert to clear
+      }
+
+      function showFeedback(type, message) {
+        if (!availabilityFeedbackAlert || !availabilityFeedbackMsg) return;
+        
+        availabilityFeedbackAlert.className = `alert alert-${type === 'error' ? 'danger' : type} mt-3 mb-0 py-2.5 px-3 small rounded-3`;
+        availabilityFeedbackMsg.textContent = message;
+        availabilityFeedbackAlert.classList.remove('d-none');
+      }
+
+      function clearFeedback() {
+        if (availabilityFeedbackAlert) {
+          availabilityFeedbackAlert.classList.add('d-none');
+        }
+      }
+
+    })();
+  </script>
+
+</body>
+</html>
