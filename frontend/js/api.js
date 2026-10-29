@@ -136,7 +136,7 @@ async function api(path, options = {}) {
     delete headers['Content-Type'];
   }
 
-  // Sensible default timeout (12s) to prevent hanging promises
+  // Sensible default timeout (60s) to prevent hanging promises
   let timeoutId = null;
   let signal = options.signal;
   if (!signal && typeof AbortController !== 'undefined') {
