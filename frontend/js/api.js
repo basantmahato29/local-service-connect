@@ -1,6 +1,4 @@
-var API_BASE = (typeof window !== 'undefined' && window.location && window.location.protocol && window.location.protocol.startsWith('http'))
-? 'https://local-service-connect-uc2u.onrender.com/api'
-: 'http://localhost:8080/api';
+var API_BASE = 'https://local-service-connect-uc2u.onrender.com/api';
 
 var Auth = (typeof window !== 'undefined' && window.Auth) ? window.Auth : {
   save(d) {
