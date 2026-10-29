@@ -144,7 +144,7 @@ async function api(path, options = {}) {
   if (!signal && typeof AbortController !== 'undefined') {
     const controller = new AbortController();
     signal = controller.signal;
-    const timeoutMs = options.timeout || 12000;
+    const timeoutMs = options.timeout || 60000;
     timeoutId = setTimeout(() => {
       controller.abort();
     }, timeoutMs);
@@ -3500,4 +3500,3 @@ const ShareProvider = {
     }
   }
 };
-
